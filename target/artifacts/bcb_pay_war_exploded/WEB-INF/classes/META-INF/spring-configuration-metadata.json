@@ -1,0 +1,11 @@
+{
+  "groups": [
+    {
+      "name": "server",
+      "type": "com.bcb.WebAppConfig",
+      "sourceType": "com.bcb.WebAppConfig"
+    }
+  ],
+  "properties": [],
+  "hints": []
+}
