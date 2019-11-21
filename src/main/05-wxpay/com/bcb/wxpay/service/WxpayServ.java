@@ -1,6 +1,7 @@
 package com.bcb.wxpay.service;
 
-import com.bcb.wxpay.entity.MicroAccount;
+import com.bcb.wxpay.entity.WxMicroAccount;
+import com.bcb.wxpay.entity.WxRedPack;
 
 public interface WxpayServ {
 
@@ -20,7 +21,12 @@ public interface WxpayServ {
      * 4、服务商引导经营者使用微信扫码完成签约
      * 5、服务商现场调试设备，完成首单交易
      */
-    int saveMicroAccount(MicroAccount microAccount);
+    int saveMicroAccount(WxMicroAccount wxMicroAccount);
 
+
+    /**
+     * 商户发红包
+     */
+    int saveRedPack(WxRedPack wxRedPack);
 
 }

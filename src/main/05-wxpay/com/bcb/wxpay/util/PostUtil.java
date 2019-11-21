@@ -1,13 +1,10 @@
 package com.bcb.wxpay.util;
 
 import com.bcb.log.util.LogUtil;
-import com.bcb.wxpay.util_v3.LoadSslUtil;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
+import com.bcb.wxpay.util.company.WxpayConfig;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -17,23 +14,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
-import javax.net.ssl.SSLContext;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.security.KeyStore;
 import java.util.Map;
 
 public class PostUtil {
-
-
-    //连接超时时间，默认10秒
-    private final static int socketTimeout = 10000;
-
-    //传输超时时间，默认30秒
-    private final static int connectTimeout = 30000;
-
     //带证书提交
     public final static String doPostWithCert(String syspath, String mchid, String url, String data) {
         String result = "";
@@ -79,9 +63,9 @@ public class PostUtil {
     }
 
     //带证书上传文件
-    public final static String doPostFileDataWithCert(String syspath, String mchid, String url, Map<String, Object> paramMap, String fileKey, File file) {
+    public final static String doPostFileDataWithCert(String syspath, String mchid, String url, Map<String, String> paramMap, String fileKey, File file) {
         //获取证书路径
-        String keyStoreUrl=WxpayConfig.getCertPath(syspath,mchid);
+        String keyStoreUrl= WxpayConfig.getCertPath(syspath,mchid);
         System.out.println("keyStoreUrl="+keyStoreUrl);
 
         try {

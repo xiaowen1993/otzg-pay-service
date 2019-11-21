@@ -27,6 +27,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import com.bcb.log.util.LogUtil;
+import com.bcb.wxpay.util.company.WxpayConfig;
 import net.sf.json.JSONObject;
 
 /**

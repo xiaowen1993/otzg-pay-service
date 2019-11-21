@@ -15,7 +15,7 @@ public class SignUtil {
      * @param payKey   签名密钥
      * @return 待签名字符串
      */
-    public final static String getSignTemp(Map<String, Object> paramMap, String payKey) {
+    public final static String getSignTemp(Map<String, String> paramMap, String payKey) {
         ArrayList<String> keyList = new ArrayList<>(paramMap.keySet());
         Collections.sort(keyList);
 

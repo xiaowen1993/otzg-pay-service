@@ -15,8 +15,8 @@
 //import com.bcb.pay.entity.PayOrdersLog;
 //import com.bcb.pay.util.PayChannelType;
 //import com.bcb.pay.util.PayType;
-//import com.bcb.wxpay.util.WxpayConfig;
-//import com.bcb.wxpay.util.WxpaySubmit;
+//import com.bcb.wxpay.util.company.WxpayConfig;
+//import com.bcb.wxpay.util.company.WxpaySubmit;
 //import com.bcb.promotion.entity.Allocation;
 //import com.bcb.promotion.entity.AllocationPay;
 //import com.bcb.promotion.service.AllocationServ;

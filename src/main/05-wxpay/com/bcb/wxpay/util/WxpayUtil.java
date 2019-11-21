@@ -5,6 +5,7 @@ package com.bcb.wxpay.util;
 
 import com.bcb.log.util.LogUtil;
 import com.bcb.util.SubmitUtil;
+import com.bcb.wxpay.util.company.WxpayConfig;
 import net.sf.json.JSONObject;
 import org.junit.Test;
 
