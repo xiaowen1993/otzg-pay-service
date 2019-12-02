@@ -104,7 +104,7 @@ public class RedisService {
      */
     @SuppressWarnings("unchecked")
     public void del(String... key) {
-        LogUtil.saveTradeLog(LogUtil.getFileSavePath(), "数据库:redis删除key"+key);
+        LogUtil.saveTradeLog("数据库:redis删除key"+key);
         if (key != null && key.length > 0) {
             //redisTemplate=switchdb(db);
             if (key.length == 1) {

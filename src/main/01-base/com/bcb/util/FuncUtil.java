@@ -112,10 +112,6 @@ public class FuncUtil {
         return a;
     }
 
-    // String mt =
-    // info.getContent().replaceAll("[A-Za-z\\/\\<\\>\\\\^\\#\\$\\!\\?\\%\\.\\%\\(\\)\\*\\:\\&\\-\\_\\=\\;\\\"]",
-    // "");
-
     /**
      * 逗号规整字符串
      * 去掉首尾的及中间的多个

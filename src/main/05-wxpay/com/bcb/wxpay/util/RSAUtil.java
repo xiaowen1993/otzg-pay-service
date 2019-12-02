@@ -1,5 +1,6 @@
 package com.bcb.wxpay.util;
 
+import com.bcb.wxpay.util.service.WXPayConfig;
 import javax.crypto.Cipher;
 import javax.security.cert.X509Certificate;
 import java.nio.file.Files;
@@ -73,6 +74,7 @@ public class RSAUtil {
     //对“hello world进行加密”
     public static void main(String[] args) {
         try {
+            RSAUtil.setCertPath(WXPayConfig.getPublicCertPath());
             System.out.println( "after encrypt: " + rsaEncrypt("hello world"));
         } catch (Exception e) {
             e.printStackTrace();

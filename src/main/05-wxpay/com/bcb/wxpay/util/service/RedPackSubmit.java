@@ -3,6 +3,7 @@ package com.bcb.wxpay.util.service;
 import com.bcb.util.JsonUtil;
 import com.bcb.wxpay.entity.WxRedPack;
 import com.bcb.wxpay.util.WxpayUtil;
+import com.bcb.wxpay.util.XmlUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
@@ -29,7 +30,7 @@ public class RedPackSubmit {
         //微信分配的公众账号ID（企业号corpid即为此appId）。接口传入的所有appid应该为公众号的appid（在mp.weixin.qq.com申请的），不能为APP的appid（在open.weixin.qq.com申请的）。
         paramMap.put("wxappid", wxRedPack.getGzhAppId());
         //服务商模式下触达用户时的appid(可填服务商自己的appid或子商户的appid)，服务商模式下必填，服务商模式下填入的子商户appid必须在微信支付商户平台中先录入，否则会校验不过。
-        paramMap.put("msgappid", wxRedPack.getSubAppId());
+        paramMap.put("msgappid", "wxa574b9142c67f42e");
         //红包发送者名称 length=32 注意：敏感词会被转义成字符*
         paramMap.put("send_name", wxRedPack.getSendName());
         //接受红包的用户
@@ -84,13 +85,12 @@ public class RedPackSubmit {
      * @throws Exception
      */
     public final static JSONObject redPackPay(Map<String, String> map) throws Exception {
-        String certRootPath = "D:/workspace/bcb-pay/target/artifacts/bcb_pay_war_exploded";
-        WXPayConfig wxPayConfig = new WxPayConfigImpl(SignType.MD5.name(), certRootPath);
+        WXPayConfig wxPayConfig = new WXPayConfig(SignType.MD5.name(), true);
 
         wxPayConfig.setUrl(WXPayConstants.getRePackPayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         Map<String, String> result = wxPayRequest.requestCert(map);
-        System.out.println("调用成功=" + result.toString());
+        System.out.println("调用结果=" + result.toString());
 
         if (result.get("return_code") != null
                 && result.get("return_code").equals("SUCCESS")
@@ -134,12 +134,11 @@ public class RedPackSubmit {
      * @throws Exception
      */
     public final static JSONObject redPackGroupPay(Map<String, String> map) throws Exception {
-        String certRootPath = "D:/workspace/bcb-pay/target/artifacts/bcb_pay_war_exploded";
-        WXPayConfig wxPayConfig = new WxPayConfigImpl(SignType.MD5.name(), certRootPath);
+        WXPayConfig wxPayConfig = new WXPayConfig(SignType.MD5.name(), true);
         wxPayConfig.setUrl(WXPayConstants.getRePackGroupPayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         Map<String, String> result = wxPayRequest.requestCert(map);
-        System.out.println("调用成功=" + result.toString());
+        System.out.println("调用结果=" + result.toString());
 
         if (result.get("return_code") != null
                 && result.get("return_code").equals("SUCCESS")
@@ -160,7 +159,6 @@ public class RedPackSubmit {
 
 
     String subMchId = "1525006091";
-    //    String subMchId = "1521225291";
     String subAppId = "wxd8de5d37b6976b55"; //
 
 
@@ -169,7 +167,7 @@ public class RedPackSubmit {
 
 
     //商户号下的公众号appid
-    String gzhAppId = "wxd8de5d37b6976b55";
+    String gzhAppId = "wxa574b9142c67f42e";
 
     //测试普通红包
     @Test
@@ -178,7 +176,7 @@ public class RedPackSubmit {
         wxRedPack.setActName("新年红包");
         wxRedPack.setSendName("菠菜包");
         wxRedPack.setClientIp(WxpayUtil.localIp());
-        wxRedPack.setGzhAppId(gzhAppId);
+        wxRedPack.setGzhAppId(subAppId);
         wxRedPack.setMchBillno("1332313233233213");
         wxRedPack.setRemark("恭喜发财");
         wxRedPack.setWishing("恭喜发财");
@@ -189,7 +187,7 @@ public class RedPackSubmit {
         wxRedPack.setTotalNum(1);
         wxRedPack.setSceneId("PRODUCT_2");
         Map<String, String> payData = redPackData(wxRedPack);
-
+        System.out.println("result=" + XmlUtil.Map2Xml(payData));
         Map<String, String> result = redPackPay(payData);
         System.out.println("result=" + result.toString());
         //2019-11-21 09:55

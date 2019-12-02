@@ -53,21 +53,28 @@ public enum RespTips {
     IMG_DELETE_ERROR("9105","图片删除错误"),
     IMG_CODE_NEED("9106","图片验证码错误！！！"),
 
-    DEPOSIT_NOT_FOUND("10001","未交纳押金"),
-    ACCOUNT_IS_FROZEN("10002","账户被冻结"),
-    ACCOUNT_IS_INSUFFICIENT("10003","账户余额不足"),
-    ACCOUNT_IS_UNAVAILABLE("10004","账户不可用"),
-    ACCOUNT_PROFIT_LESS("10005","收益余额不足"),
-    ACCOUNT_REFUND_LESS("10006","退款金额大于订单金额"),
-    ACCOUNT_PAYCHANNEL_ERROR("account_paychannel_error","支付渠道账户未设置"),
+    PAYORDER_FOUND("7001","支付业务单重复创建"),
+    PAYORDER_NOTFOUND("7002","没有对应的业务单"),
+    PAYORDER_NOTFINISHED("7003","支付业务未成功"),
+    PAYORDER_FINISHED("7004","支付业务已成功"),
+    PAYORDER_LOCK_ERROR("7005","正在支付中请稍后..."),
+    PAYORDER_ERROR("7006","支付失败"),
 
-    ACCOUNT_PASSWORD_IS_EMPTY("account_password_empty","尚未设置密码" ),
-    ACCOUNT_PASSWORD_IS_RIGHT("account_password_right","密码正确" ),
-    ACCOUNT_PASSWORD_IS_WRONG("account_password_wrong","密码错误" ),
+    PAYCHANNEL_SET_ERROR("7101","支付渠道账户未设置"),
+    PAYCHANNLE_PAY_ERROR("7102","支付渠道返回错误"),
 
-    HAS_NOTFINISHED_PAYORDERS("10015","有提现未完成的订单"),
-    PAY_LOCK_ERROR("10016","正在支付中请稍后..."),
-    PAY_ERROR("10017","支付失败"),
+    PAYACCOUNT_IS_UNAVAILABLE("7201","账户不可用"),
+    PAYACCOUNT_FOUND("7204","账户不可重复创建"),
+    PAYACCOUNT_IS_FROZEN("7202","账户被冻结"),
+    PAYACCOUNT_IS_INSUFFICIENT("7203","账户余额不足"),
+    PAYACCOUNT_PROFIT_LESS("7205","收益余额不足"),
+    PAYACCOUNT_REFUND_LESS("7206","退款金额大于订单金额"),
+
+
+    PAYACCOUNT_PASSWORD_IS_RIGHT("7210","密码正确" ),
+    PAYACCOUNT_PASSWORD_IS_WRONG("7211","密码错误" ),
+    PAYACCOUNT_PASSWORD_IS_EMPTY("7212","尚未设置密码" ),
+
 
     APP_PAY_NOTIFY_FAIL("app_pay_notify_fail","子系统支付回调接口未设置"),
     REFUND_DATA_FOUND("10007","订单已经退款"),
@@ -83,7 +90,7 @@ public enum RespTips {
     NODE_PASS("node_is_pass","环节已通过"),
     NODE_FAIL("node_is_fail","环节未通过"),
 
-    PAYCHANNLE_PAY_ERROR("11001","支付渠道返回错误"),
+
 
     MEMBER_NULL("member_null","没有对应客户账号"),
 
@@ -96,9 +103,10 @@ public enum RespTips {
 
     GOODS_IS_UNAVAILAVLE("1501","商品不可用"),
 
+    LOCK_ERROR("19003","操作失败请稍后再试"),
 
-    SMSCODE_ERROR("smsCode_wrong","短信验证码错误"),
-    PAYORDER_CREATE_ERROR("payorder_create_error","创建支付单失败");
+
+    SMSCODE_ERROR("smsCode_wrong","短信验证码错误");
 
 
 

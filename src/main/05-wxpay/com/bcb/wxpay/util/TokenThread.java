@@ -4,12 +4,14 @@
 package com.bcb.wxpay.util;
 
 
+import com.bcb.log.util.LogUtil;
+
+import javax.net.ssl.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-//import java.security.cert.Certificate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -19,16 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import com.bcb.log.util.LogUtil;
-import com.bcb.wxpay.util.company.WxpayConfig;
-import net.sf.json.JSONObject;
+//import java.security.cert.Certificate;
 
 /**
  * @author G/2016年10月14日
@@ -44,15 +37,15 @@ public class TokenThread implements Runnable {
                 accessToken = this.getAccessToken();
                 if (accessToken != null) {
                     accessToken.getAccessToken();
-                    LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"进入线程accessToken"+accessToken.getAccessToken());
+                    LogUtil.saveTradeLog("进入线程accessToken"+accessToken.getAccessToken());
                     System.out.println(accessToken.getAccessToken());
                     jsapiTicket = WxpayUtil.getJsapiTicket(accessToken.getAccessToken());
                     System.out.println(jsapiTicket);
-                    LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"返回值jsapiTicket"+jsapiTicket);
+                    LogUtil.saveTradeLog("返回值jsapiTicket"+jsapiTicket);
                     //获取到access_token 休眠7000秒
                     Thread.sleep(6500 * 1000);
                 } else {
-                    LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"如果有accessToken"+accessToken.getAccessToken());
+                    LogUtil.saveTradeLog("如果有accessToken"+accessToken.getAccessToken());
                     //获取的access_token为空 休眠3秒
                     Thread.sleep(1000 * 3);
                 }
@@ -74,20 +67,20 @@ public class TokenThread implements Runnable {
      * @return
      */
     private AccessToken getAccessToken() {
-        LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"进入线程accessToken");
-        //正式
-        String Url = String.format(WxpayConfig.WXPAY_ACCESS_TOKEN, WxpayConfig.GZHAPPID, WxpayConfig.GZHAPPSECRET);
-        String result = getHttpsResponse(Url, "");
-        //9月12日修改待测试
-        if (result != null && result.length() > 0) {
-            LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"进入线程accessToken"+result);
-            //response.getWriter().println(result);
-            JSONObject json = JSONObject.fromObject(result);
-            AccessToken token = new AccessToken();
-            token.setAccessToken(json.getString("access_token"));
-            token.setExpiresin(json.getInt("expires_in"));
-            return token;
-        }
+//        LogUtil.saveTradeLog("进入线程accessToken");
+//        //正式
+//        String Url = String.format(WxpayConfig.WXPAY_ACCESS_TOKEN, WxpayConfig.GZHAPPID, WxpayConfig.GZHAPPSECRET);
+//        String result = getHttpsResponse(Url, "");
+//        //9月12日修改待测试
+//        if (result != null && result.length() > 0) {
+//            LogUtil.saveTradeLog("进入线程accessToken"+result);
+//            //response.getWriter().println(result);
+//            JSONObject json = JSONObject.fromObject(result);
+//            AccessToken token = new AccessToken();
+//            token.setAccessToken(json.getString("access_token"));
+//            token.setExpiresin(json.getInt("expires_in"));
+//            return token;
+//        }
         return null;
     }
 
@@ -152,7 +145,7 @@ public class TokenThread implements Runnable {
                     resultData += inputLine + "\n";
                 }
                 System.out.println("错误"+resultData);
-                LogUtil.saveTradeLog(LogUtil.getFileSavePath(),"赋值"+resultData);
+                LogUtil.saveTradeLog("赋值"+resultData);
             }
         } catch (Exception e) {
             e.printStackTrace();

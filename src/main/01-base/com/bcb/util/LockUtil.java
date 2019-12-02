@@ -14,9 +14,9 @@ public class LockUtil {
     @Autowired
     private RedisService redisService;
     //保存锁支付账户的头部
-    private final static String accountLockPreStr = "yt_ac_tk";
+    private final static String accountLockPreStr = "bcb_ac_tk";
     //保存锁支付账户的头部
-    private final static String payLockPreStr = "yt_pay";
+    private final static String payLockPreStr = "bcb_pay";
 
     private final static long second = 300l;
 
@@ -47,12 +47,12 @@ public class LockUtil {
     //================================具体实现方法======================================================/
 
     //账号加锁
-    public boolean lockAccount(String token) {
-        return lock(accountLockPreStr+token,token,second);
+    public boolean lockAccount(String key) {
+        return lock(accountLockPreStr+key,key,second);
     }
 
-    public boolean unLockAccount(String token) {
-        return unLock(accountLockPreStr+ token);
+    public boolean unLockAccount(String key) {
+        return unLock(accountLockPreStr+ key);
     }
 
 

@@ -9,7 +9,7 @@
         <module name="bcb-pay" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="7">
       <module name="bcb-pay" target="1.8" />
     </bytecodeTargetLevel>
   </component>

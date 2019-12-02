@@ -59,6 +59,26 @@ public class WXPayRequest {
         return XmlUtil.Map2Xml(reqData);
     }
 
+    /**
+     * 向 Map 中添加 mch_id、nonce_str、sign_type、sign <br>
+     * 满足有些接口不能传appid的情况
+     *  @param reqData
+     * @return
+     * @throws Exception
+     */
+    private String fillRequestDataNoAppId(Map<String, String> reqData) throws Exception {
+        reqData.put("mch_id", config.getMchId());
+        reqData.put("nonce_str", WXPayUtil.generateNonceStr());
+        if (SignType.MD5.name().equals(config.getSignType())) {
+            reqData.put("sign_type", WXPayConstants.MD5);
+        }
+        else if (SignType.HMACSHA256.name().equals(config.getSignType())) {
+            reqData.put("sign_type", WXPayConstants.HMACSHA256);
+        }
+        reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), config.getSignType()));
+        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
+        return XmlUtil.Map2Xml(reqData);
+    }
 
 
     /**
@@ -302,6 +322,16 @@ public class WXPayRequest {
         }
     }
 
+
+    /**
+     * 微信坑爹接口不能传appid
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public Map<String, String> requestNoAppId(Map<String, String> data) throws Exception {
+        return XmlUtil.parse(request(this.fillRequestDataNoAppId(data),false));
+    }
 
 //    /**
 //     * 判断xml数据的sign是否有效，必须包含sign字段，否则返回false。

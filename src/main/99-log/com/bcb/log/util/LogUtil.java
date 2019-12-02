@@ -11,18 +11,19 @@ import java.util.Vector;
 
 public class LogUtil {
 
-    private static String version;
-    private static String ServerIp;
-    private static String localPath = "";
-    private static String webRootUrl = "http://127.0.0.1";
+    static String version;
+    static String ServerIp;
+    static String localPath = "";
+    static String webRootUrl = "http://127.0.0.1";
     //服务器文件保存路径
-    private static String fileSavePath = "";
+    static String fileSavePath = "";
     //服务器文件访问路径
-    private static String servUrl = "";
-    private static Vector<String> sysLog = new Vector<String>();
-    private static Vector<String> webAccessLog = new Vector<String>();
+    static String servUrl = "";
+    static Vector<String> sysLog = new Vector<String>();
+    static Vector<String> webAccessLog = new Vector<String>();
     //服务器文件访问Ip
-    private static String serverIpPath = "";
+    static String serverIpPath = "";
+    static boolean debug=true;
 
 
     //设置当前应用版本
@@ -35,7 +36,7 @@ public class LogUtil {
     }
 
     //加载ip黑名单
-    private static StringBuffer blackIp=new StringBuffer();
+    static StringBuffer blackIp=new StringBuffer();
 
     /**
      * 获取服务器配置文件
@@ -149,10 +150,11 @@ public class LogUtil {
      * @author G/2018年1月21日下午1:10:23
      * @param str 要写入的内容
      */
-    public final static void saveTradeLog(String path,String str) {
+    public final static void saveTradeLog(String str) {
         try{
+            print(str);
             //交易日志
-            String tradeLogPath = path+"/log/trade/payMentLog" + DateUtil.yearMonth() + ".log";
+            String tradeLogPath = getFileSavePath()+"/log/trade/payMentLog" + DateUtil.yearMonth() + ".log";
             //获取系统支付日志路径
             File file = createFileOrFolder(tradeLogPath);
             write2File(file, DateUtil.yearMonthDayTime() + " " + str);
@@ -179,7 +181,7 @@ public class LogUtil {
      * @param path
      * @return
      */
-    private final static String readLog(String path){
+    final static String readLog(String path){
         StringBuffer re=new StringBuffer();
         try{
             File file = new File(path);
@@ -200,19 +202,21 @@ public class LogUtil {
      * @param str
      */
     public final static void print(Object str){
-        System.out.println("===print===");
-        System.out.println(DateUtil.yearMonthDayTime()+" "+str);
+        if(debug){
+            System.out.println("===print===");
+            System.out.println(DateUtil.yearMonthDayTime()+" "+str);
+        }
     }
 
 
     /**
      * 内存日志向量写入硬盘
      * @author G/2015-11-12 上午9:26:02
-     * @param log
+     * @param newLogs
      * @param newLogs
      * @return
      */
-    private final static synchronized boolean write2File(File file,Vector<String> newLogs) {
+    final static synchronized boolean write2File(File file,Vector<String> newLogs) {
         boolean flag=false;
         //如果文件不可写
         if(!file.exists() ||!file.canWrite()){
@@ -287,7 +291,7 @@ public class LogUtil {
      * @param file
      * @return
      */
-    private final static synchronized boolean write2File(File file,String log) {
+    final static synchronized boolean write2File(File file,String log) {
         boolean flag=false;
         //如果文件不可写
         if(!file.exists() ||!file.canWrite()){
@@ -413,7 +417,7 @@ public class LogUtil {
      * 获取本机ip
      * @return
      */
-    private static String[] getAllLocalHostIP() {
+    static String[] getAllLocalHostIP() {
         String[] ret = null;
         try {
             String hostName = InetAddress.getLocalHost().getHostName();

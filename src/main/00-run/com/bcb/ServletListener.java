@@ -8,8 +8,7 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author G
- * @date 2018/1/3 10:33.
+ * @author wangzhigang
  */
 @WebListener
 public class ServletListener implements javax.servlet.ServletRequestListener {

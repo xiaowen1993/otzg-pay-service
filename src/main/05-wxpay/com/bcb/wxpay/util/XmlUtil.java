@@ -25,7 +25,7 @@ import org.xml.sax.InputSource;
  */
 public class XmlUtil{
     public static Map<String,String> parse(String protocolXML) {
-    	Map<String,String> params = new HashMap<String,String>();
+    	Map<String,String> params = new HashMap<>();
     	try{   
     		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();   
     		DocumentBuilder builder = factory.newDocumentBuilder();   

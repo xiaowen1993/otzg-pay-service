@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * 打包发布到tomcat目录下的时候
  * 1、需要jre8.0以上，Tomcat8.5支持
  * 2、WebSocketConfig 配置需要注释掉
- * @author 曹操,caocao
+ * @author G.
  */
 
 //扫描servlet组件

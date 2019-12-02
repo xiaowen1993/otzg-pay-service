@@ -5,7 +5,6 @@ package com.bcb.wxpay.util;
 
 import com.bcb.log.util.LogUtil;
 import com.bcb.util.SubmitUtil;
-import com.bcb.wxpay.util.company.WxpayConfig;
 import net.sf.json.JSONObject;
 import org.junit.Test;
 
@@ -254,7 +253,7 @@ public class WxpayUtil {
         url = String.format(url, accessToken);
         String result = SubmitUtil.get(url);
         JSONObject jo = JSONObject.fromObject(result);
-        LogUtil.saveTradeLog(LogUtil.getFileSavePath(), "jsapiTicket值" + jo.toString());
+        LogUtil.saveTradeLog( "jsapiTicket值" + jo.toString());
         if (jo != null && jo.getString("ticket") != null) {
             result = jo.getString("ticket");
         }
@@ -262,36 +261,36 @@ public class WxpayUtil {
     }
 
     //获取微信网页需要的支付参数
-    public final static JSONObject getJsapiPayJson(String prepayId) {
-        /**
-         * prepay_id 通过微信支付统一下单接口拿到，
-         * paySign 采用统一的微信支付 Sign 签名生成方法，
-         * 注意这里 appId 也要参与签名，
-         * appId 与 config 中传入的 appId 一致，
-         * 即最后参与签名的参数有appId, timeStamp, nonceStr, package, signType
-         */
-        JSONObject jo = new JSONObject();
-        String nonce_str = getNonce("jsapi", 16);
-        String timestamp = create_timestamp();
-        String signature = "";
-        //注意这里参数名必须全部小写，且必须有序
-        Map<String, String> data = new HashMap<String, String>();
-        data.put("appId", WxpayConfig.GZHAPPID);
-        data.put("nonceStr", nonce_str);
-        data.put("timeStamp", timestamp);
-        data.put("package", "prepay_id=" + prepayId);
-        data.put("signType", "MD5");
-        data.put("key", WxpayConfig.GZHKEY);
-
-        signature = WxpayUtil.Sign(data);
-        jo.put("appId", WxpayConfig.GZHAPPID);
-        jo.put("timeStamp", timestamp);
-        jo.put("nonceStr", nonce_str);
-        jo.put("package", "prepay_id=" + prepayId);
-        jo.put("signType", "MD5");
-        jo.put("paySign", signature);
-        return jo;
-    }
+//    public final static JSONObject getJsapiPayJson(String prepayId) {
+//        /**
+//         * prepay_id 通过微信支付统一下单接口拿到，
+//         * paySign 采用统一的微信支付 Sign 签名生成方法，
+//         * 注意这里 appId 也要参与签名，
+//         * appId 与 config 中传入的 appId 一致，
+//         * 即最后参与签名的参数有appId, timeStamp, nonceStr, package, signType
+//         */
+//        JSONObject jo = new JSONObject();
+//        String nonce_str = getNonce("jsapi", 16);
+//        String timestamp = create_timestamp();
+//        String signature = "";
+//        //注意这里参数名必须全部小写，且必须有序
+//        Map<String, String> data = new HashMap<String, String>();
+//        data.put("appId", WxpayConfig.GZHAPPID);
+//        data.put("nonceStr", nonce_str);
+//        data.put("timeStamp", timestamp);
+//        data.put("package", "prepay_id=" + prepayId);
+//        data.put("signType", "MD5");
+//        data.put("key", WxpayConfig.GZHKEY);
+//
+//        signature = WxpayUtil.Sign(data);
+//        jo.put("appId", WxpayConfig.GZHAPPID);
+//        jo.put("timeStamp", timestamp);
+//        jo.put("nonceStr", nonce_str);
+//        jo.put("package", "prepay_id=" + prepayId);
+//        jo.put("signType", "MD5");
+//        jo.put("paySign", signature);
+//        return jo;
+//    }
 
     private static String byteToHex(final byte[] hash) {
         Formatter formatter = new Formatter();
@@ -334,14 +333,14 @@ public class WxpayUtil {
 //		request.sign= "7FFECB600D7157C5AA49810D2D8F28BC2811827B";
 //		A7E211451F2912B3A9AA491A19DA927A
 
-        paramMap.put("appid", "wxd930ea5d5a258f4f");
-        paramMap.put("partnerid", "1900000109");
-        paramMap.put("prepayid", "1101000000140415649af9fc314aa427");
-        paramMap.put("package", "Sign=WXPay");
-        paramMap.put("noncestr", "1101000000140429eb40476f8896f4c9");
-        paramMap.put("timestamp", "1398746574");
-        paramMap.put("key", WxpayConfig.APPKEY);
-        System.out.println(WxpayUtil.Sign(paramMap));
+//        paramMap.put("appid", "wxd930ea5d5a258f4f");
+//        paramMap.put("partnerid", "1900000109");
+//        paramMap.put("prepayid", "1101000000140415649af9fc314aa427");
+//        paramMap.put("package", "Sign=WXPay");
+//        paramMap.put("noncestr", "1101000000140429eb40476f8896f4c9");
+//        paramMap.put("timestamp", "1398746574");
+//        paramMap.put("key", WxpayConfig.APPKEY);
+//        System.out.println(WxpayUtil.Sign(paramMap));
 //		System.out.println("22D571F7D693B168A1BEE4AE3F55F1BF");
         //"paySign":"22D571F7D693B168A1BEE4AE3F55F1BF"
     }

@@ -81,7 +81,7 @@
 #      # 连接池中的最小空闲连接
 #        min-idle: 0
 #      # 连接超时时间（毫秒）
-      timeout: 0
+      timeout: 5000
 
 
     #配置jpa
@@ -109,15 +109,17 @@
 
   pay:
     wx:
-      appID: wxa574b9142c67f42e
+      mchId: 1513549201
       key: Bcb19e0814494a248d28c591d4bc31e1
-      mchID: 1405082702
+      appId: wxa574b9142c67f42e
+      autoReport: true
       useSandbox: false
-      sandboxKey: 240bd79d4237406b7b0792ea56207f70
-      notifyUrl: http://c3t22e.natappfree.cc/jsPayNotify
-    sub:
-      mchID: 1521225291
-    certSn: 5663476TEREGD45FH63GDFHFG657FCHBFG
+      sandboxKey: 5ffeda033fb8fab92ae24d321257b01f
+#      本地测试需每日更换
+      notifyUrl: http://n925wj.natappfree.cc/pay/wx/notify
+      certSn: 5663476TEREGD45FH63GDFHFG657FCHBFG
+      certRootPath: D:/workspace/bcb-pay/src/main/webapp
+      appSecret: D:/workspace/bcb-pay/src/main/webapp
 
     alipay:
       alipay-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1EHvr+EMX5SM3NY9GtJrUNWGd6jeyeov6481Fi5ZFSxkuiY9MD8cYF1NZ/HrXZuXcrsFUTReZjm+Arl57tuU+It6dJga0R44yPirYJnJxxliAhjtY+pluQRUMaKwMMxap8i0aStdBj58frLWG3sr6QQD2V/DglQ6YaeFGMHLq9EMtQ87Hvms8P41t9x3PXBpsWQ44EYH6NI4eNgpgw47M6LQXNqG/5O0iE6E9iHvzMDE62M7Jm8fJULOMm9FEl8652jkquwB5W0291A84sXAhArkNCbckzbIRvMAw8Oohezkwis+l6uvQKqsUmagOD9flaM1IyK/oH6yhk2/2OprHwIDAQAB"

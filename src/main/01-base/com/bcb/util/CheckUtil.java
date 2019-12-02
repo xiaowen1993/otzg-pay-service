@@ -26,6 +26,39 @@ public final class CheckUtil {
     }
 
     /**
+     * 校验金额
+     *
+     * @param amount
+     * @return
+     */
+    public static boolean checkAmount(Double amount) {
+        if (null == amount) {
+            return true;
+        }
+        if (amount.compareTo(new Double(0)) < 1) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 校验参数
+     *
+     * @param param
+     * @param length
+     * @return
+     */
+    public static boolean checkParam(String param, int length) {
+        if (isEmpty(param)) {
+            return true;
+        }
+        if (param.length() > length) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 判断集合是否为空
      *
      * @param collection

@@ -1,6 +1,5 @@
 package com.bcb;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -16,6 +15,10 @@ public class ApplicationStartRunner implements ApplicationRunner {
     public void run(ApplicationArguments var1) throws Exception{
         //加载访问权限
 
+        //加载微信守护线程
+//        Thread wx = new Thread(new TokenThread());
+//        wx.setDaemon(true);
+//        wx.start();
     }
 
 }

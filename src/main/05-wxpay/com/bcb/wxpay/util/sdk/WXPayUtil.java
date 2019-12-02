@@ -1,5 +1,6 @@
 package com.bcb.wxpay.util.sdk;
 
+import com.bcb.log.util.LogUtil;
 import com.bcb.wxpay.util.service.SignType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +154,7 @@ public class WXPayUtil {
      * @return 签名是否正确
      * @throws Exception
      */
-    public static boolean isSignatureValid(Map<String, String> data, String key) throws Exception {
+    public static boolean isSignatureValid(Map<String, String> data, String key){
         return isSignatureValid(data, key, SignType.MD5.name());
     }
 
@@ -166,7 +167,7 @@ public class WXPayUtil {
      * @return 签名是否正确
      * @throws Exception
      */
-    public static boolean isSignatureValid(Map<String, String> data, String key, String signType) throws Exception {
+    public static boolean isSignatureValid(Map<String, String> data, String key, String signType){
         if (!data.containsKey(WXPayConstants.FIELD_SIGN) ) {
             return false;
         }
@@ -181,7 +182,7 @@ public class WXPayUtil {
      * @param key API密钥
      * @return 签名
      */
-    public static String generateSignature(final Map<String, String> data, String key) throws Exception {
+    public static String generateSignature(final Map<String, String> data, String key){
         return generateSignature(data, key, SignType.MD5.name());
     }
 
@@ -193,27 +194,31 @@ public class WXPayUtil {
      * @param signType 签名方式
      * @return 签名
      */
-    public static String generateSignature(final Map<String, String> data, String key, String signType) throws Exception {
-        Set<String> keySet = data.keySet();
-        String[] keyArray = keySet.toArray(new String[keySet.size()]);
-        Arrays.sort(keyArray);
-        StringBuilder sb = new StringBuilder();
-        for (String k : keyArray) {
-            if (k.equals(WXPayConstants.FIELD_SIGN) || null==data.get(k)) {
-                continue;
+    public static String generateSignature(final Map<String, String> data, String key, String signType){
+        try{
+            Set<String> keySet = data.keySet();
+            String[] keyArray = keySet.toArray(new String[keySet.size()]);
+            Arrays.sort(keyArray);
+            StringBuilder sb = new StringBuilder();
+            for (String k : keyArray) {
+                if (k.equals(WXPayConstants.FIELD_SIGN) || null==data.get(k)) {
+                    continue;
+                }
+                if (data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
+                    sb.append(k).append("=").append(data.get(k).trim()).append("&");
             }
-            if (data.get(k).trim().length() > 0) // 参数值为空，则不参与签名
-                sb.append(k).append("=").append(data.get(k).trim()).append("&");
-        }
-        sb.append("key=").append(key);
-        if (SignType.MD5.name().equals(signType)) {
-            return MD5(sb.toString()).toUpperCase();
-        }
-        else if (SignType.HMACSHA256.name().equals(signType)) {
-            return HMACSHA256(sb.toString(), key);
-        }
-        else {
-            throw new Exception(String.format("Invalid sign_type: %s", signType));
+            sb.append("key=").append(key);
+            if (SignType.MD5.name().equals(signType)) {
+                return MD5(sb.toString()).toUpperCase();
+            }
+            else if (SignType.HMACSHA256.name().equals(signType)) {
+                return HMACSHA256(sb.toString(), key);
+            }
+            return "";
+        }catch (Exception e){
+            e.printStackTrace();
+            LogUtil.saveTradeLog(String.format("Invalid sign_type: %s", signType));
+            return "";
         }
     }
 

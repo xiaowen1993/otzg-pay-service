@@ -1,7 +1,7 @@
 package com.bcb.wxpay.util;
 
 import com.bcb.log.util.LogUtil;
-import com.bcb.wxpay.util.company.WxpayConfig;
+import com.bcb.wxpay.util.service.WXPayConfig;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -19,15 +19,15 @@ import java.util.Map;
 
 public class PostUtil {
     //带证书提交
-    public final static String doPostWithCert(String syspath, String mchid, String url, String data) {
+    public final static String doPostWithCert(String url, String data) {
         String result = "";
 
         //获取证书路径
-        String keyStoreUrl=WxpayConfig.getCertPath(syspath,mchid);
+        String keyStoreUrl= WXPayConfig.getCertPath();
         System.out.println("keyStoreUrl="+keyStoreUrl);
 
         //加载证书
-        SSLConnectionSocketFactory sslsf = LoadSslUtil.getInstance().loadCert(keyStoreUrl, mchid);
+        SSLConnectionSocketFactory sslsf = LoadSslUtil.getInstance().loadCert(keyStoreUrl, WXPayConfig.getMchId());
         //如果加载失败直接返回
         if (sslsf == null) {
             return result;
@@ -46,26 +46,26 @@ public class PostUtil {
             //得指明使用UTF-8编码，否则到API服务器XML的中文不能被成功识别
             StringEntity postEntity = new StringEntity(data, "UTF-8");
             httpPost.addHeader("Content-Type", "text/xml");
-            httpPost.addHeader(HTTP.USER_AGENT, "wxpay sdk java v1.0 " + mchid);
+            httpPost.addHeader(HTTP.USER_AGENT, "wxpay sdk java v1.0 " + WXPayConfig.getMchId());
             httpPost.setEntity(postEntity);
 
             CloseableHttpResponse response = httpClient.execute(httpPost);
 
             result = EntityUtils.toString(response.getEntity(), "UTF-8");
-            LogUtil.saveTradeLog("官方微信--请求返回结果：", result);
+            LogUtil.saveTradeLog("官方微信--请求返回结果："+result);
 
             return result;
         } catch (Exception e) {
-            LogUtil.saveTradeLog("官方微信--请求失败：", e.toString());
+            LogUtil.saveTradeLog("官方微信--请求失败："+e.toString());
         }
 
         return result;
     }
 
     //带证书上传文件
-    public final static String doPostFileDataWithCert(String syspath, String mchid, String url, Map<String, String> paramMap, String fileKey, File file) {
+    public final static String doPostFileDataWithCert(String url, Map<String, String> paramMap, String fileKey, File file) {
         //获取证书路径
-        String keyStoreUrl= WxpayConfig.getCertPath(syspath,mchid);
+        String keyStoreUrl= WXPayConfig.getCertPath();
         System.out.println("keyStoreUrl="+keyStoreUrl);
 
         try {
@@ -78,7 +78,7 @@ public class PostUtil {
             });
 
             //加载证书
-            SSLConnectionSocketFactory sslsf = LoadSslUtil.getInstance().loadCert(keyStoreUrl, mchid);
+            SSLConnectionSocketFactory sslsf = LoadSslUtil.getInstance().loadCert(keyStoreUrl, WXPayConfig.getMchId());
             //如果加载失败直接返回
             if (sslsf == null) {
                 return null;
@@ -91,16 +91,16 @@ public class PostUtil {
                 httpPost.setConfig(config);
                 ////这里的Content-type要设置为"multipart/form-data"，否则返回“参数填写有误，请检查后重试”
                 httpPost.addHeader(HTTP.CONTENT_TYPE, "multipart/form-data; charset=UTF-8");
-                httpPost.addHeader(HTTP.USER_AGENT, "wxpay sdk java v1.0 " + mchid);
+                httpPost.addHeader(HTTP.USER_AGENT, "wxpay sdk java v1.0 " + WXPayConfig.getMchId());
                 httpPost.setEntity(multipartEntityBuilder.build());
                 CloseableHttpResponse response = httpClient.execute(httpPost);
 
                 String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-                LogUtil.saveTradeLog("官方微信--请求返回结果：", result);
+                LogUtil.saveTradeLog("官方微信--请求返回结果："+result);
 
                 return result;
             } catch (Exception e) {
-                LogUtil.saveTradeLog("官方微信--请求失败：", e.toString());
+                LogUtil.saveTradeLog("官方微信--请求失败："+e.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

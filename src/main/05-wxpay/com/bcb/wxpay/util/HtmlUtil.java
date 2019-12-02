@@ -56,7 +56,6 @@ public class HtmlUtil {
 
             // 释放资源
             inputStream.close();
-            inputStream = null;
         } catch (IOException e1) {
             e1.printStackTrace();
             return null;

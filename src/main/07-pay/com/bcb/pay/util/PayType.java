@@ -19,7 +19,7 @@ public enum PayType {
     }
 
     //判断是否在枚举类型内的值
-    public final static boolean isFound(Integer i){
+    public final static boolean has(Integer i){
         for (PayType pt : PayType.values()) {
             if(pt.index==i){
                 return true;
@@ -54,7 +54,4 @@ public enum PayType {
         return FuncUtil.CleanComma(names);
     }
 
-//    public static void main(String args[]) {
-//        LogUtil.print(getNames());
-//    }
 }

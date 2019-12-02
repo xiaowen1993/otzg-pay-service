@@ -1,11 +1,11 @@
 package com.bcb.wxpay.util.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bcb.util.JsonUtil;
 import com.bcb.wxpay.util.WxpayUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
-import net.sf.json.JSONObject;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public class DepositSubmit {
     /**
      * 刷脸交押金
      */
-    public final static Map<String, String> postDepositPay(Map<String, String> map) throws Exception {
-        WXPayConfig wxPayConfig = new WxPayConfigImpl();
+    public final static Map<String, Object> postDepositPay(Map<String, String> map) throws Exception {
+        WXPayConfig wxPayConfig = new WXPayConfig();
 
 //        wxPayConfig.setUseSandBox(true);
 //        WXPayConstants.setUseSandBox(true);
@@ -99,7 +99,7 @@ public class DepositSubmit {
                 "测试订单1", "190108165433002", new Double(1.01), faceCode, WxpayUtil.localIp());
 
         System.out.println("payData=>" + payData);
-        Map<String, String> result = postDepositPay(payData);
+        Map<String, Object> result = postDepositPay(payData);
         System.out.println("result=" + result.toString());
         //2019-11-16 17:33
         //{return_msg=沙箱支付金额不正确，请确认验收case, return_code=FAIL}

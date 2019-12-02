@@ -1,34 +1,111 @@
 package com.bcb.wxpay.util.service;
 
-import com.bcb.wxpay.util.company.WxpayConfig;
 import com.bcb.wxpay.util.sdk.IWXPayDomain;
+import com.bcb.wxpay.util.sdk.WXPayConstants;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 
-public abstract class WXPayConfig {
+@Component
+public class WXPayConfig {
 
     //菠菜包
-    String mchId = "1513549201";
-    String appId = "wxa574b9142c67f42e";
-    String key = "Bcb19e0814494a248d28c591d4bc31e1";
+    static String mchId = "1513549201";
+    //appid是微信公众账号或开放平台APP的唯一标识，在公众平台申请公众账号或者在开放平台申请APP账号后，微信会自动分配对应的appid，用于标识该应用。可在微信公众平台-->开发者中心查看，商户的微信支付审核通过邮件中也会包含该字段值。
+    static String appId = "wxa574b9142c67f42e";
+
+    //交易过程生成签名的密钥，仅保留在商户系统和微信支付后台，不会在网络中传播。商户妥善保管该Key，切勿在网络中传输，不能在其他客户端中存储，保证key不会被泄漏。商户可根据邮件提示登录微信商户平台进行设置。也可按一下路径设置：微信商户平台(pay.weixin.qq.com)-->账户设置-->API安全-->密钥设置
+    static String key = "Bcb19e0814494a248d28c591d4bc31e1";
+
+    //AppSecret是APPID对应的接口密码，用于获取接口调用凭证access_token时使用。在微信支付中，先通过OAuth2.0接口获取用户openid，此openid用于微信内网页支付模式下单接口使用。在开发模式中获取AppSecret（成为开发者且帐号没有异常状态）。
+    static String appSecret = "";
+
+    //微信收款异步通知接口
+    static String notifyUrl = "";
+    //微信证书存放路径
+    static String certRootPath = "D:/workspace/bcb-pay/src/main/webapp";
 
     //沙箱key
-    String sandBoxKey = "5ffeda033fb8fab92ae24d321257b01f";
+    static String sandBoxKey = "";
+
+    static boolean useSandbox = false;
+    //自动回复
+    static boolean autoReport = false;
+
+
+    @Value("${pay.wx.mchId}")
+    public void setMchId(String value) {
+        mchId = value;
+    }
+
+    @Value("${pay.wx.appId}")
+    public void setAppId(String value) {
+        appId = value;
+    }
+
+    @Value("${pay.wx.key}")
+    public void setKey(String value) {
+        key = value;
+    }
+    @Value("${pay.wx.notifyUrl}")
+    public void setNotifyUrl(String value){
+        notifyUrl=value;
+    }
+    @Value("${pay.wx.autoReport}")
+    public void setAutoReport(boolean value){
+        autoReport=value;
+    }
+
+    @Value("${pay.wx.sandboxKey}")
+    public void setSandBoxKey(String value) {
+        sandBoxKey = value;
+    }
+
+    @Value("${pay.wx.useSandbox}")
+    public void setUseSandbox(boolean value) {
+        useSandbox = value;
+    }
+
+    @Value("${pay.wx.certRootPath}")
+    public void setCertRootPath(String value){ certRootPath = value;}
+
+    @Value("${pay.wx.appSecret}")
+    public void setAppSecret(String value){ appSecret = value;}
+
+    public static String getMchId() {
+        return mchId;
+    }
+
+    public static String getKey() {
+        return key;
+    }
+
+    public static String getAppId() {
+        return appId;
+    }
+
+    public static String getNotifyUrl() {
+        return notifyUrl;
+    }
+
+    public static boolean isAutoReport() {
+        return autoReport;
+    }
+
+    public static String getCertRootPath() {
+        return certRootPath;
+    }
 
     //提交地址
     String url;
 
-    //自动回复
-    boolean autoReport = true;
-
     String signType= SignType.MD5.name();
     byte[] certData;
 
-    /**
-     * 微信收款异步通知接口
-     */
-    //正式环境1111111111111
-    public static String WXPAY_RECEIVE_NOTIFY = "http://c3t22e.natappfree.cc/jsPayNotify";
 
     //连接超时时间，默认10秒
     public final static int socketTimeout = 10000;
@@ -76,83 +153,14 @@ public abstract class WXPayConfig {
 
 
     //获取证书路径
-    public final String getCertPath(String syspath,String mchid){
-        String path=syspath;
-        if(mchid.equals(WxpayConfig.GZHMCHID)){
-            path += WxpayConfig.GZHCERTPATH;
-        }else if(mchid.equals(WxpayConfig.APPMCHID)){
-            path += WxpayConfig.APPCERTPATH;
-        }
-        return path;
+    public final static String getCertPath(){
+        return getCertRootPath() + APPCERTPATH;
     }
 
-    public final String getPublicCertPath(String syspath,String mchid){
-        String path=syspath;
-        if(mchid.equals(WxpayConfig.APPMCHID)){
-            path += WxpayConfig.APPPUBLICCERTPATH;
-        }
-        return path;
+    public final static String getPublicCertPath(){
+        return getCertRootPath() + APPPUBLICCERTPATH;
     }
 
-
-
-
-    /**
-     * 获取 App ID
-     *
-     * @return App ID
-     */
-    public abstract String getAppId();
-
-    /**
-     *
-     * @return
-     */
-    public abstract boolean getAutoReport();
-
-    /**
-     * 提交地址
-     * @return
-     */
-    public abstract String getUrl();
-
-    public abstract void setUrl(String url);
-    /**
-     * 获取 Mch ID
-     *
-     * @return Mch ID
-     */
-    public abstract String getMchId();
-
-
-    /**
-     * 获取 API 密钥
-     *
-     * @return API密钥
-     */
-    public abstract String getKey();
-
-    /**
-     * 获取签名方式
-     * @return
-     */
-    public abstract String getSignType();
-
-    //设置使用沙箱模式(测期间可用)
-    public abstract void setUseSandBox(boolean useSandBox);
-
-    /**
-     * 获取商户证书内容
-     *
-     * @return 商户证书内容
-     */
-    public abstract InputStream getCertStream();
-
-    /**
-     * 获取WXPayDomain, 用于多域名容灾自动切换
-     * @return
-     */
-    public abstract IWXPayDomain getWXPayDomain();
 
     /**
      * 是否自动上报。
@@ -193,4 +201,72 @@ public abstract class WXPayConfig {
         return 10;
     }
 
+    public String getSignType() {
+        return signType;
+    }
+
+    public void setSignType(String signType) {
+        this.signType = signType;
+    }
+
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public InputStream getCertStream() {
+        ByteArrayInputStream certBis = new ByteArrayInputStream(this.certData);
+        return certBis;
+    }
+
+    public WXPayConfig() {
+    }
+
+    public WXPayConfig(String signType) {
+        this.signType = signType;
+    }
+    public WXPayConfig(String signType, boolean cert) {
+        if(signType!=null){
+            this.signType=signType;
+        }
+        if(cert){
+            loadCert();
+        }
+    }
+
+    void loadCert(){
+        try{
+            String certPath = getCertPath();
+            System.out.println("文件路径="+certPath);
+            File file = new File(certPath);
+            if(file.exists() && file.isFile()){
+                InputStream certStream = new FileInputStream(file);
+                this.certData = new byte[(int) file.length()];
+                certStream.read(this.certData);
+                certStream.close();
+            }else{
+                System.out.println("文件路径错误="+certPath);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public IWXPayDomain getWXPayDomain() {
+        IWXPayDomain iwxPayDomain = new IWXPayDomain() {
+            @Override
+            public void report(String domain, long elapsedTimeMillis, Exception ex) {
+
+            }
+            @Override
+            public DomainInfo getDomain(WXPayConfig config) {
+                return new IWXPayDomain.DomainInfo(WXPayConstants.DOMAIN_API, true);
+            }
+        };
+        return iwxPayDomain;
+    }
 }

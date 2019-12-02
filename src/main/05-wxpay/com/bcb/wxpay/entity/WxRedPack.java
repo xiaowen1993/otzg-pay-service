@@ -14,7 +14,9 @@ import java.io.Serializable;
 @Table
 public class WxRedPack implements Serializable {
     @Id
+    @Column(name = "id", nullable = false, length = 32)
     String id;
+
     //子商户号
     @Column(name = "sub_mch_id",nullable = false,length = 32)
     String subMchId;

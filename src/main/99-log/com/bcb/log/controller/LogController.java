@@ -3,6 +3,7 @@ package com.bcb.log.controller;
 import com.bcb.base.BaseController;
 import com.bcb.log.util.LogUtil;
 import com.bcb.util.RespTips;
+import com.bcb.wxpay.util.service.WXPayConfig;
 import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,6 +48,11 @@ public class LogController extends BaseController {
         jo.put("file-save-path",LogUtil.getFileSavePath());
         jo.put("local-path",LogUtil.getLocalPath());
         jo.put("server-ip-path",LogUtil.getServerIpPath());
+        jo.put("wx.appId=", WXPayConfig.getAppId());
+        jo.put("wx.mchId=", WXPayConfig.getMchId());
+        jo.put("wx.isAutoReport=", WXPayConfig.isAutoReport());
+        jo.put("wx.key=", WXPayConfig.getKey());
+        jo.put("wx.notifyUrl=", WXPayConfig.getNotifyUrl());
         //返回结果
         sendJson(true, RespTips.SUCCESS_CODE.code,jo);
     }

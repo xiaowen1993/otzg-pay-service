@@ -192,7 +192,7 @@ public class FileServImpl extends AbstractServ implements FileServ {
             jo.put("filePath",LogUtil.getServUrl()+filePath);
 
         } catch (IOException e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            rollBack();
             P("FileServImpl.saveHeadImg:"+e,"ERROR");
         }
         return jo;
@@ -294,7 +294,7 @@ public class FileServImpl extends AbstractServ implements FileServ {
 
             return fi;
         } catch (IOException e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            rollBack();
             P("FileServImpl.saveLocal"+e,"ERROR");
         }
         return null;
@@ -511,7 +511,7 @@ public class FileServImpl extends AbstractServ implements FileServ {
             return fi;
 
         } catch (IOException e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            rollBack();
             P("FileServImpl.saveLocal"+e,"ERROR");
         }
         return null;
@@ -549,7 +549,7 @@ public class FileServImpl extends AbstractServ implements FileServ {
             return fi;
 
         } catch (IOException e) {
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            rollBack();
             P("FileServImpl.saveLocal"+e,"ERROR");
         }
         return null;

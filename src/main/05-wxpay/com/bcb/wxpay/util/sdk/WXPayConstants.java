@@ -85,11 +85,14 @@ public class WXPayConstants {
 
 
     //=================================关于分账================================================/
-    //服务商分账
+    //请求单次分账
     public static final String PROFITSHARING_URL_SUFFIX = "/secapi/pay/profitsharing";
     //添加分账接收方：服务商代子商户发起添加分账接收方请求，后续可通过发起分账请求将结算后的钱分到该分账接收方。HMAC-SHA256
     public static final String PROFITSHARING_ADDRECEIVER_URL_SUFFIX = "/pay/profitsharingaddreceiver";
+    //删除分账接收方
     public static final String PROFITSHARING_REMOVERECEIVER_URL_SUFFIX = "/pay/profitsharingremovereceiver";
+    //分账结果查询
+    public static final String PROFITSHARING_QUERY_URL_SUFFIX = "/pay/profitsharingquery";
 
 
     //=================================提现(不支持的)================================================/
@@ -190,22 +193,27 @@ public class WXPayConstants {
 
 
     //企业付款接口
-    public String getTransPayUrl() {
+    public static String getTransPayUrl() {
         return getDomain()+TRANSFER_URL_SUFFIX;
     }
-    //服务商分账
-    public String getProfitSharingUrl() {
+    //请求单次分账
+    public static String getProfitSharingUrl() {
         return getDomain()+PROFITSHARING_URL_SUFFIX;
     }
 
-    //服务商添加分账
+    //服务商添加分账者
     public static String getProfitSharingAddReceiverUrl() {
         return getDomain()+PROFITSHARING_ADDRECEIVER_URL_SUFFIX;
     }
 
-    //服务商添加分账
-    public String getProfitSharingRemoveReceiverUrl() {
-        return getDomain()+PROFITSHARING_ADDRECEIVER_URL_SUFFIX;
+    //服务商删除分账者
+    public static String getProfitSharingRemoveReceiverUrl() {
+        return getDomain()+PROFITSHARING_REMOVERECEIVER_URL_SUFFIX;
+    }
+
+    //服务商分账结果查询
+    public static String getProfitSharingQueryUrl() {
+        return getDomain()+PROFITSHARING_QUERY_URL_SUFFIX;
     }
 
 

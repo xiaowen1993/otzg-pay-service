@@ -18,4 +18,8 @@ public abstract class BaseBean {
         LogUtil.addSysErrorLog(o,level);
     }
 
+    protected final static void PT(String str){
+        LogUtil.saveTradeLog(str);
+    }
+
 }

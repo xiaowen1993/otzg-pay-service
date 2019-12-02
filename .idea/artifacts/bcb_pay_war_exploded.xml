@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" name="bcb-pay:war exploded">
-    <output-path>$PROJECT_DIR$/target/artifacts/bcb_pay_war_exploded</output-path>
+    <output-path>$PROJECT_DIR$/target/bcb-pay</output-path>
     <root id="root">
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
