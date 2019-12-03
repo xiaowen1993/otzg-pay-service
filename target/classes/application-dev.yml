@@ -10,10 +10,26 @@
 #    文件服务路径
     servUrl: http://192.168.3.112:8030
 
+#服务注册
+  eureka:
+    client:
+      service-url:
+        defaultZone: http://192.168.3.112:8090/eureka
+    #        defaultZone: http://zhuce.fangshangqu.cn/eureka
+    instance:
+      #      lease-renewal-interval-in-seconds: 10
+      #      lease-expiration-duration-in-seconds: 5
+
+      #    注册到eureka服务器的地址及端口,注意部署到tomcat后的端口问题
+      instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+      prefer-ip-address: true
+
+
+
  #本服务基本配置
   spring:
     application:
-      name: BCB-B2B-SERVER
+      name: BCB-PAY-SERVER
 
     #数据库
     datasource:

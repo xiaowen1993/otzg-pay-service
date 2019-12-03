@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -24,7 +26,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ServletComponentScan
 //开启事务支持后，然后在访问数据库的Service方法上添加注解 @Transactional
 @EnableTransactionManagement
+@EnableDiscoveryClient
 @SpringBootApplication
+@EnableFeignClients
 @EnableCaching
 @EnableConfigurationProperties
 public class MainApplication{
