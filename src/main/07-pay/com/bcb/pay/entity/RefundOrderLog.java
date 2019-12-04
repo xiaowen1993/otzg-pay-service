@@ -35,7 +35,7 @@ public class RefundOrderLog implements Serializable {
     @Column(name = "order_no",length = 64,nullable = false)
     String orderNo;
 
-    //子系统收款业务单号
+    //子系统退款业务单号
     @Column(name = "refund_order_no",length = 64,nullable = false)
     String refundOrderNo;
 

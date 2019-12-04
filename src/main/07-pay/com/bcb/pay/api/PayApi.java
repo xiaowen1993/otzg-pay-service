@@ -102,6 +102,7 @@ public class PayApi extends AbstractController {
         }
     }
 
+    //回复支付渠道
     void sendBack(boolean flag) {
         getResponse().setContentType("text/plain;charset=UTF-8");
         try {
@@ -116,7 +117,7 @@ public class PayApi extends AbstractController {
         }
     }
 
-
+    //收款业务查询
     @RequestMapping(value = "/pay/query")
     public void payOrderQuery(String unitId, String payOrderNo) {
         if (CheckUtil.isEmpty(unitId)
@@ -146,7 +147,7 @@ public class PayApi extends AbstractController {
         }
     }
 
-
+    //收款业务
     @RequestMapping(value = "/pay/receive")
     public void payReceive(PayOrderDto payOrderDto) {
         if (CheckUtil.isEmpty(payOrderDto)) {
@@ -168,6 +169,7 @@ public class PayApi extends AbstractController {
             return;
         }
 
+        //判断基本账户是否已创建
         PayAccount payAccount = payAccountServ.findByUnitId(payOrderDto.getUnitId());
         if(null==payAccount
                 || !payAccount.isUseable()){
@@ -189,6 +191,7 @@ public class PayApi extends AbstractController {
             sendFail();
             return;
         }
+
         //如果返回失败
         if(result.get("success").equals(false)){
             sendFail();

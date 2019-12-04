@@ -97,7 +97,9 @@ public class RefundApi extends AbstractController {
         if(r==0){
             //退款成功
             sendSuccess();
-        }else if(r==1){
+        }else if(r==2){
+            sendJson(false,RespTips.PAYORDER_LOCK_ERROR.code,RespTips.PAYORDER_LOCK_ERROR.tips);
+        }else if(r>2){
             sendFail();
         }
 

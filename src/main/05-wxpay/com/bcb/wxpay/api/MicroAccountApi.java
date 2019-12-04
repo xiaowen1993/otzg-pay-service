@@ -2,6 +2,7 @@ package com.bcb.wxpay.api;
 
 import com.bcb.pay.api.AbstractController;
 import com.bcb.util.CheckUtil;
+import com.bcb.util.RespTips;
 import com.bcb.wxpay.dto.WxMicroAccountDto;
 import com.bcb.wxpay.entity.WxMicroAccount;
 import com.bcb.wxpay.service.MicroAccountServ;
@@ -24,6 +25,11 @@ public class MicroAccountApi extends AbstractController {
 	public final void save(String unitId,WxMicroAccountDto wxMicroAccountDto){
         if(CheckUtil.isEmpty(unitId)){
             sendParamError();
+            return;
+        }
+
+        if(null!=microAccountServ.query(unitId)){
+            sendJson(false, RespTips.PAYACCOUNT_FOUND.code,"商户材料已提交");
             return;
         }
 

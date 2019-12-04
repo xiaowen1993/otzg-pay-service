@@ -8,8 +8,8 @@ import java.util.Map;
  */
 public abstract class CheckDtoUtil<T> {
     protected T t;
-    protected boolean pass = false;
-    protected String code = RespTips.ERROR_CODE.code;
+    protected boolean pass = true;
+    protected String code = RespTips.SUCCESS_CODE.code;
     protected String msg = "";
     //构造函数
     public CheckDtoUtil(T t) {

@@ -17,6 +17,7 @@ public class PayAccountApi extends AbstractController {
     @Autowired
     LockUtil lockUtil;
 
+    //创建基本账户
     @RequestMapping("/payAccount/create")
     public void createPayAccount(String unitId, String name, String contact, String mobilePhone) {
         if (CheckUtil.isEmpty(unitId)
