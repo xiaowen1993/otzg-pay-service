@@ -30,7 +30,7 @@ public class WxMicroUtil {
             //平台证书序列号
             paramMap.put("cert_sn", "749535475D89DF9ECF413A6CA05F74FF4CEDDCB8");
             paramMap.put("mch_id", WXPayConfig.getMchId());
-            paramMap.put("nonce_str", WxpayUtil.getNonce("nonce", 16));
+            paramMap.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
 
             //业务申请编号
             paramMap.put("business_code", wxMicroAccount.getBusinessCode());
@@ -163,7 +163,7 @@ public class WxMicroUtil {
         //接口版本号
         paramMap.put("version", "1.0");
         paramMap.put("mch_id", WXPayConfig.getMchId());
-        paramMap.put("nonce_str", WxpayUtil.getNonce("nonce", 16));
+        paramMap.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
         //商户申请单号
 //        paramMap.put("applyment_id", applyment_id);
         //业务申请编号

@@ -7,8 +7,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.StringJoiner;
 
 /**
  * @Author G.
@@ -20,9 +19,13 @@ public class RefundOrder implements Serializable {
     @Id
     Long id;
 
-    //支付系统退款业务单号
+    //支付系统收款时候的业务单号
     @Column(name = "pay_order_no", length = 64, nullable = false, unique = true)
     String payOrderNo;
+
+    //支付系统退款业务单号
+    @Column(name = "pay_refund_order_no", length = 64, nullable = false, unique = true)
+    String payRefundOrderNo;
 
     //子系统收款时候的业务单号
     @Column(name = "order_no", length = 64, nullable = false)
@@ -116,6 +119,14 @@ public class RefundOrder implements Serializable {
         this.payOrderNo = payOrderNo;
     }
 
+    public String getPayRefundOrderNo() {
+        return payRefundOrderNo;
+    }
+
+    public void setPayRefundOrderNo(String payRefundOrderNo) {
+        this.payRefundOrderNo = payRefundOrderNo;
+    }
+
     public String getSubject() {
         return subject;
     }
@@ -180,14 +191,21 @@ public class RefundOrder implements Serializable {
         this.refundOrderNo = refundOrderNo;
     }
 
-    public Map<String, Object> getBaseJson() {
-        Map<String, Object> jo = new TreeMap<>();
-        jo.put("id", this.getId());
-        jo.put("payOrderNo", this.getPayOrderNo());
-        jo.put("subject", this.getSubject());
-        jo.put("amount", this.getAmount());
-        //支付订单状态{-2:订单删除,-1:支付失败,0:正在支付,1:支付成功}
-        jo.put("status", this.getStatus());
-        return jo;
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", "{", "}")
+                .add("id:" + id)
+                .add("payOrderNo:'" + payOrderNo + "'")
+                .add("payRefundOrderNo:'" + payRefundOrderNo + "'")
+                .add("orderNo:'" + orderNo + "'")
+                .add("refundOrderNo:'" + refundOrderNo + "'")
+                .add("memberId:'" + memberId + "'")
+                .add("unitId:'" + unitId + "'")
+                .add("subject:'" + subject + "'")
+                .add("amount:" + amount)
+                .add("payChannel:'" + payChannel + "'")
+                .add("payChannelAccount:'" + payChannelAccount + "'")
+                .add("status:" + status)
+                .toString();
     }
 }

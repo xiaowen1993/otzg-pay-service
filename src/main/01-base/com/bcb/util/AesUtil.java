@@ -15,6 +15,8 @@ import java.security.SecureRandom;
  */
 public class AesUtil {
 
+    final static String key="A0391DBF25247BE1F2B5C51B3CC";
+
     /**
      * MD5加密
      * @author G_2017年12月19日 下午2:31:10
@@ -99,6 +101,15 @@ public class AesUtil {
      *   @param   strMing
      *   @return
      */
+    public final static String getEnCode(String strMing){
+        String strMi = "";
+        try{
+            strMi = byte2hex(getEnCode(strMing.getBytes(),key));
+        }catch(Exception e){
+            System.out.println(e);
+        }
+        return strMi;
+    }
     public final static String getEnCode(String strMing,String strkey){
         String strMi = "";
         try{
@@ -115,13 +126,20 @@ public class AesUtil {
      *   @return
      */
     public final static String getDeCode(String strMi,String key){
-        String strMing = "";
         try{
-            strMing = new String(getAesCode(hex2byte(strMi.getBytes()),key));
+            return new String(getAesCode(hex2byte(strMi.getBytes()),key));
         }catch(Exception e){
-            System.out.println(e);
+            e.printStackTrace();
+            return null;
         }
-        return strMing;
+    }
+    public final static String getDeCode(String strMi){
+        try{
+            return new String(getAesCode(hex2byte(strMi.getBytes()),key));
+        }catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -191,7 +209,7 @@ public class AesUtil {
     }
 
     public static void main(String[] args){
-        String key="A0391DBF25247BE1F2B5C51B3CC";
+
         //加密字符串,返回String的密文
         String strEnc = getEnCode("{\"header\":\"中文\",\"style\":\"sv01\",\"bad\":true}",key);
         System.out.println(strEnc);

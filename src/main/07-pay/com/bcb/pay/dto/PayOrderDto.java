@@ -23,8 +23,8 @@ public class PayOrderDto implements Serializable {
     /**
      * 支付平台支持的收单类型
      *
-     * 微信：{JSAPI,APP,MWEB(H5),MICROPAY,N}
-     * 支付宝：{}
+     * 微信：{JSAPI,APP,MWEB(H5),MICROPAY,NATIVE}
+     * 支付宝：{APP,BARCODE,FACE,CREATE,PRECREATE}
      * 邮储：{}
      *
      * 必填

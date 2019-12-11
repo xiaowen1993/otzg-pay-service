@@ -5,6 +5,7 @@ import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.entity.PayAccount;
 import com.bcb.pay.entity.PayOrder;
 import net.sf.json.JSONObject;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -76,6 +77,17 @@ public interface PayOrderServ {
     PayOrder findByPayOrderNo(String unitId, String payOrderNo);
 
     /**
+     * 子系统支付单查询
+     * @param unitId
+     * @param orderNo
+     * @return
+     */
+    PayOrder findByUnitAndOrderNo(String unitId, String orderNo);
+
+    //微信查询支付结果并更新数据
+    Map queryByPayChannel(PayOrder payOrder);
+
+    /**
      * 根据子系统的支付业务单查询是否已经创建
      * @param unitId
      * @param orderNo
@@ -103,13 +115,13 @@ public interface PayOrderServ {
      * 处理支付回调业务
      * 1.支付成功：更新支付单状态：payOrder.status=1
      * 2.回调子系统：支付成功。
-     * @param outTradeNo
-     * @param transactionId
+     * @param payOrderNo
+     * @param payChannelNo
      * @param resultCode
-     * @param openId
-     * @param mchId
+     * @param payerId
+     * @param payeeId
      * @return
      */
-    boolean handleNotify(String outTradeNo, String transactionId, String resultCode, String openId, String mchId);
+    boolean handleNotify(String payOrderNo, String payChannelNo, String resultCode, String payerId, String payeeId);
 
 }

@@ -44,7 +44,7 @@ public class AesGcmUtil {
          */
         Map<String, String> param = new HashMap<>();
         param.put("mch_id", WXPayConfig.getMchId());
-        param.put("nonce_str", WxpayUtil.getNonce("nonce", 16));
+        param.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
         // 暂只支持HMAC-SHA256 加密
         param.put("sign_type", "HMAC-SHA256");
         // 对你的参数进行加密处理

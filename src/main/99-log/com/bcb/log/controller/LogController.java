@@ -1,5 +1,6 @@
 package com.bcb.log.controller;
 
+import com.bcb.alipay.util.AlipayConfig;
 import com.bcb.base.BaseController;
 import com.bcb.log.util.LogUtil;
 import com.bcb.util.RespTips;
@@ -53,6 +54,8 @@ public class LogController extends BaseController {
         jo.put("wx.isAutoReport=", WXPayConfig.isAutoReport());
         jo.put("wx.key=", WXPayConfig.getKey());
         jo.put("wx.notifyUrl=", WXPayConfig.getNotifyUrl());
+        jo.put("alipay.notifyUrl=", AlipayConfig.getNotifyUrl());
+        jo.put("alipay.authNotifyUrl=", AlipayConfig.getAuthNotifyUrl());
         //返回结果
         sendJson(true, RespTips.SUCCESS_CODE.code,jo);
     }

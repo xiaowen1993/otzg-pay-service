@@ -2,6 +2,7 @@ package com.bcb.wxpay.util.service;
 
 import com.bcb.log.util.LogUtil;
 import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.util.PayRefund;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
@@ -17,7 +18,7 @@ import java.util.TreeMap;
  * @Author G.
  * @Date 2019/11/27 0027 上午 10:43
  */
-public class WxRefundUtil {
+public class WxRefundUtil implements PayRefund {
 
     /**
      * 请求退款的数据
@@ -74,19 +75,63 @@ public class WxRefundUtil {
     }
 
     /**
+     * 退款结果查询
+     * <xml>
+     * <appid>wx2421b1c4370ec43b</appid>
+     * <mch_id>10000100</mch_id>
+     * <nonce_str>0b9f35f484df17a732e537c37708d1d0</nonce_str>
+     * <out_refund_no>123456789</out_refund_no>
+     * <out_trade_no>1415757673</out_trade_no>
+     * <sub_mch_id>1900000109</sub_mch_id>
+     * <sign>66FFB727015F450D167EF38CCC549521</sign>
+     * </xml>
+     *
+     * @return
+     */
+    public final Map<String, String> refundQueryData(String subMchId, String outRefundNo) {
+        Map<String, String> paramMap = new HashMap<>();
+        //子商户号
+        paramMap.put("sub_mch_id", subMchId);
+        //随机数
+        //transaction_id是微信系统为每一笔支付交易分配的订单号，通过这个订单号可以标识这笔交易，它由支付订单API支付成功时返回的数据里面获取到。
+        //根据API给的签名规则进行签名
+        paramMap.put("out_refund_no", outRefundNo);
+        return paramMap;
+    }
+
+
+    RefundOrderDto refundOrderDto;
+
+    public WxRefundUtil(RefundOrderDto refundOrderDto) {
+        this.refundOrderDto = refundOrderDto;
+    }
+
+    public WxRefundUtil() {
+    }
+
+    /**
      * 提交退款
      *
      * @return {transaction_id=4200000232201901097507856496, nonce_str=3PFz75JiEy4q7Ajw, out_refund_no=1901081654330013, sign=CDA7C77CD91BF60252234C2E54D0C097C3996EDA8080E09B2CE1BE8F52DEE448, return_msg=OK, mch_id=1519839251, refund_id=50000009452019010907917586560, cash_fee=1, out_trade_no=1901081654330013, coupon_refund_fee=0, refund_channel=, appid=wx4dc8cb7f0eb12288, refund_fee=1, total_fee=1, result_code=SUCCESS, coupon_refund_count=0, cash_refund_fee=1, return_code=SUCCESS}
      * @author G/2016年10月27日 上午9:04:42
      */
-    public final Map refund(String subMchId, String payOrderNo, String refundOrderNo, Double totalAmount, RefundOrderDto refundOrderDto) {
+
+    /**
+     * 成功必须返回支付渠道单号
+     * 微信 refund_id => payChannelNo
+     * @param payChannelAccount
+     * @param payOrderNo
+     * @return
+     */
+    @Override
+    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo) {
         Map map = getInitMap();
         try {
             WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name(),true);
             wxPayConfig.setUrl(WXPayConstants.getPayRefundUrl());
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
-            Map<String, String> data = refundData(subMchId, payOrderNo, refundOrderNo, totalAmount, refundOrderDto);
+            Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, this.refundOrderDto.getAmount(), refundOrderDto);
             map = wxPayRequest.requestCert(data);
             LogUtil.saveTradeLog("调用结果=" + map);
             //2019-11-27 16:52
@@ -128,7 +173,10 @@ public class WxRefundUtil {
                     && map.get("result_code").equals("SUCCESS")
             ) {
                 LogUtil.saveTradeLog("调用成功=" + map.toString());
-                return FastJsonUtil.get(true, map.get("result_code").toString(), "调用成功", map);
+                //如果成功应返回一个结构体payChannelNo
+                Map jo = new TreeMap();
+                jo.put("payChannelNo",map.get("refund_id"));
+                return FastJsonUtil.get(true, map.get("result_code").toString(), "调用成功", jo);
             } else {
                 LogUtil.saveTradeLog("调用失败");
                 return FastJsonUtil.get(false, map.get("result_code").toString(), "调用失败");
@@ -142,31 +190,6 @@ public class WxRefundUtil {
 
 
     /**
-     * 退款结果查询
-     * <xml>
-     * <appid>wx2421b1c4370ec43b</appid>
-     * <mch_id>10000100</mch_id>
-     * <nonce_str>0b9f35f484df17a732e537c37708d1d0</nonce_str>
-     * <out_refund_no>123456789</out_refund_no>
-     * <out_trade_no>1415757673</out_trade_no>
-     * <sub_mch_id>1900000109</sub_mch_id>
-     * <sign>66FFB727015F450D167EF38CCC549521</sign>
-     * </xml>
-     *
-     * @return
-     */
-    public final Map<String, String> refundQueryData(String subMchId, String outRefundNo) {
-        Map<String, String> paramMap = new HashMap<>();
-        //子商户号
-        paramMap.put("sub_mch_id", subMchId);
-        //随机数
-        //transaction_id是微信系统为每一笔支付交易分配的订单号，通过这个订单号可以标识这笔交易，它由支付订单API支付成功时返回的数据里面获取到。
-        //根据API给的签名规则进行签名
-        paramMap.put("out_refund_no", outRefundNo);
-        return paramMap;
-    }
-
-    /**
      * 提交退款结果查询
      *
      * @return {transaction_id=4200000232201901097507856496, nonce_str=PM8FDErs4JbioIFY,
@@ -177,13 +200,15 @@ public class WxRefundUtil {
      * refund_account_0=REFUND_SOURCE_UNSETTLED_FUNDS, refund_count=1, return_code=SUCCESS, refund_channel_0=ORIGINAL}
      * @author G/2016年10月27日 上午9:04:42
      */
-    public final Map postRefundQuery(String subMchId, String outRefundNo){
+
+    @Override
+    public Map query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
         try{
             WXPayConfig wxPayConfig = new WXPayConfig();
             wxPayConfig.setUrl(WXPayConstants.getPayRefundQueryUrl());
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
-            Map<String, String> map = refundQueryData(subMchId, outRefundNo);
+            Map<String, String> map = refundQueryData(payChannelAccount, refundOrderNo);
             Map<String, String> result = wxPayRequest.request(map);
             LogUtil.saveTradeLog("微信退款查询调用结果=" + result.toString());
             //2019-11-28 13:59
@@ -209,5 +234,4 @@ public class WxRefundUtil {
             return getInitMap();
         }
     }
-
 }

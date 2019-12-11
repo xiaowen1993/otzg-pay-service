@@ -11,9 +11,7 @@ import java.util.Optional;
  * @Date 2019/11/25 0025 上午 11:07
  */
 public interface PayChannelAccountDao  extends AbstractDao<PayChannelAccount,Long> {
-    @Query("select pca from PayChannelAccount pca join pca.payAccount pa where pa.id=?1 and pca.payChannel=?2")
     Optional<PayChannelAccount> findByPayAccountIdAndPayChannel(Long payAccountId, String payChannel);
 
-    @Query("select pca from PayChannelAccount pca join pca.payAccount pa where pa.unitId=?1 and pca.payChannel=?2")
-    Optional<PayChannelAccount>  findByUnitAndPayChannel(String unitId, String payChannel);
+    Optional<PayChannelAccount>  findByUnitIdAndPayChannel(String unitId, String payChannel);
 }

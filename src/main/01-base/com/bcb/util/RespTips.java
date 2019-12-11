@@ -60,8 +60,19 @@ public enum RespTips {
     PAYORDER_LOCK_ERROR("7005","正在支付中请稍后..."),
     PAYORDER_ERROR("7006","支付失败"),
 
+    PAYCHANNEL_PAY_SUCCESS("7100","交易支付成功"),
     PAYCHANNEL_SET_ERROR("7101","支付渠道账户未设置"),
     PAYCHANNLE_PAY_ERROR("7102","支付渠道返回错误"),
+    PAYCHANNLE_PAY_WAIT("7103","等待用户支付"),
+    PAYCHANNLE_PAY_CLOSED("7104","未付款交易超时关闭，或支付完成后全额退款"),
+    PAYCHANNLE_PAY_FINISHED("7105","交易结束，不可退款"),
+
+    //支付宝授权回调
+    PAYCHANNLE_AUTHCODE_SUCCESS("70100","支付宝三方授权成功"),
+    PAYCHANNLE_AUTHCODE_ERROR("70101","支付宝三方授权链接获取失败"),
+
+
+
 
     PAYACCOUNT_IS_UNAVAILABLE("7201","账户不可用"),
     PAYACCOUNT_FOUND("7204","账户不可重复创建"),

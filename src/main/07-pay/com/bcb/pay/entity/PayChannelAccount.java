@@ -1,5 +1,7 @@
 package com.bcb.pay.entity;
 
+import org.springframework.stereotype.Component;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -18,9 +20,16 @@ public class PayChannelAccount implements Serializable {
     Long id;
 
     //基本账户
-    @ManyToOne
-    @JoinColumn(name = "pay_account_id",nullable = false)
-    PayAccount payAccount;
+    @Column(name = "pay_account_id",nullable = false)
+    Long payAccountId;
+
+    //基本账户名称
+    @Column(name = "pay_account_name",length = 32)
+    String payAccountName;
+
+    //平台商户id
+    @Column(name = "unit_id", length = 32)
+    String unitId;
 
     //支付渠道类型{}
     @Column(name = "pay_channel",length = 16)
@@ -47,17 +56,17 @@ public class PayChannelAccount implements Serializable {
     Date updateTime;
 
 
-
-
-    //支付渠道付款账号(支付宝buyer_id,微信opend_id)
+    /**
+     * 支付渠道付款账号(支付宝商户号pid)
+     */
     @Column(name = "pay_channel_id",length = 32)
     String payChannelId;
 
     /**
-     * 支付渠道账号
+     * 支付渠道授权码或子商户号
      *
-     * 支付宝对应 pid (支付宝商户号 登录账号包含邮箱号和手机号
-     * 微信对应 mchid (公众号|app 商户号))
+     * 支付宝对应 authToken (支付宝授权码，第三方应用下面的子商户)
+     * 微信对应 mchid (公众号|app 商户号，对应服务商下的子商户号)
      */
     @Column(name = "pay_channel_account",length = 64)
     String payChannelAccount;
@@ -78,12 +87,28 @@ public class PayChannelAccount implements Serializable {
         this.id = id;
     }
 
-    public PayAccount getPayAccount() {
-        return payAccount;
+    public String getUnitId() {
+        return unitId;
     }
 
-    public void setPayAccount(PayAccount payAccount) {
-        this.payAccount = payAccount;
+    public void setUnitId(String unitId) {
+        this.unitId = unitId;
+    }
+
+    public Long getPayAccountId() {
+        return payAccountId;
+    }
+
+    public void setPayAccountId(Long payAccountId) {
+        this.payAccountId = payAccountId;
+    }
+
+    public String getPayAccountName() {
+        return payAccountName;
+    }
+
+    public void setPayAccountName(String payAccountName) {
+        this.payAccountName = payAccountName;
     }
 
     public String getPayChannel() {

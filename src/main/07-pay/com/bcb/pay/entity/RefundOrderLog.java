@@ -27,9 +27,9 @@ public class RefundOrderLog implements Serializable {
     @Column(name = "unit_id",length = 32,nullable = false)
     String unitId;
 
-    //支付系统退款单号
-    @Column(name = "pay_order_no", length = 64, nullable = false)
-    String payOrderNo;
+    //支付系统退款业务单号
+    @Column(name = "pay_refund_order_no", length = 64, nullable = false, unique = true)
+    String payRefundOrderNo;
 
     //子系统收款业务单号
     @Column(name = "order_no",length = 64,nullable = false)
@@ -87,12 +87,12 @@ public class RefundOrderLog implements Serializable {
         this.unitId = unitId;
     }
 
-    public String getPayOrderNo() {
-        return payOrderNo;
+    public String getPayRefundOrderNo() {
+        return payRefundOrderNo;
     }
 
-    public void setPayOrderNo(String payOrderNo) {
-        this.payOrderNo = payOrderNo;
+    public void setPayRefundOrderNo(String payRefundOrderNo) {
+        this.payRefundOrderNo = payRefundOrderNo;
     }
 
     public String getOrderNo() {
@@ -157,7 +157,7 @@ public class RefundOrderLog implements Serializable {
         jo.put("unitId",this.getUnitId());
 
         //支付系统业务单号
-        jo.put("payOrderNo",this.getPayOrderNo());
+        jo.put("payRefundOrderNo",this.getPayRefundOrderNo());
         //子系统收款单号
         jo.put("orderNo",this.getOrderNo());
         //子系统退款单号

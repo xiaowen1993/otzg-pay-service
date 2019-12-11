@@ -2,7 +2,7 @@ package com.bcb.wxpay.util.service;
 
 import com.bcb.util.JsonUtil;
 import com.bcb.wxpay.entity.WxRedPack;
-import com.bcb.wxpay.util.WxpayUtil;
+import com.bcb.wxpay.util.WxPayUtil;
 import com.bcb.wxpay.util.XmlUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
@@ -27,10 +27,14 @@ public class RedPackSubmit {
         paramMap.put("mch_billno", wxRedPack.getMchBillno());
         //随机数
         paramMap.put("nonce_str", WXPayUtil.generateNonceStr());
-        //微信分配的公众账号ID（企业号corpid即为此appId）。接口传入的所有appid应该为公众号的appid（在mp.weixin.qq.com申请的），不能为APP的appid（在open.weixin.qq.com申请的）。
+        //微信分配的公众账号ID（企业号corpid即为此appId）。
+        // 接口传入的所有appid应该为公众号的appid（在mp.weixin.qq.com申请的），
+        // 不能为APP的appid（在open.weixin.qq.com申请的）。
         paramMap.put("wxappid", wxRedPack.getGzhAppId());
-        //服务商模式下触达用户时的appid(可填服务商自己的appid或子商户的appid)，服务商模式下必填，服务商模式下填入的子商户appid必须在微信支付商户平台中先录入，否则会校验不过。
-        paramMap.put("msgappid", "wxa574b9142c67f42e");
+        //服务商模式下触达用户时的appid(可填服务商自己的appid或子商户的appid)，
+        // 服务商模式下必填，服务商模式下填入的子商户appid必须在微信支付商户平台中先录入
+        // ，否则会校验不过。
+        paramMap.put("msgappid", wxRedPack.getSubAppId());
         //红包发送者名称 length=32 注意：敏感词会被转义成字符*
         paramMap.put("send_name", wxRedPack.getSendName());
         //接受红包的用户
@@ -89,7 +93,7 @@ public class RedPackSubmit {
 
         wxPayConfig.setUrl(WXPayConstants.getRePackPayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
-        Map<String, String> result = wxPayRequest.requestCert(map);
+        Map<String, String> result = wxPayRequest.requestCertNoAppId(map);
         System.out.println("调用结果=" + result.toString());
 
         if (result.get("return_code") != null
@@ -157,8 +161,9 @@ public class RedPackSubmit {
 
 
 
-
+    //李唐的商户号
     String subMchId = "1525006091";
+
     String subAppId = "wxd8de5d37b6976b55"; //
 
 
@@ -173,15 +178,15 @@ public class RedPackSubmit {
     @Test
     public void redPackTest() throws Exception {
         WxRedPack wxRedPack = new WxRedPack();
-        wxRedPack.setActName("新年红包");
+        wxRedPack.setActName("redbag");
         wxRedPack.setSendName("菠菜包");
-        wxRedPack.setClientIp(WxpayUtil.localIp());
-        wxRedPack.setGzhAppId(subAppId);
+        wxRedPack.setClientIp(WxPayUtil.localIp());
+        wxRedPack.setGzhAppId(gzhAppId);
         wxRedPack.setMchBillno("1332313233233213");
-        wxRedPack.setRemark("恭喜发财");
-        wxRedPack.setWishing("恭喜发财");
+        wxRedPack.setRemark("gxfc");
+        wxRedPack.setWishing("gxfc");
         wxRedPack.setReOpenId(openid);
-        wxRedPack.setSubAppId(subAppId);
+        wxRedPack.setSubAppId(WXPayConfig.getAppId());
         wxRedPack.setSubMchId(subMchId);
         wxRedPack.setTotalAmount(1000);
         wxRedPack.setTotalNum(1);
@@ -193,6 +198,10 @@ public class RedPackSubmit {
         //2019-11-21 09:55
         //{re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, total_num=10, err_code=PARAM_ERROR, return_msg=参数错误:total_num必须等于1, result_code=FAIL, err_code_des=参数错误:total_num必须等于1, mch_id=1513549201, return_code=SUCCESS, wxappid=wxd8de5d37b6976b55, mch_billno=1332313233233213}
         //{re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, err_code=CA_ERROR, return_msg=证书已过期, result_code=FAIL, err_code_des=证书已过期, mch_id=1513549201, return_code=SUCCESS, wxappid=wxd8de5d37b6976b55, mch_billno=1332313233233213}
+        //调用结果={re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, err_code=SIGN_ERROR, return_msg=签名错误, result_code=FAIL, err_code_des=签名错误, mch_id=1513549201, return_code=SUCCESS, wxappid=wxd8de5d37b6976b55, mch_billno=1332313233233213}
+        //{re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, err_code=SIGN_ERROR, return_msg=签名错误, result_code=FAIL, err_code_des=签名错误, mch_id=1513549201, return_code=SUCCESS, wxappid=wxa574b9142c67f42e, mch_billno=1332313233233213}
+        //2019-12-07 10:26
+        //{re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, err_code=PRODUCT_AUTHORITY_UNOPEN, return_msg=你的商户号未开通该产品权限，请联系管理员到产品中心开通。开通路径：产品中心-产品大全-现金红包-申请开通, result_code=FAIL, err_code_des=你的商户号未开通该产品权限，请联系管理员到产品中心开通。开通路径：产品中心-产品大全-现金红包-申请开通, mch_id=1513549201, return_code=SUCCESS, wxappid=wxa574b9142c67f42e, mch_billno=1332313233233213}
     }
 
     //裂变红包

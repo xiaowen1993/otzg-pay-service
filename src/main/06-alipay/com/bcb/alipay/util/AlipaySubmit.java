@@ -1,22 +1,214 @@
 package com.bcb.alipay.util;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.AlipayResponse;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.*;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.*;
 import com.alipay.api.response.*;
+import com.bcb.alipay.util.face.MerchantInfo;
+import com.bcb.alipay.util.face.api.AlipayCallBack;
+import com.bcb.alipay.util.face.api.request.TradepayParam;
 import com.bcb.log.util.LogUtil;
-import com.bcb.util.JsonUtil;
-import net.sf.json.JSONObject;
+import com.bcb.util.FastJsonUtil;
+import com.bcb.util.RespTips;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 public class AlipaySubmit {
+
+    /**
+     * 统一收单线上收款二维码
+     * @param appAuthToken
+     * @param outTradeNo
+     * @param subject
+     * @param totalAmount
+     * @param buyerId     必填项与线下的不同
+     * @return
+     */
+    public JSONObject createPay(String appAuthToken,
+                                String outTradeNo,
+                                String subject,
+                                String totalAmount,
+                                String buyerId) {
+
+        try {
+
+            AlipayTradeCreateModel model = new AlipayTradeCreateModel();
+            model.setOutTradeNo(outTradeNo);
+            model.setSubject(subject);
+            model.setTotalAmount(totalAmount);
+            model.setBuyerId(buyerId);
+
+
+            /**
+             * 系统商编号
+             * 该参数作为系统商返佣数据提取的依据，请填写系统商签约协议的PID
+             */
+            ExtendParams extendParams = new ExtendParams();
+            extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            model.setExtendParams(extendParams);
+
+
+            //初始化请求类
+            AlipayTradeCreateRequest request = new AlipayTradeCreateRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
+
+            request.setBizModel(model);
+            //绑定异步通知接口
+            request.setNotifyUrl(LogUtil.getServUrl() + AlipayConfig.getNotifyUrl());
+
+            AlipayTradeCreateResponse response = getAlipayClient().execute(request);
+            if (response.isSuccess()) {
+                System.out.println("调用成功=>" + response.getBody());
+                //如果支付结果 response.code=10000时表示支付成功
+                //如果支付结果 response.code=10003时表示等待用户付款
+
+                JSONObject jo = new JSONObject();
+                jo.put("body", response.getBody());
+                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+            } else {
+                System.out.println("调用失败");
+                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 统一收单线下收款二维码
+     *
+     * @param appAuthToken
+     * @param outTradeNo
+     * @param subject
+     * @param totalAmount
+     * @return
+     */
+    public JSONObject precreatePay(String appAuthToken,
+                                   String outTradeNo,
+                                   String subject,
+                                   String totalAmount) {
+
+        try {
+
+            AlipayTradePrecreateModel model = new AlipayTradePrecreateModel();
+            model.setOutTradeNo(outTradeNo);
+            model.setSubject(subject);
+            model.setTotalAmount(totalAmount);
+            model.setTimeoutExpress("30m");
+
+
+            /**
+             * 系统商编号
+             * 该参数作为系统商返佣数据提取的依据，请填写系统商签约协议的PID
+             */
+            ExtendParams extendParams = new ExtendParams();
+            extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            model.setExtendParams(extendParams);
+
+
+            //初始化请求类
+            AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
+
+            request.setBizModel(model);
+            //绑定异步通知接口
+            request.setNotifyUrl(LogUtil.getServUrl() + AlipayConfig.getNotifyUrl());
+
+            AlipayTradePrecreateResponse response = getAlipayClient().execute(request);
+            if (response.isSuccess()) {
+                System.out.println("调用成功=>" + response.getBody());
+                //如果支付结果 response.code=10000时表示支付成功
+                //如果支付结果 response.code=10003时表示等待用户付款
+
+                JSONObject jo = new JSONObject();
+                jo.put("body", response.getBody());
+                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+            } else {
+                System.out.println("调用失败");
+                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //======================================app收款=======================================================/
+
+    /**
+     * app收款
+     *
+     * @param appAuthToken
+     * @param outTradeNo
+     * @param subject
+     * @param totalAmount
+     * @return
+     */
+    public JSONObject appPay(String appAuthToken,
+                             String outTradeNo,
+                             String subject,
+                             String totalAmount) {
+
+        try {
+
+            AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
+            model.setOutTradeNo(outTradeNo);
+            model.setSubject(subject);
+            model.setTotalAmount(totalAmount);
+
+            model.setBody("我是测试数据");
+            model.setTimeoutExpress("30m");
+            model.setProductCode("QUICK_MSECURITY_PAY");
+
+
+            /**
+             * 系统商编号
+             * 该参数作为系统商返佣数据提取的依据，请填写系统商签约协议的PID
+             */
+            ExtendParams extendParams = new ExtendParams();
+            extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            model.setExtendParams(extendParams);
+
+            AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
+
+            request.setBizModel(model);
+            //绑定异步通知接口
+            request.setNotifyUrl(LogUtil.getServUrl() + AlipayConfig.getNotifyUrl());
+
+            AlipayTradeAppPayResponse response = getAlipayClient().sdkExecute(request);
+            if (response.isSuccess()) {
+                System.out.println("调用成功=>" + response.getBody());
+                //如果支付结果 response.code=10000时表示支付成功
+                //如果支付结果 response.code=10003时表示等待用户付款
+
+                JSONObject jo = new JSONObject();
+                jo.put("tradeNo", response.getTradeNo());
+                jo.put("body", response.getBody());
+                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+            } else {
+                System.out.println("调用失败");
+                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     //======================================支付宝条码收款=======================================================/
 
@@ -45,54 +237,150 @@ public class AlipaySubmit {
      * "trade_no":"2019011022001433520200667601"},
      * "sign":"Io//wg+Q85Qg+408yv1WGsIAFrtIRno3eURYv2J6KrXwlUPXfVkF1N40luV6KgsvMBPArg44kwC8jyIJUlIZUN3tsOhrdtcXdC1u0tQHY9U4qZ2Z0qW2S8rr8fMZTWV7Py4mViroNOoPIckFjICSYaM7nhDl46uOuXpmFTJcOd9SsXEMS8aDQK3oicWvLtItwkxQdSLEQ01Ommg3XiwhdvtDuJRbA7bDEDlZnbeGeXzfW4WBExYHJMmVvetXZcsAAhJN0R5olx9PCmabLDzKe4FiHSxORDqZtvwnr37f2xRizEW37N4vbS6/kyuNL0NtTpoVBBq5RKmd3RLtuDjHDg=="}
      */
-    public static JSONObject barCodPay(String appAuthToken,
-                                       String authCode,
-                                       String outTradeNo,
-                                       String subject,
-                                       String totalAmount,
-                                       String discountableAmount,
-                                       String storeId) throws AlipayApiException {
+    public JSONObject barCodPay(String appAuthToken,
+                                String authCode,
+                                String outTradeNo,
+                                String subject,
+                                String totalAmount,
+                                String discountableAmount,
+                                String storeId) {
 
-        AlipayTradePayModel model = new AlipayTradePayModel();
-        model.setOutTradeNo(outTradeNo);
-        model.setSubject(subject);
-        model.setTotalAmount(totalAmount);
-        //支付宝中的付款码
-        model.setAuthCode(authCode);
-        model.setScene("bar_code");
-        model.setStoreId(storeId);
+        try {
+            AlipayTradePayModel model = new AlipayTradePayModel();
+            model.setOutTradeNo(outTradeNo);
+            model.setSubject(subject);
+            model.setTotalAmount(totalAmount);
+            //支付宝中的付款码
+            model.setAuthCode(authCode);
+            model.setScene("bar_code");
+            model.setStoreId(storeId);
 
-        /**
-         * 系统商编号
-         * 该参数作为系统商返佣数据提取的依据，请填写系统商签约协议的PID
-         */
-        ExtendParams extendParams = new ExtendParams();
-        extendParams.setSysServiceProviderId(AlipayConfig.pid);
-        model.setExtendParams(extendParams);
+            /**
+             * 系统商编号
+             * 该参数作为系统商返佣数据提取的依据，请填写系统商签约协议的PID
+             */
+            ExtendParams extendParams = new ExtendParams();
+            extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            model.setExtendParams(extendParams);
 
-        AlipayTradePayRequest request = new AlipayTradePayRequest();
-        //第三方应用授权
-        request.putOtherTextParam("app_auth_token", appAuthToken);
+            AlipayTradePayRequest request = new AlipayTradePayRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
 
-        request.setBizModel(model);
-        //绑定异步通知接口
-        request.setNotifyUrl(LogUtil.getServUrl() + AlipayConfig.notify_url);
+            request.setBizModel(model);
+            //绑定异步通知接口
+            request.setNotifyUrl(LogUtil.getServUrl() + AlipayConfig.getNotifyUrl());
 
-        AlipayTradePayResponse response = getAlipayClient().execute(request);
-        if (response.isSuccess()) {
-            System.out.println("调用成功=>"+response.getBody());
-            //如果支付结果 response.code=10000时表示支付成功
-            //如果支付结果 response.code=10003时表示等待用户付款
+            AlipayTradePayResponse response = getAlipayClient().execute(request);
+            if (response.isSuccess()) {
+                System.out.println("调用成功=>" + response.getBody());
+                //如果支付结果 response.code=10000时表示支付成功
+                //如果支付结果 response.code=10003时表示等待用户付款
 
-            JSONObject jo = new JSONObject();
-            jo.put("tradeNo", response.getTradeNo());
-            jo.put("buyerUserId", response.getBuyerUserId());
-            return JsonUtil.get(true, response.getCode(), response.getMsg(), jo);
-        } else {
+                JSONObject jo = new JSONObject();
+                jo.put("tradeNo", response.getTradeNo());
+                jo.put("buyerUserId", response.getBuyerUserId());
+                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+            } else {
+                System.out.println("调用失败");
+                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
             System.out.println("调用失败");
-            return JsonUtil.get(false, response.getCode(), response.getMsg());
+            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
         }
     }
+    //======================================刷脸收款=======================================================/
+
+    /**
+     * */
+//    public JSONObject smilePay(String metaInfo) {
+//
+//        try {
+//            //正式接入请上传metaInfo到服务端，不要忘记UrlEncode，使用服务端使用的sdk从服务端访问openapi获取zimId和zimInitClientData；
+//            AlipayClient alipayClient = getAlipayClient();
+//
+//            ZolozAuthenticationCustomerSmilepayInitializeRequest request
+//                    = new ZolozAuthenticationCustomerSmilepayInitializeRequest();
+//
+//            // zolozGetMetaInfo接口返回的metainfo对象中加入业务参数
+//            JSONObject zimmetainfo = JSON.parseObject(metaInfo);
+//            JSONObject merchantInfo = zimmetainfo.getJSONObject("merchantInfo");
+//            merchantInfo.put("pay_amount", "订单金额");//可选，支付币种订单金额,值为double类型
+//            merchantInfo.put("pay_currency", "CNY");//可选，支付币种，目前仅支持 人民币：CNY
+//
+//            request.setBizContent(zimmetainfo.toJSONString());
+//
+//            //起一个异步线程发起网络请求
+//            alipayClient.execute(request,new AlipayCallBack() {
+//                @Override
+//                public AlipayResponse onResponse(AlipayResponse response) {
+//                    if (response != null && SMILEPAY_CODE_SUCCESS.equals(response.getCode())) {
+//                        try {
+//                            ZolozAuthenticationCustomerSmilepayInitializeResponse zolozResponse
+//                                    = (ZolozAuthenticationCustomerSmilepayInitializeResponse)response;
+//
+//                            String zimId = zolozResponse.getZimId();
+//                            String zimInitClientData = zolozResponse.getZimInitClientData();
+//                            //人脸调用
+//                            smile(zimId, zimInitClientData);
+//                        } catch (Exception e) {
+//                            promptText(TXT_OTHER);
+//                        }
+//                    } else {
+//                        promptText(TXT_OTHER);
+//                    }
+//                    return null;
+//                }
+//            });
+//        } catch (AlipayApiException e) {
+//            e.printStackTrace();
+//            System.out.println("调用失败");
+//            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+//        }
+//    }
+    public JSONObject facePay(String appAuthToken,String ftoken,String totalAmount) {
+        try {
+            TradepayParam tradepayParam = new TradepayParam();
+            tradepayParam.setOut_trade_no(UUID.randomUUID().toString());
+
+            //auth_code和scene填写需要注意
+            tradepayParam.setAuth_code(ftoken); // 人脸zolozVerify接口返回的ftoken
+            tradepayParam.setScene("security_code");//对于刷脸付，必须写为security_code
+            tradepayParam.setSubject("smilepay");
+            tradepayParam.setStore_id("smilepay test");
+            tradepayParam.setTimeout_express("5m");
+            tradepayParam.setTotal_amount(totalAmount);
+
+
+            AlipayTradePayRequest request = new AlipayTradePayRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
+
+            request.setBizContent(JSON.toJSONString(tradepayParam));
+
+            AlipayTradePayResponse response = getAlipayClient().execute(request);
+            if (response.isSuccess()) {
+                System.out.println("调用成功=>" + response.getBody());
+                //如果支付结果 response.code=10000时表示支付成功
+                //如果支付结果 response.code=10003时表示等待用户付款
+
+                JSONObject jo = new JSONObject();
+                jo.put("tradeNo", response.getTradeNo());
+                jo.put("buyerUserId", response.getBuyerUserId());
+                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+            } else {
+                System.out.println("调用失败");
+                return FastJsonUtil.get(false, response.getCode(), response.getBody());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            System.out.println("调用失败");
+            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+        }
+    }
+
 
     /**
      * 查询支付结果
@@ -109,22 +397,46 @@ public class AlipaySubmit {
      * "trade_status":"TRADE_CLOSED"},
      * "sign":"IEtVhRN7tqDsEcWvaLW9zfwx1sR2Fxm/ivQfyXVIiEih+nNq3Ven1hLE/s86Ha0+ovOk29IhC1BrUqz7Ry/vciD+qtesVzEkZ4ypxXK+sgh0iLKFoS9jPoYQZdkkb57Jj0W3xokmwocNO1GOjUf+bMht4ZblncDaMCKK4UNnBRhTyHr/AMx8lv1qYq1aJ30s+Sr4+o9vrkW+f6o358LyrcPuDTYkh2cQ/J9+KR5G6oimRVS7kami7w8ssSI/U1qZrnBcLkllAvDCI26pbQqUO6K/4diEFu3ewmotmIa5miciGLJgrc8yBiIJ7wv3bP9+qTENUmoo+sOl1AkTFM/YRA=="}
      */
-    public static JSONObject payQuery (String outTradeNo,
-                                      String tradeNo) throws AlipayApiException {
+    public JSONObject payQuery(String appAuthToken,
+                               String outTradeNo,
+                               String tradeNo) {
+        try {
+            AlipayTradeQueryModel model = new AlipayTradeQueryModel();
+            model.setOutTradeNo(outTradeNo);
+            model.setTradeNo(tradeNo);
 
-        AlipayTradeQueryModel model = new AlipayTradeQueryModel();
-        model.setOutTradeNo(outTradeNo);
-        model.setTradeNo(tradeNo);
+            AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+            //第三方应用授权
+            request.putOtherTextParam("app_auth_token", appAuthToken);
+            request.setBizModel(model);
 
-        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
-        request.setBizModel(model);
-
-        AlipayTradeQueryResponse response = getAlipayClient().execute(request);
-        LogUtil.print("查询支付结果" + response.getBody());
-        if (response.isSuccess()) {
-            return JsonUtil.get(true, response.getCode(),"支付成功");
-        } else {
-            return JsonUtil.get(false, response.getCode(), "支付失败",response.getBody());
+            AlipayTradeQueryResponse response = getAlipayClient().execute(request);
+            LogUtil.print("查询支付结果" + response.getBody());
+            //{"alipay_trade_query_response":{"code":"10000","msg":"Success","buyer_logon_id":"375***@qq.com",
+            // "buyer_pay_amount":"0.00","buyer_user_id":"2088002123336273","invoice_amount":"0.00",
+            // "out_trade_no":"2019033011111111119","point_amount":"0.00","receipt_amount":"0.00",
+            // "total_amount":"0.01","trade_no":"2019120622001436275742033599","trade_status":"WAIT_BUYER_PAY"},
+            // "sign":"VEWHEd08A+yuEjakUTJkOADvyV/4Hm5zWG5r/tP3J2+aeqF/EMFNWeiN4nvDcL08gm4mKIKCpF2FIQmAmHuZ0j264eOGcVRYfR1Mf2fE3pgSRVIuKi6/9vSyMysb6+1zzJu1GQ3R6iVU8rv8MmqYD41G6YWKupuAcU4X9efNotzMdXNk3vY5sELZZhJBhitL0z43f7mDhApvt2GvnWI6XW/WVNKjqcLP38vLxYnG0OdtBwJMEwkPGV5+tTzjQnWX3A+h5KDeEd7eLNKtVmtobl9LJI9fe//yJsM1zTaA7Ck9qbwtesl/5Pq4pKuOCdLBH7G3r2h1ZAiDtevyA71bEw=="}
+            if (response.isSuccess()) {
+                //交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）、TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）、TRADE_SUCCESS（交易支付成功）、TRADE_FINISHED（交易结束，不可退款）
+                if (response.getTradeStatus().equals("TRADE_SUCCESS")) {
+                    return FastJsonUtil.get(true, RespTips.PAYCHANNEL_PAY_SUCCESS.code, RespTips.PAYCHANNEL_PAY_SUCCESS.tips);
+                } else if (response.getTradeStatus().equals("WAIT_BUYER_PAY")) {
+                    return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_WAIT.code, RespTips.PAYCHANNLE_PAY_WAIT.tips);
+                } else if (response.getTradeStatus().equals("TRADE_CLOSED")) {
+                    return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_CLOSED.code, RespTips.PAYCHANNLE_PAY_CLOSED.tips);
+                } else if (response.getTradeStatus().equals("TRADE_FINISHED")) {
+                    return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_FINISHED.code, RespTips.PAYCHANNLE_PAY_FINISHED.tips);
+                } else {
+                    return FastJsonUtil.get(false, response.getCode(), "支付失败", response.getBody());
+                }
+            } else {
+                return FastJsonUtil.get(false, response.getCode(), "支付失败", response.getBody());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            System.out.println("调用失败");
+            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
         }
     }
 
@@ -201,8 +513,71 @@ public class AlipaySubmit {
      */
 
     //获取授权链接
-    public static String getAuthTokenUrl(String domainUrl) {
-        return String.format(AlipayConfig.auth_url, AlipayConfig.app_id, domainUrl + AlipayConfig.auth_notify_url);
+    public String getAuthTokenUrl(String uid) {
+        return String.format(AlipayConfig.auth_url, AlipayConfig.app_id, String.format(AlipayConfig.getAuthNotifyUrl(), uid));
+    }
+
+    /**
+     * 换取应用授权令牌。
+     * 在应用授权的场景下，商户把名下应用授权给ISV后，支付宝会给ISV颁发应用授权码app_auth_code，
+     * ISV可通过获取到的app_auth_code换取app_auth_token。app_auth_code作为换取app_auth_token的票据，
+     * 每次用户授权带上的app_auth_code将不一样，app_auth_code只能使用一次，一天（从当前时间算起的24小时）未被使用自动过期。
+     * 刷新应用授权令牌，ISV可通过获取到的refresh_token刷新app_auth_token，
+     * 刷新后老的refresh_token会在一段时间后失效（失效时间为接口返回的re_expires_in）。
+     */
+    public JSONObject getOpenAuthTokenAppByCode(String appAuthCode) {
+        try {
+            AlipayOpenAuthTokenAppModel model = new AlipayOpenAuthTokenAppModel();
+            model.setCode(appAuthCode);
+            model.setGrantType("authorization_code");
+
+            AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
+            request.setBizModel(model);
+
+            AlipayOpenAuthTokenAppResponse response = getAlipayClient().execute(request);
+            //app_auth_token令牌信息String是授权令牌信息
+            //app_refresh_token刷新令牌String是刷新令牌
+            //auth_app_id授权方应用id String 是 授权方应用 id
+            //expires_in令牌有效期 String 是有效期
+            //re_expires_in刷新令牌有效时间String是刷新令牌有效期
+            //userid支付宝用户标识String是支付宝用户标识
+
+            if (!response.isSuccess()) {
+                return FastJsonUtil.get(false, response.getCode(),response.getBody());
+            }
+
+            JSONObject jo = new JSONObject();
+            jo.put("appAuthToken", response.getAppAuthToken());
+            jo.put("appRefreshToken", response.getAppRefreshToken());
+            jo.put("authAppId", response.getAuthAppId());
+            jo.put("expiresIn", response.getExpiresIn());
+            jo.put("reExpiresIn", response.getReExpiresIn());
+            jo.put("userId", response.getUserId());
+            return FastJsonUtil.get(true, response.getCode(), jo);
+
+
+
+            //2019-12-05 13:55
+            //{"code":"10000","data":{"appRefreshToken":"201912BB38046e1221ca4c69b8b0859ddafb4X27",
+            // "appAuthToken":"201912BBcafdea2c002c4ad687ef7e9e9a02cC27","userId":"2088002123336273",
+            // "authAppId":"2019120569622857"},"success":true}
+            //李唐token
+            //{"code":"10000","data":{"appRefreshToken":"201912BB393c97a1110e4d71aa40773d3b7adC96",
+            // "appAuthToken":"201912BB1036430444af4866a42fc6f9028c9D96","userId":"2088431307185963",
+            // "authAppId":"2019012863166278"},"success":true}
+
+            //jo=>{"code":"10000","data":{"appRefreshToken":"201912BBdd96cdfee5444d2dade579865e215X27",
+            // "appAuthToken":"201912BBe1f7f50ed3cd4910800178b111fb3X27","userId":"2088002123336273",
+            // "authAppId":"2019120569622857"},"success":true}
+
+            //jo=>{"code":"10000","data":{"expiresIn":"31536000","appRefreshToken":"201912BBf17117f29f0c49fa82a0ee8abb369F96","appAuthToken":"201912BBbcc767843e584bec8dd0747867819X96","reExpiresIn":"32140800","userId":"2088431307185963","authAppId":"2019012863166278"},"success":true}
+
+
+
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            return FastJsonUtil.get(false,"500", e.getMessage());
+        }
     }
 
     /**
@@ -212,24 +587,74 @@ public class AlipaySubmit {
      * 3、userId
      * 4、authAppId
      */
-    public static JSONObject openAuthTokenApp(String appAuthCode) throws AlipayApiException {
-        AlipayOpenAuthTokenAppModel model = new AlipayOpenAuthTokenAppModel();
-        model.setCode(appAuthCode);
-        model.setGrantType("authorization_code");
+    public JSONObject getOpenAuthTokenAppByRefreshToken(String refreshToken) {
+        try {
+            AlipayOpenAuthTokenAppModel model = new AlipayOpenAuthTokenAppModel();
+            model.setGrantType("refresh_token");
+            model.setRefreshToken(refreshToken);
 
-        AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
-        request.setBizModel(model);
+            AlipayOpenAuthTokenAppRequest request = new AlipayOpenAuthTokenAppRequest();
+            request.setBizModel(model);
 
-        AlipayOpenAuthTokenAppResponse response = getAlipayClient().execute(request);
-        if (response.isSuccess()) {
-            JSONObject jo = new JSONObject();
-            jo.put("appAuthToken", response.getAppAuthToken());
-            jo.put("appRefreshToken", response.getAppRefreshToken());
-            jo.put("userId", response.getUserId());
-            jo.put("authAppId", response.getAuthAppId());
-            return JsonUtil.get(true, response.getCode(), jo);
-        } else {
-            return JsonUtil.get(false, response.getCode());
+            AlipayOpenAuthTokenAppResponse response = getAlipayClient().execute(request);
+            //app_auth_token令牌信息String是授权令牌信息
+            //app_refresh_token刷新令牌String是刷新令牌
+            //auth_app_id授权方应用id String 是 授权方应用 id
+            //expires_in令牌有效期 String 是有效期
+            //re_expires_in刷新令牌有效时间String是刷新令牌有效期
+            //userid支付宝用户标识String是支付宝用户标识
+
+            if (response.isSuccess()) {
+                JSONObject jo = new JSONObject();
+                jo.put("appAuthToken", response.getAppAuthToken());
+                jo.put("appRefreshToken", response.getAppRefreshToken());
+                jo.put("authAppId", response.getAuthAppId());
+                jo.put("expiresIn", response.getExpiresIn());
+                jo.put("reExpiresIn", response.getReExpiresIn());
+                jo.put("userId", response.getUserId());
+                return FastJsonUtil.get(true, response.getCode(), jo);
+            } else {
+                return FastJsonUtil.get(false, response.getCode());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            return FastJsonUtil.get(false, e.getMessage());
+        }
+    }
+
+    /**
+     * 查询授权信息
+     *
+     * @param appAuthToken
+     * @return
+     */
+    public JSONObject authTokenQuery(String appAuthToken) {
+        try {
+            AlipayOpenAuthTokenAppQueryModel model = new AlipayOpenAuthTokenAppQueryModel();
+            model.setAppAuthToken(appAuthToken);
+
+            AlipayOpenAuthTokenAppQueryRequest request = new AlipayOpenAuthTokenAppQueryRequest();
+            request.setBizModel(model);
+
+            AlipayOpenAuthTokenAppQueryResponse response = getAlipayClient().execute(request);
+            if (response.isSuccess()) {
+                JSONObject jo = new JSONObject();
+                jo.put("userId", response.getUserId());
+                jo.put("authAppId", response.getAuthAppId());
+                //交换令牌的有效期，单位秒，换算成天的话为365天
+                jo.put("expiresIn", response.getExpiresIn());
+                jo.put("authMethods", response.getAuthMethods());
+                jo.put("authStart", response.getAuthStart());
+                //当前app_auth_token的授权失效时间
+                jo.put("authEnd", response.getAuthEnd());
+                jo.put("status", response.getStatus());
+                return FastJsonUtil.get(true, response.getCode(), jo);
+            } else {
+                return FastJsonUtil.get(false, response.getCode());
+            }
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            return FastJsonUtil.get(false, e.getMessage());
         }
     }
 
@@ -241,7 +666,7 @@ public class AlipaySubmit {
      * @return
      * @author:G/2017年9月14日
      */
-    public static boolean notifyCheck(HttpServletRequest request) {
+    public boolean notifyCheck(HttpServletRequest request) {
         try {
             //获取支付宝POST过来反馈信息
             Map<String, String> params = new HashMap<String, String>();
@@ -283,13 +708,10 @@ public class AlipaySubmit {
      * "refund_fee":"1.00","send_back_fee":"1.00","trade_no":"2019010922001433520200663215"},
      * "sign":"fsRfZ8cHsiK+NizXnvE1RweP1rDiQQe30EMj7B5mqk0V/VayuE5xXj4kVbRQsiNr4iMROnbbjKjL3iPraH9gDqCzWKn2HD4dkiXhe24MZA+9uBNpBXf0RRg1eNcT89eSGnRAfxcvuovHIvkTca3VpZ3IfzXu8/WtLe7tKWjBG9HlWEILMo2x2PhiP2jDKmv5HYu4humw6xMiMzn30JYi1kx8A5EnpY5uW9Ys1pfZpmLsOqsfgzppfpNMr8zRJaDtvbGH/bz4Z5nTVe9+BiBK+3qJbPPPWeQfPVmKXm0DJnUkFcU1ViL283yd2WUUJPHdQ77GEHqf9U/SVKACGIFRiw=="}
      */
-    public static JSONObject refund(String app_id,
-                                    String app_private_key,
-                                    String alipay_public_key,
-
-                                    String outTradeNo,
-                                    String refundAmount,
-                                    String storeId) throws AlipayApiException {
+    public JSONObject refund(String appAuthToken,
+                             String outTradeNo,
+                             String refundAmount,
+                             String storeId) throws AlipayApiException {
 
         AlipayTradeRefundModel model = new AlipayTradeRefundModel();
         model.setOutTradeNo(outTradeNo);
@@ -297,13 +719,15 @@ public class AlipaySubmit {
         model.setStoreId(storeId);
 
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        //第三方应用授权
+        request.putOtherTextParam("app_auth_token", appAuthToken);
         request.setBizModel(model);
 
         AlipayTradeRefundResponse response = getAlipayClient().execute(request);
         if (response.isSuccess()) {
-            return JsonUtil.get(true, response.getCode(), response.getMsg(), response.getTradeNo());
+            return FastJsonUtil.get(true, response.getCode(), response.getMsg(), response.getTradeNo());
         } else {
-            return JsonUtil.get(false, response.getCode(), response.getMsg());
+            return FastJsonUtil.get(false, response.getCode(), response.getMsg());
         }
     }
 
@@ -315,8 +739,8 @@ public class AlipaySubmit {
      * @param tradeNo    收款单号
      * @return {"alipay_trade_fastpay_refund_query_response":{"code":"10000","msg":"Success","out_request_no":"191018154556136588113","out_trade_no":"191018154556136588113","refund_amount":"1.00","total_amount":"1.00","trade_no":"2019010922001433520200660680"},"sign":"j8OcS61wlzGJ0Zb7wUMplSTmtRDqet/vuJUUDPxCefyMZjnBWbI3tNiN4QeVwhHT1ugP0H2IdNGOJueswboEqT20Cy5fqrZj1WnzxpT1YpCGbL+eAo69A5oZLI0W4hbZnepbR0MpxnOA70A7vD3SSouPn34LQqMF9VX/cbp14zgWNDil0oEKhaoYkKX3ggpyYInE0QpMxFh4hmN5zYcQH088p4yOny8L315AN066imFBrgTLgmyu/48l1Vn89RzOfXTc88XJ7tyvHxmooR21icar5zBhGT6+8PnBcMN7d734bB+d/qZE7pKKbL8+7weMBPxpdLtx1mCbBMqE3VSyFg=="}
      */
-    public static JSONObject refundQuery(String outTradeNo,
-                                         String tradeNo) throws AlipayApiException {
+    public JSONObject refundQuery(String appAuthToken, String outTradeNo,
+                                  String tradeNo) throws AlipayApiException {
 
         AlipayTradeFastpayRefundQueryModel model = new AlipayTradeFastpayRefundQueryModel();
         model.setOutTradeNo(outTradeNo);
@@ -326,17 +750,19 @@ public class AlipaySubmit {
         model.setTradeNo(tradeNo);
 
         AlipayTradeFastpayRefundQueryRequest request = new AlipayTradeFastpayRefundQueryRequest();
+        //第三方应用授权
+        request.putOtherTextParam("app_auth_token", appAuthToken);
         request.setBizModel(model);
 
         AlipayTradeFastpayRefundQueryResponse response = getAlipayClient().execute(request);
         if (response.isSuccess()) {
-            return JsonUtil.get(true, response.getCode(), response.getMsg());
+            return FastJsonUtil.get(true, response.getCode(), response.getMsg());
         } else {
-            return JsonUtil.get(false, response.getCode(), response.getMsg());
+            return FastJsonUtil.get(false, response.getCode(), response.getMsg());
         }
     }
 
-    private static AlipayClient getAlipayClient() {
+    private AlipayClient getAlipayClient() {
         AlipayClient alipayClient = new DefaultAlipayClient(AlipayConfig.alipay_gateway,
                 AlipayConfig.app_id,
                 AlipayConfig.app_private_key,
@@ -347,25 +773,4 @@ public class AlipaySubmit {
         return alipayClient;
     }
 
-
-    public static void main(String[] args) throws AlipayApiException {
-
-        //收款码
-        String authCode = "287749032239774976";
-//        String appAuthToken ="";
-        //收款
-        JSONObject jo = barCodPay(null,authCode, "2019033011111111115", "测试收款", "0.01", null, "store_1");
-        System.out.println("result=" + jo);
-//        System.out.println("result=" + getAuthTokenUrl("https:/www.fangshangqu.cn"));
-
-
-        //退款
-//		JSONObject jo = refund(alipayConfig,"191018154556136588113","1","store_1");
-// 		JSONObject jo = refundQuery(null,null,null,"191018154556136588113","");
-
-        //查询
-//		JSONObject jo = payQuery("234234",null);
-//		System.out.println("result="+jo);
-
-    }
 }

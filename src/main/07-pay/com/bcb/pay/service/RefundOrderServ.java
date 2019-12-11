@@ -29,7 +29,7 @@ public interface RefundOrderServ {
      * @param refundOrderDto
      * @return
      */
-    int createRefundOrderByUnit(Long payAccountId,PayOrder payOrder, RefundOrderDto refundOrderDto);
+    int refundByUnit(Long payAccountId,PayOrder payOrder, RefundOrderDto refundOrderDto);
 
     /**
      * 查询退款结果

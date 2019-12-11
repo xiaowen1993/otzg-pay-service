@@ -2,19 +2,20 @@ package com.bcb.pay.service;
 
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
-import com.bcb.pay.dao.*;
+import com.bcb.pay.dao.PayOrderDao;
+import com.bcb.pay.dao.PayOrderLogDao;
 import com.bcb.pay.dto.PayOrderDto;
-import com.bcb.pay.entity.PayAccount;
-import com.bcb.pay.entity.PayChannelAccount;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.PayOrderLog;
 import com.bcb.pay.util.PayChannelType;
+import com.bcb.pay.util.PayQueryUtil;
+import com.bcb.pay.util.PayReceiveUtil;
 import com.bcb.util.CheckUtil;
 import com.bcb.util.DateUtil;
 import com.bcb.util.FuncUtil;
-import com.bcb.util.LockUtil;
-import com.bcb.wxpay.util.service.WxReceiveUtil;
+import com.bcb.wxpay.util.service.WxpayUtil;
 import net.sf.json.JSONObject;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author G./2018/7/3 10:38
@@ -39,19 +41,37 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     @Override
     @Transactional
     public Map createPayOrderByUnit(String payChannelAccount, PayOrderDto payOrderDto) {
-        String payOrderNo = getPayOrderNo(payOrderDto.getUnitId());
-        PayOrder payOrder = new PayOrder(payOrderNo, payChannelAccount, payOrderDto);
-        payOrder.setId(getId());
-        //状态未支付
-        payOrder.setStatus(0);
-        payOrderDao.save(payOrder);
+        RLock lock = redisson.getLock(payChannelAccount);
+        try {
+            boolean l = lock.tryLock(30, TimeUnit.SECONDS);
+            if (!l) {
+                P("redisson lock false");
+                return null;
+            }
 
-        //如果是微信支付
-        if (payOrderDto.getPayChannel().equals(PayChannelType.wxpay.name())) {
-            return new WxReceiveUtil().pay(payChannelAccount,payOrderNo, payOrderDto);
+            String payOrderNo = getPayOrderNo(payOrderDto.getUnitId());
+            PayOrder payOrder = new PayOrder(payOrderNo, payChannelAccount, payOrderDto);
+            payOrder.setId(getId());
+            //状态未支付
+            payOrder.setStatus(0);
+            payOrderDao.save(payOrder);
+
+            //策略模式收款方法
+            PayReceiveUtil payReceiveUtil= new PayReceiveUtil(payOrderDto);
+            if(null==payReceiveUtil){
+                throw new Exception();
+            }
+
+            return payReceiveUtil.pay(payChannelAccount, payOrderNo, payOrderDto);
+
+        }catch (Exception e){
+            rollBack();
+            P("error");
+            return null;
+        } finally {
+            lock.unlock();
+            P("redisson lock unlock");
         }
-
-        return null;
     }
 
     //自动生成订单号
@@ -69,45 +89,34 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         return null;
     }
 
+    @Override
+    public PayOrder findByUnitAndOrderNo(String unitId, String orderNo) {
+        return payOrderDao.findByUnitIdAndOrderNo(unitId,orderNo).orElse(null);
+    }
 
     @Override
     public PayOrder findByPayOrderNo(String unitId, String payOrderNo) {
-        Optional<PayOrder> op = payOrderDao.findByPayOrderNo(payOrderNo);
-        if(!op.isPresent()){
-            return null;
-        }
-
-        PayOrder payOrder = op.get();
-        //如果没有收款成功，调支付渠道接口查询
-        if(payOrder.getStatus()==0){
-            new Thread(()-> queryByPayChannel(payOrder)).start();
-        }
-
-        return payOrder;
+        return payOrderDao.findByPayOrderNo(payOrderNo).orElse(null);
     }
 
     //微信查询支付结果并更新数据
-    Map queryByPayChannel(PayOrder payOrder){
-        Map map = new HashMap();
-        if (payOrder.getPayChannel().equals(PayChannelType.wxpay.name())) {
-            map = new WxReceiveUtil().query(payOrder.getPayChannelAccount(),payOrder.getPayOrderNo());
-            P("支付渠道查账结果=>"+map.toString());
-            if(null==map
-                    || map.get("success").equals(false)
-                    || null == map.get("data")){
-                return map;
-            }
-            //支付成功
-            Map result = (Map)map.get("data");
-            //{transaction_id=4200000423201911268573008667, nonce_str=Htuf1711NiY17XXd, trade_state=SUCCESS, bank_type=OTHERS,
-            // openid=olFJwwNOyw5v5OpMq-2Ex959r5is, sign=130164F6749E46A9F85C5C12C426388E, return_msg=OK, fee_type=CNY,
-            // mch_id=1513549201, sub_mch_id=1525006091, cash_fee=1, out_trade_no=2019112617331281031867378635,
-            // cash_fee_type=CNY, appid=wxa574b9142c67f42e, total_fee=1, trade_state_desc=支付成功, trade_type=NATIVE,
-            // result_code=SUCCESS, attach=, time_end=20191126173621, is_subscribe=Y, return_code=SUCCESS}
-            //执行收款操作
-            saveSuccess(payOrder,result.get("transaction_id").toString(),result.get("openid").toString(),result.get("sub_mch_id").toString());
-
+    @Override
+    @Transactional
+    public Map queryByPayChannel(PayOrder payOrder){
+        //策略模式收款方法
+        PayQueryUtil payQueryUtil = new PayQueryUtil(payOrder);
+        Map map = payQueryUtil.query(payOrder.getPayChannelAccount(),payOrder.getPayOrderNo());
+        P("支付渠道查账结果=>"+map.toString());
+        if(null==map
+                || map.get("success").equals(false)
+                || null == map.get("data")){
+            return map;
         }
+        //支付成功
+        Map result = (Map)map.get("data");
+        //String payChannelNo,String payerId,String payeeId;
+        //执行收款操作
+        saveSuccess(payOrder,result.get("payChannelNo").toString(),result.get("payerId").toString(),result.get("payeeId").toString());
         return map;
     }
 
@@ -161,9 +170,9 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         savePayOrderLog(payOrder,payOrder.getPayOrderNo(),payChannelNo,payerId,payeeId);
 
         //更新支付渠道账户及账户记录
-        payChannelAccountServ.addPayAccount(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
+        payChannelAccountServ.add(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
 
-        //通知子系统收款已成功
+        //FIXME:通知子系统收款已成功
         if(!CheckUtil.isEmpty(payOrder.getPayNotify())){
             new Thread(()->sendSubNotify(payOrder.getOrderNo(),payOrder.getPayNotify())).start();
         }

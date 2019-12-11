@@ -14,8 +14,6 @@ public class PayAccountApi extends AbstractController {
 
     @Autowired
     PayAccountServ payAccountServ;
-    @Autowired
-    LockUtil lockUtil;
 
     //创建基本账户
     @RequestMapping("/payAccount/create")
@@ -34,22 +32,12 @@ public class PayAccountApi extends AbstractController {
             return;
         }
 
-        //==================================创建锁===============================================
-        boolean lock = lockUtil.lockAccount(unitId);
-        if(!lock){
-            sendJson(false,RespTips.LOCK_ERROR.code,RespTips.LOCK_ERROR.tips);
-            return;
-        }
-
-        P("创建基本账户-加锁成功");
         int r = payAccountServ.create(unitId,name,contact,mobilePhone);
         if(r==0){
             sendSuccess();
         }else{
             sendFail();
         }
-        lockUtil.unLockAccount(unitId);
-        P("创建基本账户-解锁成功");
 
     }
 

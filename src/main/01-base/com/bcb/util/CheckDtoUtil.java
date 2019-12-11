@@ -14,11 +14,11 @@ public abstract class CheckDtoUtil<T> {
     //构造函数
     public CheckDtoUtil(T t) {
         this.t = t;
-        check();
     }
 
     //校验不成功返回null(创建支付单失败)
     public T get() {
+        check();
         if (!pass) {
             return null;
         }

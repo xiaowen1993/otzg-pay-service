@@ -8,6 +8,10 @@ public abstract class BaseBean {
     protected final static void P(Object o){
         P(o,"info");
     }
+    //支持格式化输出
+    protected final static void P(String str, Object... args){
+        P(String.format(str,args),"info");
+    }
 
     /**
      * 保存业务层日志
@@ -16,6 +20,11 @@ public abstract class BaseBean {
      */
     protected final static void P(Object o,String level){
         LogUtil.addSysErrorLog(o,level);
+    }
+
+    //支持格式化输出
+    protected final static void PT(String str, Object... args){
+        PT(String.format(str,args));
     }
 
     protected final static void PT(String str){

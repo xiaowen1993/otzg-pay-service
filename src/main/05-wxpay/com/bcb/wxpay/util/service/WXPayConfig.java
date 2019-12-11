@@ -1,5 +1,6 @@
 package com.bcb.wxpay.util.service;
 
+import com.bcb.log.util.LogUtil;
 import com.bcb.wxpay.util.sdk.IWXPayDomain;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ public class WXPayConfig {
 
     //菠菜包
     static String mchId = "1513549201";
+    //(菠菜包的服务号)
     //appid是微信公众账号或开放平台APP的唯一标识，在公众平台申请公众账号或者在开放平台申请APP账号后，微信会自动分配对应的appid，用于标识该应用。可在微信公众平台-->开发者中心查看，商户的微信支付审核通过邮件中也会包含该字段值。
     static String appId = "wxa574b9142c67f42e";
 
@@ -89,7 +91,7 @@ public class WXPayConfig {
     }
 
     public static String getNotifyUrl() {
-        return notifyUrl;
+        return LogUtil.getServUrl()+notifyUrl;
     }
 
     public static boolean isAutoReport() {

@@ -24,19 +24,23 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
 
     @Override
     public void check() {
+        super.check();
+
         if (!TradeType.has(t.getPayType())) {
             msg = "微信支付类型(payType)参数错误";
             code = RespTips.PARAM_ERROR.code;
             pass = false;
             return;
-        } else if (t.getPayType().equals(TradeType.JSAPI.name())) {
+        }
+
+        if (t.getPayType().equals(TradeType.JSAPI.name())) {  //微信及小程序
             jsapiPayCheck();
-        } else if (t.getPayType().equals(TradeType.APP.name())) {
+        } else if (t.getPayType().equals(TradeType.APP.name())) {   //app
             appPayCheck();
         } else if (t.getPayType().equals(TradeType.MWEB.name())) {   //h5收款校验
             ipAddressCheck();
             notifyCheck();
-        } else if (t.getPayType().equals(TradeType.MICROPAY.name())) {   //扫码收款校验
+        } else if (t.getPayType().equals(TradeType.MICROPAY.name())) {   //刷脸及扫码收款校验
             microPayCheck();
         } else if (t.getPayType().equals(TradeType.NATIVE.name())) {     //主扫
             nativePayCheck();
@@ -106,7 +110,7 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     }
 
     public enum TradeType {
-        JSAPI, APP, MWEB, MICROPAY, NATIVE;
+        JSAPI,APP,MWEB,MICROPAY,NATIVE;
 
         public static boolean has(String name) {
             try {

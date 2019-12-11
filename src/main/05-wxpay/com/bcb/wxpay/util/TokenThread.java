@@ -39,7 +39,7 @@ public class TokenThread implements Runnable {
                     accessToken.getAccessToken();
                     LogUtil.saveTradeLog("进入线程accessToken"+accessToken.getAccessToken());
                     System.out.println(accessToken.getAccessToken());
-                    jsapiTicket = WxpayUtil.getJsapiTicket(accessToken.getAccessToken());
+                    jsapiTicket = WxPayUtil.getJsapiTicket(accessToken.getAccessToken());
                     System.out.println(jsapiTicket);
                     LogUtil.saveTradeLog("返回值jsapiTicket"+jsapiTicket);
                     //获取到access_token 休眠7000秒

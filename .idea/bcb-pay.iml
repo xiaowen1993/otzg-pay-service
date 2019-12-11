@@ -7,6 +7,18 @@
     <facet type="web" name="Web">
       <configuration>
         <webroots />
+        <sourceRoots>
+          <root url="file://$MODULE_DIR$/src/main/00-run" />
+          <root url="file://$MODULE_DIR$/src/main/01-base" />
+          <root url="file://$MODULE_DIR$/src/main/07-pay" />
+          <root url="file://$MODULE_DIR$/src/main/90-file" />
+          <root url="file://$MODULE_DIR$/src/main/99-log" />
+          <root url="file://$MODULE_DIR$/src/main/resources" />
+          <root url="file://$MODULE_DIR$/src/main/10-aip" />
+          <root url="file://$MODULE_DIR$/src/main/05-wxpay" />
+          <root url="file://$MODULE_DIR$/src/main/06-alipay" />
+          <root url="file://$MODULE_DIR$/src/main/webapp" />
+        </sourceRoots>
       </configuration>
     </facet>
   </component>
@@ -23,11 +35,11 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/10-aip" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/05-wxpay" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/06-alipay" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/main/webapp" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="alipay-sdk-java-4.8.73.ALL" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.1.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.1.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:5.1.7.RELEASE" level="project" />
@@ -162,15 +174,6 @@
     <orderEntry type="library" name="Maven: com.dangdang:sharding-jdbc-core:1.5.4" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:18.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.26" level="project" />
-    <orderEntry type="module-library">
-      <library name="Maven: com.alipay:sdk:0.0.1">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/src/main/webapp/WEB-INF/lib/alipay-sdk-java20170829142630.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:2.1.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-starter:2.1.2.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-context:2.1.2.RELEASE" level="project" />

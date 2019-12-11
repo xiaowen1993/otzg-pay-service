@@ -5,7 +5,7 @@ import com.bcb.util.CheckUtil;
 import com.bcb.util.RespTips;
 import com.bcb.wxpay.dto.WxMicroAccountDto;
 import com.bcb.wxpay.entity.WxMicroAccount;
-import com.bcb.wxpay.service.MicroAccountServ;
+import com.bcb.wxpay.service.WxMicroAccountServ;
 import com.bcb.wxpay.util.WxMicroAccountUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,7 @@ import java.util.Map;
 @RestController
 public class MicroAccountApi extends AbstractController {
     @Autowired
-    MicroAccountServ microAccountServ;
+    WxMicroAccountServ wxMicroAccountServ;
     @RequestMapping("/pay/microAccount/save")
 	public final void save(String unitId,WxMicroAccountDto wxMicroAccountDto){
         if(CheckUtil.isEmpty(unitId)){
@@ -28,7 +28,7 @@ public class MicroAccountApi extends AbstractController {
             return;
         }
 
-        if(null!=microAccountServ.query(unitId)){
+        if(null!= wxMicroAccountServ.query(unitId)){
             sendJson(false, RespTips.PAYACCOUNT_FOUND.code,"商户材料已提交");
             return;
         }
@@ -44,7 +44,7 @@ public class MicroAccountApi extends AbstractController {
         WxMicroAccount wxMicroAccount = check.getPojo();
         wxMicroAccount.setUnitId(unitId);
 
-        int r = microAccountServ.saveMicroAccount(wxMicroAccount);
+        int r = wxMicroAccountServ.saveMicroAccount(wxMicroAccount);
         if(r==0){
             sendSuccess();
         }
@@ -57,7 +57,7 @@ public class MicroAccountApi extends AbstractController {
             return;
         }
 
-        Map jo =microAccountServ.query(unitId);
+        Map jo = wxMicroAccountServ.query(unitId);
         if(null == jo){
             sendFail();
         }else {

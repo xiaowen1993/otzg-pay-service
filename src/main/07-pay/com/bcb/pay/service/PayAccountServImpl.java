@@ -10,6 +10,8 @@ import com.bcb.pay.entity.PayAccountLog;
 import com.bcb.pay.entity.PayChannelAccount;
 import com.bcb.pay.util.PayAccountType;
 import com.bcb.util.DateUtil;
+import org.redisson.Redisson;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PayAccountServImpl extends AbstractServ implements PayAccountServ {
@@ -28,20 +31,35 @@ public class PayAccountServImpl extends AbstractServ implements PayAccountServ {
     @Autowired
     PayAccountLogDao payAccountLogDao;
 
-
     @Override
     @Transactional
     public int create(String unitId,String name,String contact,String mobilePhone) {
-        try{
+        RLock lock = redisson.getLock(unitId);
+        try {
+            boolean l = lock.tryLock(30, TimeUnit.SECONDS);
+            if (!l) {
+                P("redisson lock false");
+                return 1;
+            }
+
             PayAccount payAccount = new PayAccount(unitId,name,contact,mobilePhone, PayAccountType.UNIT.index);
             payAccount.setId(getId());
             payAccountDao.save(payAccount);
             return 0;
         }catch (Exception e){
-            return 1;
+            rollBack();
+            P("error");
+            return 2;
+        } finally {
+            lock.unlock();
+            P("redisson lock unlock");
         }
     }
 
+    @Override
+    public PayAccount findByUnitId(String unitId) {
+        return payAccountDao.findByUnitId(unitId).orElse(null);
+    }
 
 
     @Override
@@ -51,12 +69,6 @@ public class PayAccountServImpl extends AbstractServ implements PayAccountServ {
     @Override
     public PayAccount findByMemberId(String memberId) {
         return null;
-    }
-
-    @Override
-    public PayAccount findByUnitId(String unitId) {
-        Optional<PayAccount> op = payAccountDao.findByUnitId(unitId);
-        return op.orElse(null);
     }
 
     @Override

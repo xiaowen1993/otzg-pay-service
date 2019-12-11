@@ -1,12 +1,14 @@
 package com.bcb.wxpay.entity;
 
 import com.alibaba.fastjson.JSON;
+import com.bcb.util.DateUtil;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -50,6 +52,14 @@ public class WxMicroAccountLog implements Serializable {
     //签约链接 (当申请状态为TO_BE_SIGNED或FINISH时才返回)
     @Column(name = "sign_url", length = 32)
     String signUrl;
+
+    //创建时间
+    @Column(name = "create_time", nullable = false, length = 19)
+    Date createTime;
+
+    //账户状态{0:失败,1:成功}
+    @Column(name = "status",nullable = false,length = 1)
+    Integer status;
 
     public WxMicroAccountLog() {
     }
@@ -126,6 +136,22 @@ public class WxMicroAccountLog implements Serializable {
         this.signUrl = signUrl;
     }
 
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     public Map getJson() {
         String jsonStr = new StringJoiner(", ", "{", "}")
                 .add("id:" + id)
@@ -137,6 +163,8 @@ public class WxMicroAccountLog implements Serializable {
                 .add("auditDetail:'" + auditDetail + "'")
                 .add("subMchId:'" + subMchId + "'")
                 .add("signUrl:'" + signUrl + "'")
+                .add("createTime:'" + DateUtil.dateTime2Str(createTime) + "'")
+                .add("status:'" + status + "'")
                 .toString();
         return (Map) JSON.parse(jsonStr);
     }

@@ -2,7 +2,7 @@ package com.bcb.wxpay.util.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.bcb.util.JsonUtil;
-import com.bcb.wxpay.util.WxpayUtil;
+import com.bcb.wxpay.util.WxPayUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
@@ -96,7 +96,7 @@ public class DepositSubmit {
         String faceCode = "b713b5d2-666c-48b6-8c37-f15acf5a7069";
 
         Map<String, String> payData = receiveDepositData(subMchId,
-                "测试订单1", "190108165433002", new Double(1.01), faceCode, WxpayUtil.localIp());
+                "测试订单1", "190108165433002", new Double(1.01), faceCode, WxPayUtil.localIp());
 
         System.out.println("payData=>" + payData);
         Map<String, Object> result = postDepositPay(payData);

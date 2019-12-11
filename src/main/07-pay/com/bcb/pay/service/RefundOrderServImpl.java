@@ -9,9 +9,13 @@ import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.RefundOrder;
 import com.bcb.pay.entity.RefundOrderLog;
 import com.bcb.pay.util.PayChannelType;
+import com.bcb.pay.util.PayRefund;
+import com.bcb.pay.util.PayRefundUtil;
 import com.bcb.util.DateUtil;
 import com.bcb.util.FuncUtil;
+import com.bcb.util.RespTips;
 import com.bcb.wxpay.util.service.WxRefundUtil;
+import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,6 +26,7 @@ import sun.security.krb5.internal.ktab.KeyTab;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author G.
@@ -52,75 +57,92 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
      * 1.收款单支付渠道，收款单号，收款金额
      * 2.冻结收款渠道账户金额
      * 3.执行退款业务
+     *
      * @param payOrder
      * @param refundOrderDto
      * @return
      */
     @Override
     @Transactional
-    public int createRefundOrderByUnit(Long payAccountId,PayOrder payOrder, RefundOrderDto refundOrderDto) {
-
+    public int refundByUnit(Long payAccountId, PayOrder payOrder, RefundOrderDto refundOrderDto) {
         //获取支付渠道商户账户
-        PayChannelAccount payChannelAccount = payChannelAccountServ.findByAccountAndPayChannel(payAccountId,payOrder.getPayChannel());
+        PayChannelAccount payChannelAccount = payChannelAccountServ.findByAccountAndPayChannel(payAccountId, payOrder.getPayChannel());
         //如果支付渠道账户不存在或者支付账户余额小于退款金额返回失败
-        if(null == payChannelAccount
-                || FuncUtil.getBigDecimalScale(payChannelAccount.getBalance()).compareTo(FuncUtil.getBigDecimalScale(new BigDecimal(refundOrderDto.getAmount())))<0){
-            return 1;
-        }
-
-        //如果冻结账户不成功
-        if(!payChannelAccountServ.freezeBalance(payChannelAccount,new BigDecimal(refundOrderDto.getAmount()))){
+        if (null == payChannelAccount
+                || FuncUtil.getBigDecimalScale(payChannelAccount.getBalance()).compareTo(FuncUtil.getBigDecimalScale(new BigDecimal(refundOrderDto.getAmount()))) < 0) {
             return 2;
         }
 
-        //创建退款业务单
-        RefundOrder refundOrder = createRefundOrder(payOrder.getPayChannel(),payOrder.getPayChannelAccount(),refundOrderDto);
-
-
-        //=======================================提交支付渠道退款===================================================
-        //如果是微信支付
-        if (payOrder.getPayChannel().equals(PayChannelType.wxpay.name())) {
-            //提交支付渠道退款
-            Map map = new WxRefundUtil().refund(payChannelAccount.getPayChannelAccount(),payOrder.getPayOrderNo(),refundOrder.getPayOrderNo(),payOrder.getAmount().doubleValue(),refundOrderDto);
-            //如果没有返回成功
-            if(map.get("success").equals(false)){
-                PT("退款业务执行失败");
-                payChannelAccountServ.unFreezeBalance(payChannelAccount,new BigDecimal(refundOrderDto.getAmount()),true);
-                return 3;
+        //对支付渠道账户加锁
+        RLock lock = redisson.getLock(payChannelAccount.toString());
+        try {
+            boolean l = lock.tryLock(30, TimeUnit.SECONDS);
+            if (!l) {
+                P("redisson lock false");
+                return 5;
             }
 
-            PT("退款业务执行成功");
-            //{transaction_id=4200000434201911276476814411, nonce_str=QzsYpbhkDxagqn1G,
-            // out_refund_no=2019112717363163181867378635, sign=98ED8407FC1B9FA8E479705A7C51A21066A7714836F09F5DBD4DA28E7CD5E983,
-            // return_msg=OK, mch_id=1513549201, sub_mch_id=1525006091, refund_id=50300302252019112713407326039, cash_fee=1,
-            // out_trade_no=2019112717261637271867378635, coupon_refund_fee=0, refund_channel=,
-            // appid=wxa574b9142c67f42e, refund_fee=1, total_fee=1, result_code=SUCCESS, coupon_refund_count=0, cash_refund_fee=1, return_code=SUCCESS}
-            Map result = ((Map)map.get("data"));
-            String payChannelNo = result.get("refund_id").toString();
+            //判断该退款单号是否已经生成
+            if (checkByRefundOrderNo(refundOrderDto.getRefundOrderNo())) {
+                return 1;
+            }
+
+            //如果冻结账户不成功
+            PT("冻结支付渠道账户退款余额");
+            if (!payChannelAccountServ.freezeBalance(payChannelAccount, new BigDecimal(refundOrderDto.getAmount()))) {
+                return 3;
+            }
+            PT("冻结支付渠道账户退款余额成功。开始执行退款业务=> refundOrderDto.orderNo="+refundOrderDto.getOrderNo());
+
+            RefundOrder refundOrder = createRefundOrder(payOrder.getPayChannel(), payOrder.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrderDto);
+            PT("创建退款业务单成功=> refundOrder.getRefundOrderNo="+refundOrder.getRefundOrderNo());
+
+            //=======================================提交支付渠道退款===================================================
+            //策略模式获取退款渠道
+            PayRefund payRefund = new PayRefundUtil(payOrder.getPayChannel(),refundOrderDto);
+            //提交支付渠道退款
+            Map map = payRefund.refund(payChannelAccount.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo());
+            //如果没有返回成功
+            if (map.get("success").equals(false)) {
+                PT("退款业务执行失败,账户冻结余额解冻");
+                payChannelAccountServ.unFreezeBalance(payChannelAccount, new BigDecimal(refundOrderDto.getAmount()), true);
+                return 4;
+            }
+
+            PT("执行退款业务成功");
+            Map result = ((Map) map.get("data"));
+            String payChannelNo = result.get("payChannelNo").toString();
             //更新退款单
-            finishRefundOrder(refundOrder,payChannelNo);
+            finishRefundOrder(refundOrder, payChannelNo);
 
             //更新账户余额
-            payChannelAccountServ.substract(payChannelAccount,refundOrderDto.getUnitId(),payOrder.getPayChannel(),refundOrder.getPayOrderNo(), refundOrderDto.getSubject(), payChannelNo, new BigDecimal(refundOrderDto.getAmount()));
+            payChannelAccountServ.substract(payChannelAccount, refundOrderDto.getUnitId(), payOrder.getPayChannel(), refundOrder.getPayRefundOrderNo(), refundOrderDto.getSubject(), payChannelNo, new BigDecimal(refundOrderDto.getAmount()));
 
             PT("更新退款单成功");
             return 0;
-        }
 
-        return 4;
+        } catch (Exception e) {
+            rollBack();
+            P("error");
+            return 6;
+        } finally {
+            lock.unlock();
+            P("redisson lock unlock");
+        }
     }
 
 
     //创建退款业务单,并返回退款单号
-    RefundOrder createRefundOrder(String payChannel,String payChannelAccount,RefundOrderDto refundOrderDto){
+    RefundOrder createRefundOrder(String payChannel, String payChannelAccount,String payOrderNo, RefundOrderDto refundOrderDto) {
         RefundOrder refundOrder = new RefundOrder();
 
         refundOrder.setId(getId());
         refundOrder.setUnitId(refundOrderDto.getUnitId());
         refundOrder.setMemberId(refundOrderDto.getMemberId());
-
+        //收款时候的业务单号
+        refundOrder.setPayOrderNo(payOrderNo);
         //支付系统退款业务单号
-        refundOrder.setPayOrderNo(getRefundOrderNo(refundOrderDto.getUnitId()));
+        refundOrder.setPayRefundOrderNo(getRefundOrderNo(refundOrderDto.getUnitId()));
         //子系统收款时候的业务单号
         refundOrder.setOrderNo(refundOrderDto.getOrderNo());
         //子系统退款业务单号
@@ -149,7 +171,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         return DateUtil.yearMonthDayTimeShort() + FuncUtil.getRandInt(10001, 19999) + Math.abs(unitId.hashCode());
     }
 
-    void finishRefundOrder(RefundOrder refundOrder,String payChannelNo){
+    void finishRefundOrder(RefundOrder refundOrder, String payChannelNo) {
         refundOrder.setUpdateTime(DateUtil.now());
         refundOrder.setStatus(1);
         //保存退款单
@@ -159,7 +181,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         RefundOrderLog refundOrderLog = new RefundOrderLog();
         refundOrderLog.setId(getId());
 
-        refundOrderLog.setPayOrderNo(refundOrder.getPayOrderNo());
+        refundOrderLog.setPayRefundOrderNo(refundOrder.getPayRefundOrderNo());
         refundOrderLog.setOrderNo(refundOrder.getOrderNo());
         refundOrderLog.setRefundOrderNo(refundOrder.getRefundOrderNo());
         refundOrderLog.setAmount(refundOrder.getAmount());
@@ -177,9 +199,10 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
     @Override
     @Transactional
     public int queryRefundOrderByUnit(RefundOrder refundOrder) {
-        Map result = new WxRefundUtil().postRefundQuery(refundOrder.getPayChannelAccount(),refundOrder.getPayOrderNo());
-        P("微信退款查询结果=>"+result);
-        if(!result.get("success").equals(true)){
+        PayRefund payRefund = new PayRefundUtil(refundOrder.getPayChannel());
+        Map result = payRefund.query(refundOrder.getPayChannelAccount(), refundOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo());
+        P("微信退款查询结果=>" + result);
+        if (!result.get("success").equals(true)) {
             return 1;
         }
 
@@ -187,7 +210,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         //{"msg":"调用失败","code":"FAIL","success":false}
 
         //更新退款单
-        finishRefundOrder(refundOrder,result.get("data").toString());
+        finishRefundOrder(refundOrder, result.get("data").toString());
 
         return 0;
     }

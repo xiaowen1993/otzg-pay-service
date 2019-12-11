@@ -30,12 +30,8 @@ public class RefundApi extends AbstractController {
     private PayOrderServ payOrderServ;
     @Autowired
     private RefundOrderServ refundOrderServ;
-
     @Autowired
     private PayAccountServ payAccountServ;
-    @Autowired
-    LockUtil lockUtil;
-
 
     /**
      * 退款接口
@@ -75,36 +71,19 @@ public class RefundApi extends AbstractController {
             return;
         }
 
-        //==================================创建锁===============================================
-        boolean lock = lockUtil.lockAccount(refundOrderDto.getUnitId());
-        if(!lock){
-            sendJson(false,RespTips.LOCK_ERROR.code,RespTips.LOCK_ERROR.tips);
-            return;
-        }
-
-
-        //判断该退款单号是否已经生成
-        if(refundOrderServ.checkByRefundOrderNo(refundOrderDto.getRefundOrderNo())){
-            sendJson(false,RespTips.PAYORDER_FOUND.code,RespTips.PAYORDER_FOUND.tips);
-            //解锁
-            lockUtil.unLockAccount(refundOrderDto.getUnitId());
-            return;
-        }
-
         //获取退款结果立即返回,退款是否成功提供退款查询接口
-        int r = refundOrderServ.createRefundOrderByUnit(payAccount.getId(),payOrder, refundOrderDto);
+        int r = refundOrderServ.refundByUnit(payAccount.getId(),payOrder, refundOrderDto);
         //如果没有对应的渠道
         if(r==0){
             //退款成功
             sendSuccess();
+        }else if(r==1){
+            sendJson(false, RespTips.PAYORDER_FOUND.code,RespTips.PAYORDER_FOUND.tips);
         }else if(r==2){
             sendJson(false,RespTips.PAYORDER_LOCK_ERROR.code,RespTips.PAYORDER_LOCK_ERROR.tips);
         }else if(r>2){
             sendFail();
         }
-
-        //解锁
-        lockUtil.unLockAccount(refundOrderDto.getUnitId());
     }
 
     @RequestMapping(value = "/pay/refund/query")

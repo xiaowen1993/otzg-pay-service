@@ -1,6 +1,6 @@
 package com.bcb.wxpay.util.sdk;
 
-import com.bcb.wxpay.util.WxpayUtil;
+import com.bcb.wxpay.util.WxPayUtil;
 import com.bcb.wxpay.util.XmlUtil;
 import com.bcb.wxpay.util.service.SignType;
 import com.bcb.wxpay.util.service.WXPayConfig;
@@ -48,14 +48,11 @@ public class WXPayRequest {
         reqData.put("appid", config.getAppId());
         reqData.put("mch_id", config.getMchId());
         reqData.put("nonce_str", WXPayUtil.generateNonceStr());
-        if (SignType.MD5.name().equals(config.getSignType())) {
-            reqData.put("sign_type", WXPayConstants.MD5);
-        }
-        else if (SignType.HMACSHA256.name().equals(config.getSignType())) {
+        if (SignType.HMACSHA256.name().equals(config.getSignType())) {
             reqData.put("sign_type", WXPayConstants.HMACSHA256);
         }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), config.getSignType()));
-        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
+//        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
         return XmlUtil.Map2Xml(reqData);
     }
 
@@ -69,14 +66,11 @@ public class WXPayRequest {
     private String fillRequestDataNoAppId(Map<String, String> reqData) throws Exception {
         reqData.put("mch_id", config.getMchId());
         reqData.put("nonce_str", WXPayUtil.generateNonceStr());
-        if (SignType.MD5.name().equals(config.getSignType())) {
-            reqData.put("sign_type", WXPayConstants.MD5);
-        }
-        else if (SignType.HMACSHA256.name().equals(config.getSignType())) {
+        if (SignType.HMACSHA256.name().equals(config.getSignType())) {
             reqData.put("sign_type", WXPayConstants.HMACSHA256);
         }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), config.getSignType()));
-        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
+//        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
         return XmlUtil.Map2Xml(reqData);
     }
 
@@ -155,7 +149,7 @@ public class WXPayRequest {
 
 
     private String request(String data, boolean useCert) throws Exception {
-        String uuid = WxpayUtil.getNonce("nonce", 16);
+        String uuid = WxPayUtil.getNonce("nonce", 16);
         Exception exception = null;
         long elapsedTimeMillis = 0;
         long startTimestampMs = WXPayUtil.getCurrentTimestampMs();
@@ -256,6 +250,10 @@ public class WXPayRequest {
 
     public Map<String, String> requestCert(Map<String, String> data) throws Exception {
         return XmlUtil.parse(request(this.fillRequestData(data),true));
+    }
+
+    public Map<String, String> requestCertNoAppId(Map<String, String> data) throws Exception {
+        return XmlUtil.parse(request(this.fillRequestDataNoAppId(data),true));
     }
 
     /**
