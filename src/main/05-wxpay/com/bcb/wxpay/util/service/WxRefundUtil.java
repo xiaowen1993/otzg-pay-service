@@ -99,13 +99,6 @@ public class WxRefundUtil implements PayRefund {
         return paramMap;
     }
 
-
-    RefundOrderDto refundOrderDto;
-
-    public WxRefundUtil(RefundOrderDto refundOrderDto) {
-        this.refundOrderDto = refundOrderDto;
-    }
-
     public WxRefundUtil() {
     }
 
@@ -124,14 +117,14 @@ public class WxRefundUtil implements PayRefund {
      * @return
      */
     @Override
-    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo) {
+    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
         Map map = getInitMap();
         try {
             WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name(),true);
             wxPayConfig.setUrl(WXPayConstants.getPayRefundUrl());
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
-            Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, this.refundOrderDto.getAmount(), refundOrderDto);
+            Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, refundOrderDto.getAmount(), refundOrderDto);
             map = wxPayRequest.requestCert(data);
             LogUtil.saveTradeLog("调用结果=" + map);
             //2019-11-27 16:52
@@ -209,7 +202,7 @@ public class WxRefundUtil implements PayRefund {
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
             Map<String, String> map = refundQueryData(payChannelAccount, refundOrderNo);
-            Map<String, String> result = wxPayRequest.request(map);
+            Map<String, Object> result = wxPayRequest.request(map);
             LogUtil.saveTradeLog("微信退款查询调用结果=" + result.toString());
             //2019-11-28 13:59
             //{transaction_id=4200000425201911283941785875, nonce_str=K5m6EFWnSUj2yawB, out_refund_no_0=20191128113553134861867378635, refund_status_0=SUCCESS, sign=D70AE04C4A386E7EBC3975ECFC8692E4, refund_fee_0=1, refund_recv_accout_0=支付用户的零钱, return_msg=OK, mch_id=1513549201, refund_success_time_0=2019-11-28 11:38:22, sub_mch_id=1525006091, cash_fee=1, refund_id_0=50300302512019112813429427470, out_trade_no=201911281133112801867378635, appid=wxa574b9142c67f42e, refund_fee=1, total_fee=1, result_code=SUCCESS, refund_account_0=REFUND_SOURCE_UNSETTLED_FUNDS, refund_count=1, return_code=SUCCESS, refund_channel_0=ORIGINAL}
@@ -223,10 +216,10 @@ public class WxRefundUtil implements PayRefund {
                     && result.get("result_code").equals("SUCCESS")
             ) {
                 LogUtil.saveTradeLog("微信退款成功=" + result.toString());
-                return FastJsonUtil.get(true, result.get("result_code"), "退款成功", result.get("transaction_id"));
+                return FastJsonUtil.get(true, result.get("result_code").toString(), "退款成功", result.get("transaction_id"));
             } else {
                 LogUtil.saveTradeLog("微信退款未成功=" + result.toString());
-                return FastJsonUtil.get(false, result.get("err_code"), "退款未成功");
+                return FastJsonUtil.get(false, result.get("err_code").toString(), "退款未成功");
             }
         }catch (Exception e){
             e.printStackTrace();

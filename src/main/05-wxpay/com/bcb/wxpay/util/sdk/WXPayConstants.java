@@ -44,8 +44,6 @@ public class WXPayConstants {
 
 
 
-//    //支付押金（人脸支付）
-//    public static final String DEPOSIT_FACEPAY_URL_SUFFIX = "/deposit/facepay";
 //    //支付押金（付款码支付）
 //    public static final String DEPOSIT_MICROPAY_URL_SUFFIX = "/deposit/micropay";
 //

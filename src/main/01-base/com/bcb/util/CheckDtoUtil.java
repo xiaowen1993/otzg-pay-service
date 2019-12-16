@@ -40,6 +40,16 @@ public abstract class CheckDtoUtil<T> {
     protected abstract void check();
 
     /**
+     * 是否为空
+     * @param param
+     * @return
+     */
+    protected boolean checkEmpty(Object param) {
+        return CheckUtil.isEmpty(param);
+    }
+
+
+    /**
      * 校验参数
      *
      * @param param

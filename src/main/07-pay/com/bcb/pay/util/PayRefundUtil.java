@@ -18,25 +18,17 @@ public class PayRefundUtil implements PayRefund {
         //如果是微信支付
         if (payChannel.equals(PayChannelType.wxpay.name())) {
             this.payRefund = new WxRefundUtil();
-        }else{
+        }else if (payChannel.equals(PayChannelType.alipay.name())) {
             //支付宝
             this.payRefund = new AliRefundUtil();
-        }
-    }
-
-    public PayRefundUtil(String payChannel,RefundOrderDto refundOrderDto) {
-        //如果是微信支付
-        if (payChannel.equals(PayChannelType.wxpay.name())) {
-            this.payRefund = new WxRefundUtil(refundOrderDto);
         }else{
-            //支付宝
-            this.payRefund = new AliRefundUtil(refundOrderDto);
+            //TODO:邮储
         }
     }
 
     @Override
-    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo) {
-        return this.payRefund.refund(payChannelAccount,payOrderNo,refundOrderNo);
+    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
+        return this.payRefund.refund(payChannelAccount,payOrderNo,refundOrderNo,refundOrderDto);
     }
 
     @Override

@@ -20,7 +20,10 @@ public class PayReceiveUtil implements PayReceive {
         if (payOrderDto.getPayChannel().equals(PayChannelType.wxpay.name())) {
             this.payReceive = new WxpayUtil();
         }else if (payOrderDto.getPayChannel().equals(PayChannelType.alipay.name())){
+            //如果是支付宝
             this.payReceive = new AlipayUtil();
+        }else{
+            //TODO:邮储
         }
     }
 

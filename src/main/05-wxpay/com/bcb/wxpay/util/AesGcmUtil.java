@@ -1,6 +1,7 @@
 package com.bcb.wxpay.util;
 
 import com.bcb.util.Base64;
+import com.bcb.util.FuncUtil;
 import com.bcb.wxpay.util.service.WXPayConfig;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -44,7 +45,7 @@ public class AesGcmUtil {
          */
         Map<String, String> param = new HashMap<>();
         param.put("mch_id", WXPayConfig.getMchId());
-        param.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
+        param.put("nonce_str", FuncUtil.getNonce("nonce", 16));
         // 暂只支持HMAC-SHA256 加密
         param.put("sign_type", "HMAC-SHA256");
         // 对你的参数进行加密处理
@@ -56,7 +57,7 @@ public class AesGcmUtil {
             System.out.println("获取平台证书响应 =" + httpResponse);
             if (httpResponse != null && httpResponse.getStatusLine().getStatusCode() == 200) {
                 String responseEntity = EntityUtils.toString(httpResponse.getEntity());
-                Map<String, String> m = XmlUtil.parse(responseEntity);
+                Map<String, Object> m = XmlUtil.parse(responseEntity);
                 System.out.println("获取平台证书响应 =" + m.toString());
                 //2019-11-15 调接口返回=>
                 // 获取平台证书响应 ={nonce_str=MWQ5hPcwyB4YuJ9Y,
@@ -76,7 +77,7 @@ public class AesGcmUtil {
                         && m.get("result_code") != null
                         && "SUCCESS".equals(m.get("result_code"))
                 ) {
-                    return m.get("certificates");
+                    return m.get("certificates").toString();
                 }
             }
         } catch (Exception e) {

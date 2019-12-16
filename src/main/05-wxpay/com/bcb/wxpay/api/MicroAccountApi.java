@@ -33,7 +33,7 @@ public class MicroAccountApi extends AbstractController {
             return;
         }
 
-        wxMicroAccountDto.setIdCardValidTime("[\"1970-01-01\",\"长期\"]");
+        wxMicroAccountDto.setIdCardValidTime("[\""+wxMicroAccountDto.getIdCardValidTime()+"\",\"长期\"]");
         //校验
         WxMicroAccountUtil check = new WxMicroAccountUtil(wxMicroAccountDto);
         if(!check.isPass()){
@@ -41,6 +41,7 @@ public class MicroAccountApi extends AbstractController {
             return;
         }
 
+        //校验通过
         WxMicroAccount wxMicroAccount = check.getPojo();
         wxMicroAccount.setUnitId(unitId);
 

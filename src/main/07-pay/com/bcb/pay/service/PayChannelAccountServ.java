@@ -1,14 +1,18 @@
 package com.bcb.pay.service;
 
+import com.bcb.base.Finder;
 import com.bcb.pay.entity.PayChannelAccount;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * 支付渠道账户
  */
 public interface PayChannelAccountServ {
+
+    PayChannelAccount findByUnitIdAndPayChannel(String unitId, String payChannel);
 
     /**
      * 单位账户绑定支付渠道账号
@@ -108,6 +112,7 @@ public interface PayChannelAccountServ {
      * 2.如果tag为true,余额增加。
      */
     boolean unFreezeBalance(PayChannelAccount payChannelAccount, BigDecimal freezeAmount, boolean tag);
+
 }
 
 

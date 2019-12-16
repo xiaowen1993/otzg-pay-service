@@ -160,7 +160,7 @@ public class WxMicroAccountLog implements Serializable {
                 .add("applymentId:'" + applymentId + "'")
                 .add("applymentState:'" + applymentState + "'")
                 .add("applymentStateDesc:'" + applymentStateDesc + "'")
-                .add("auditDetail:'" + auditDetail + "'")
+                .add("auditDetail:" + auditDetail)
                 .add("subMchId:'" + subMchId + "'")
                 .add("signUrl:'" + signUrl + "'")
                 .add("createTime:'" + DateUtil.dateTime2Str(createTime) + "'")

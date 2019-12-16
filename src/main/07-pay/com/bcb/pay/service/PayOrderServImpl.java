@@ -2,27 +2,24 @@ package com.bcb.pay.service;
 
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
+import com.bcb.base.Page;
 import com.bcb.pay.dao.PayOrderDao;
 import com.bcb.pay.dao.PayOrderLogDao;
 import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.PayOrderLog;
-import com.bcb.pay.util.PayChannelType;
 import com.bcb.pay.util.PayQueryUtil;
 import com.bcb.pay.util.PayReceiveUtil;
-import com.bcb.util.CheckUtil;
-import com.bcb.util.DateUtil;
-import com.bcb.util.FuncUtil;
-import com.bcb.wxpay.util.service.WxpayUtil;
-import net.sf.json.JSONObject;
+import com.bcb.util.*;
 import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,11 +71,6 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         }
     }
 
-    //自动生成订单号
-    String getPayOrderNo(String unitId) {
-        return DateUtil.yearMonthDayTimeShort() + FuncUtil.getRandInt(0001, 9999) + Math.abs(unitId.hashCode());
-    }
-
     @Override
     public PayOrder findByUnitAndType(String unitId, String payType) {
         return null;
@@ -122,8 +114,8 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
 
     @Override
-    public boolean checkByOrderNo(String unitId,String orderNo) {
-        return payOrderDao.findByUnitIdAndOrderNo(unitId,orderNo).isPresent();
+    public boolean checkByOrderNo(String orderNo) {
+        return payOrderDao.findByOrderNo(orderNo).isPresent();
     }
 
     @Override
@@ -136,8 +128,32 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     }
 
     @Override
-    public JSONObject findPayOrderByUnit(Finder f, String unitId) {
-        return null;
+    public Map findPayOrderByUnit(Finder finder, String unitId, String payChannel) {
+        Page page = findByUnit(finder,unitId,payChannel);
+        return FastJsonUtil.get(true,
+                RespTips.SUCCESS_CODE.code,
+                ((List<PayOrder>) page.getItems())
+                        .stream()
+                        .map(PayOrder::getBaseJson)
+                        .toArray(),
+                page.getTotalCount()
+        );
+    }
+
+    Page findByUnit(Finder finder, String unitId, String payChannel){
+        StringJoiner hql = new StringJoiner(" ");
+        hql.add("select po from PayOrder po where po.unitId='"+unitId+"'");
+        if(!CheckUtil.isEmpty(payChannel))
+            hql.add(" and po.payChannel='"+payChannel+"'");
+        if(!CheckUtil.isEmpty(finder.getStatus()))
+            hql.add(" and po.status="+finder.getStatus());
+        if(!CheckUtil.isEmpty(finder.getStartTime()))
+            hql.add(" and po.createTime >= '"+finder.getStartTime()+"'");
+        if(!CheckUtil.isEmpty(finder.getEndTime()))
+            hql.add(" and po.updateTime <= '"+finder.getEndTime()+"'");
+
+        hql.add("order by  po.updateTime desc");
+        return payOrderDao.findPageByHql(hql.toString(),finder.getPageSize(),finder.getStartIndex());
     }
 
     @Override
@@ -172,7 +188,7 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         //更新支付渠道账户及账户记录
         payChannelAccountServ.add(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
 
-        //FIXME:通知子系统收款已成功
+        //todo 通知子系统收款已成功
         if(!CheckUtil.isEmpty(payOrder.getPayNotify())){
             new Thread(()->sendSubNotify(payOrder.getOrderNo(),payOrder.getPayNotify())).start();
         }

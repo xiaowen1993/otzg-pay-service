@@ -1,5 +1,6 @@
 package com.bcb.pay.api;
 
+import com.bcb.base.Finder;
 import com.bcb.pay.dto.RefundOrderDto;
 import com.bcb.pay.entity.PayAccount;
 import com.bcb.pay.entity.PayOrder;
@@ -77,6 +78,8 @@ public class RefundApi extends AbstractController {
         if(r==0){
             //退款成功
             sendSuccess();
+        }else if(r==-1){
+            sendJson(false, RespTips.PAYCHANNLE_PAY_FINISHED.code,RespTips.PAYCHANNLE_PAY_FINISHED.tips);
         }else if(r==1){
             sendJson(false, RespTips.PAYORDER_FOUND.code,RespTips.PAYORDER_FOUND.tips);
         }else if(r==2){
@@ -118,4 +121,14 @@ public class RefundApi extends AbstractController {
         sendJson(true,RespTips.PAYORDER_FINISHED.code,RespTips.PAYORDER_FINISHED.tips);
     }
 
+    @RequestMapping(value = "/refundOrder/find")
+    public void payOrderFind(String unitId, String payChannel, Finder finder) {
+        if (CheckUtil.isEmpty(unitId)) {
+            sendParamError();
+            return;
+        }
+        //如果成功
+        sendJson(refundOrderServ.findRefundOrderByUnit(finder,unitId,payChannel));
+
+    }
 }

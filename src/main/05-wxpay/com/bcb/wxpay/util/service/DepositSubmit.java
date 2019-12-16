@@ -1,8 +1,8 @@
 package com.bcb.wxpay.util.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bcb.util.FuncUtil;
 import com.bcb.util.JsonUtil;
-import com.bcb.wxpay.util.WxPayUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
@@ -58,7 +58,7 @@ public class DepositSubmit {
         wxPayConfig.setUrl(WXPayConstants.getDepositFacePayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, String> result = wxPayRequest.requestTimes(map);
+        Map<String, Object> result = wxPayRequest.requestTimes(map);
         System.out.println("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
         if (result.get("return_code") != null
@@ -69,9 +69,9 @@ public class DepositSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code"), result.get("err_code_des"));
+            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -96,7 +96,7 @@ public class DepositSubmit {
         String faceCode = "b713b5d2-666c-48b6-8c37-f15acf5a7069";
 
         Map<String, String> payData = receiveDepositData(subMchId,
-                "测试订单1", "190108165433002", new Double(1.01), faceCode, WxPayUtil.localIp());
+                "测试订单1", "190108165433002", new Double(1.01), faceCode, FuncUtil.getLocalIp());
 
         System.out.println("payData=>" + payData);
         Map<String, Object> result = postDepositPay(payData);

@@ -1,19 +1,24 @@
 package com.bcb.pay.api;
 
+import com.bcb.base.Finder;
 import com.bcb.pay.entity.PayAccount;
+import com.bcb.pay.entity.PayChannelAccount;
 import com.bcb.pay.service.PayAccountServ;
+import com.bcb.pay.service.PayChannelAccountServ;
 import com.bcb.util.CheckUtil;
-import com.bcb.util.LockUtil;
+import com.bcb.util.FastJsonUtil;
 import com.bcb.util.RespTips;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("accountController")
+@RestController
 public class PayAccountApi extends AbstractController {
 
     @Autowired
     PayAccountServ payAccountServ;
+    @Autowired
+    PayChannelAccountServ payChannelAccountServ;
 
     //创建基本账户
     @RequestMapping("/payAccount/create")
@@ -22,24 +27,60 @@ public class PayAccountApi extends AbstractController {
                 || CheckUtil.isEmpty(name)
                 || CheckUtil.isEmpty(contact)
                 || CheckUtil.isEmpty(mobilePhone)) {
-                sendParamError();
-                return;
-        }
-
-        PayAccount payAccount = payAccountServ.findByUnitId(unitId);
-        if(null!=payAccount){
-            sendJson(false, RespTips.PAYACCOUNT_FOUND.code,RespTips.PAYACCOUNT_FOUND.tips);
+            sendParamError();
             return;
         }
 
-        int r = payAccountServ.create(unitId,name,contact,mobilePhone);
-        if(r==0){
+        PayAccount payAccount = payAccountServ.findByUnitId(unitId);
+        if (null != payAccount) {
+            sendJson(false, RespTips.PAYACCOUNT_FOUND.code, RespTips.PAYACCOUNT_FOUND.tips);
+            return;
+        }
+
+        int r = payAccountServ.create(unitId, name, contact, mobilePhone);
+        if (r == 0) {
             sendSuccess();
-        }else{
+        } else {
             sendFail();
         }
 
     }
+    //获取会员(推广员及商户)账户流水
+    @RequestMapping("/payAccount/info")
+    public void getAccount(String unitId) {
+        if(CheckUtil.isEmpty(unitId)){
+            sendParamError();
+            return;
+        }
+
+        PayAccount payAccount = payAccountServ.findByUnitId(unitId);
+        if (null == payAccount) {
+            sendJson(false, RespTips.PAYCHANNEL_SET_ERROR.code, RespTips.PAYCHANNEL_SET_ERROR.tips);
+            return;
+        }
+
+        sendSuccess(FastJsonUtil.getJson(payAccount.getJson()));
+    }
+
+    //============================账户查询====================================
+    //获取会员账户流水
+    @RequestMapping("/payAccount/find")
+    public void getAccountByAdmin(String unitId,String payChannel, Finder finder) {
+        if(CheckUtil.isEmpty(unitId)){
+            sendParamError();
+            return;
+        }
+
+        PayAccount payAccount = payAccountServ.findByUnitId(unitId);
+        if (null == payAccount) {
+            sendJson(false, RespTips.PAYCHANNEL_SET_ERROR.code, RespTips.PAYCHANNEL_SET_ERROR.tips);
+            return;
+        }
+
+        sendJson(payAccountServ.findByUnit(finder,unitId,payChannel));
+    }
+
+
 
 
     //=======================================支付密码======================================================/
@@ -74,7 +115,7 @@ public class PayAccountApi extends AbstractController {
 //        }
 //
 //        //修改支付密码
-//        int r = accountServ.savePayPassword(password, getMember(token));
+//        int r = payAccountServ.savePayPassword(password, getMember(token));
 //        if (r == 1) {
 //            sendJson(false, RespTips.ACCOUNT_IS_UNAVAILABLE.code, RespTips.ACCOUNT_IS_UNAVAILABLE.tips);
 //            return;
@@ -94,7 +135,7 @@ public class PayAccountApi extends AbstractController {
 //            return;
 //        }
 //
-//        int r = accountServ.checkPayPassword(password, getMember(token).getId());
+//        int r = payAccountServ.checkPayPassword(password, getMember(token).getId());
 //        if (r == 0) {
 //            sendJson(true, RespTips.ACCOUNT_PASSWORD_IS_RIGHT.code,RespTips.ACCOUNT_PASSWORD_IS_RIGHT.tips);
 //            return;
@@ -121,12 +162,12 @@ public class PayAccountApi extends AbstractController {
 //            return;
 //        }
 //
-//        int r = accountServ.checkPayPassword(usedPassword, getMember(token).getId());
+//        int r = payAccountServ.checkPayPassword(usedPassword, getMember(token).getId());
 //        if (r == 1) {
 //            sendJson(false, RespTips.ACCOUNT_PASSWORD_IS_WRONG.code, RespTips.ACCOUNT_PASSWORD_IS_WRONG.tips);
 //            return;
 //        }
-//        int i = accountServ.savePayPassword(newPassword, getMember(token));
+//        int i = payAccountServ.savePayPassword(newPassword, getMember(token));
 //        if (i == 1) {
 //            sendJson(false, RespTips.ACCOUNT_IS_UNAVAILABLE.code, RespTips.ACCOUNT_IS_UNAVAILABLE.tips);
 //            return;
@@ -141,7 +182,7 @@ public class PayAccountApi extends AbstractController {
 //     */
 //    @RequestMapping(value = "/member/account/password/find")
 //    public final void findAccountPassword(String token) {
-//        Account account = accountServ.findByMember(getMember(token).getId());
+//        Account account = payAccountServ.findByMember(getMember(token).getId());
 //        if (CheckUtil.isEmpty(account)) {
 //            sendJson(false, RespTips.DATA_NULL.code, "账户信息不存在!");
 //            return;
@@ -170,7 +211,7 @@ public class PayAccountApi extends AbstractController {
 //            return;
 //        }
 //
-//        int r = accountServ.clearReadMarkByProfitType(getMember(token).getAccount(), profitType);
+//        int r = payAccountServ.clearReadMarkByProfitType(getMember(token).getAccount(), profitType);
 //        if (r == 0) {
 //            sendSuccess();
 //        }
@@ -178,37 +219,7 @@ public class PayAccountApi extends AbstractController {
 //    }
 //
 //
-//    //============================记录相关====================================
-//    //获取会员(推广员及商户)账户流水
-//    @RequestMapping("/member/account/find")
-//    public void getAccountByAdmin(String token, Finder finder) {
-//        Account account = accountServ.findByMember(getMember(token).getId());
-//        if (CheckUtil.isEmpty(account)) {
-//            sendDataNull();
-//            return;
-//        }
-//        sendJson(accountServ.findAccountLog(finder, account.getId(), getMember(token).getAccount()));
-//    }
-//
-//    //获取下级商户账户流水
-//    @RequestMapping("/member/subPromotion/account/find")
-//    public void getSubPromotionAccount(String token,
-//                                       Finder finder,
-//                                       Long memberId) {
-//        if (CheckUtil.isEmpty(memberId)) {
-//            sendParamError();
-//            return;
-//        }
-//
-//        //获取当前用户的下属商户id
-//        String subPromotionMemberIds = promotionServ.findFirstMemberListByMemberId(getMember(token).getId());
-//        //如果查询的商户账户id属于当前用户
-//        if (FuncUtil.CountSubStr(memberId.toString(), subPromotionMemberIds) > 0) {
-//            sendJson(accountServ.findAccountLog(finder, null, getMember(token).getAccount()));
-//        } else {
-//            sendAccessFail();
-//        }
-//    }
+
 
 //
 //
@@ -217,19 +228,19 @@ public class PayAccountApi extends AbstractController {
 //    @RequestMapping(value = "/member/profit/statistics")
 //    public final void findProfitStatistics(String token) {
 //        //获取账户
-//        Account account = accountServ.findByMember(getMember(token).getId());
+//        Account account = payAccountServ.findByMember(getMember(token).getId());
 //        if (CheckUtil.isEmpty(account)) {
 //            sendJson(false, RespTips.ACCOUNT_IS_UNAVAILABLE.code, "账户不存在!");
 //            return;
 //        }
 //
-//        sendSuccess(accountServ.getStatistics(account.getId()));
+//        sendSuccess(payAccountServ.getStatistics(account.getId()));
 //    }
 //
 //    //商户收益统计{1天、7天、全部}
 //    @RequestMapping(value = "/unit/profit/statistics")
 //    public final void findUnitProfitStatistics(String token) {
-//        sendSuccess(accountServ.getUnitStatistics(getMember(token).getAccount()));
+//        sendSuccess(payAccountServ.getUnitStatistics(getMember(token).getAccount()));
 //    }
 //
 //    //按输入的日期获取到今天为止的每天收益金额
@@ -244,13 +255,13 @@ public class PayAccountApi extends AbstractController {
 //        }
 //
 //        //获取账户
-//        Account account = accountServ.findByMember(getMember(token).getId());
+//        Account account = payAccountServ.findByMember(getMember(token).getId());
 //        if (CheckUtil.isEmpty(account)) {
 //            sendJson(false, RespTips.ACCOUNT_IS_UNAVAILABLE.code, "账户不存在!");
 //            return;
 //        }
 //
-//        sendJson(accountServ.findDayAmountByDateBetween(account.getId(), startDate, endDate));
+//        sendJson(payAccountServ.findDayAmountByDateBetween(account.getId(), startDate, endDate));
 //    }
 //
 //    @RequestMapping(value = "/unit/profit/lastDate")
@@ -263,7 +274,7 @@ public class PayAccountApi extends AbstractController {
 //            endDate = DateUtil.yearMonthDay();
 //        }
 //
-//        sendJson(accountServ.findUnitDayAmountByDateBetween(startDate, endDate, getMember(token).getAccount()));
+//        sendJson(payAccountServ.findUnitDayAmountByDateBetween(startDate, endDate, getMember(token).getAccount()));
 //    }
 
 

@@ -1,6 +1,7 @@
 package com.bcb.util;
 
 import com.bcb.log.util.LogUtil;
+import com.bcb.wxpay.util.MD5Util;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +97,20 @@ public class FuncUtil {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * 获取随机字符串
+     * @author G/2016年10月17日 上午11:03:04
+     * @param sourceStr
+     * @param l =16则获取16位否则是一个32位的
+     * @return
+     */
+    public final static String getNonce(String sourceStr, int l) {
+        String result = MD5Util.encode(sourceStr);
+        if (l == 16)
+            result = result.substring(8, 24);
+        return result;
     }
 
     /**

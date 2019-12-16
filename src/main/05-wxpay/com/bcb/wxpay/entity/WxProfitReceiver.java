@@ -43,11 +43,9 @@ public class WxProfitReceiver implements Serializable {
     Integer status = 1;
 
     //创建时间
-    @Column(name = "create_time", nullable = false, length = 19)
     Date createTime;
 
     //修改时间
-    @Column(name = "update_time", nullable = false, length = 19)
     Date updateTime;
 
 

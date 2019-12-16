@@ -1,6 +1,8 @@
 package com.bcb.pay.service;
 
 import com.bcb.base.AbstractServ;
+import com.bcb.base.Finder;
+import com.bcb.base.Page;
 import com.bcb.pay.dao.PayAccountLogDao;
 import com.bcb.pay.dao.PayChannelAccountDao;
 import com.bcb.pay.entity.PayAccountLog;
@@ -12,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,6 +33,11 @@ public class PayChannelAccountServImpl extends AbstractServ implements PayChanne
     @Override
     public PayChannelAccount findByAccountAndPayChannel(Long payAccountId, String payChannel) {
         return payChannelAccountDao.findByPayAccountIdAndPayChannel(payAccountId, payChannel).orElse(null);
+    }
+
+    @Override
+    public PayChannelAccount findByUnitIdAndPayChannel(String unitId, String payChannel) {
+        return payChannelAccountDao.findByUnitIdAndPayChannel(unitId, payChannel).orElse(null);
     }
 
     @Override
@@ -141,7 +150,13 @@ public class PayChannelAccountServImpl extends AbstractServ implements PayChanne
     }
     @Override
     @Transactional
-    public boolean substract(PayChannelAccount payChannelAccount, String unitId, String payChannel, String payOrderNo, String subject, String payChannelNo, BigDecimal amount) {
+    public boolean substract(PayChannelAccount payChannelAccount,
+                             String unitId,
+                             String payChannel,
+                             String payOrderNo,
+                             String subject,
+                             String payChannelNo,
+                             BigDecimal amount) {
 
         //冻结金额删除
         if (!unFreezeBalance(payChannelAccount, amount, false)) {
@@ -182,7 +197,7 @@ public class PayChannelAccountServImpl extends AbstractServ implements PayChanne
     public boolean freezeBalance(PayChannelAccount payChannelAccount, BigDecimal freezeAmount) {
         //余额减掉冻结金额
         payChannelAccount.setBalance(payChannelAccount.getBalance().subtract(freezeAmount));
-        payChannelAccount.setFreezeBalance(freezeAmount);
+        payChannelAccount.setFreezeBalance(payChannelAccount.getFreezeBalance().add(freezeAmount));
         payChannelAccount.setUpdateTime(DateUtil.now());
         payChannelAccountDao.save(payChannelAccount);
         P("冻结账户余额成功");
@@ -213,4 +228,5 @@ public class PayChannelAccountServImpl extends AbstractServ implements PayChanne
         P("冻结账户余额成功");
         return true;
     }
+
 }

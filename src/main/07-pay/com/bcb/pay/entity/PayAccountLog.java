@@ -4,10 +4,14 @@ import com.bcb.pay.util.PayChannelType;
 import com.bcb.util.DateUtil;
 import com.bcb.util.FuncUtil;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * 记录账户流水信息
@@ -157,48 +161,20 @@ public class PayAccountLog implements Serializable {
         this.balanceAfter = balanceAfter;
     }
 
-    public Map getBaseJson() {
-        Map<String, Object> jo = new TreeMap<>();
-        jo.put("id", this.getId());
-        jo.put("unitId", Optional.ofNullable(this.getUnitId()).orElse(""));
-        jo.put("payOrderNo", Optional.ofNullable(this.getPayOrderNo()).orElse(""));
-        jo.put("payChannel", Optional.ofNullable(this.getPayChannel()).orElse(""));
-        jo.put("payChannelNo", Optional.ofNullable(this.getPayChannelNo()).orElse(""));
-
-        jo.put("amount", FuncUtil.getBigDecimalScale(this.getBalanceAfter().subtract(this.getBalanceBefore())));
-        jo.put("balanceAfter",FuncUtil.getBigDecimalScale(this.getBalanceAfter()));
-
-        jo.put("details", Optional.ofNullable(this.getDetails()).orElse(""));
-        jo.put("createTime", DateUtil.dateTime2Str(this.getCreateTime()));
-        jo.put("isRead", this.getIsRead());
-        return jo;
+    public String getJson() {
+        return new StringJoiner(", ", "{", "}")
+                .add("id:" + id)
+                .add("createTime:'" + DateUtil.dateTime2Str(this.getCreateTime())+"'")
+                .add("unitId:'" + unitId + "'")
+                .add("payOrderNo:'" + payOrderNo + "'")
+                .add("payChannel:'" + payChannel + "'")
+                .add("payChannelNo:'" + payChannelNo + "'")
+                .add("amount:" + FuncUtil.getBigDecimalScale(this.getBalanceAfter().subtract(this.getBalanceBefore())))
+                .add("balanceAfter:" + FuncUtil.getBigDecimalScale(this.getBalanceAfter()))
+                .add("details:'" + Optional.ofNullable(this.getDetails()).orElse("") + "'")
+                .add("profitType:" + profitType)
+                .add("isRead:" + isRead)
+                .toString();
     }
 
-    public Map getJson() {
-        Map jo = getBaseJson();
-        return jo;
-    }
-
-    //{0:充值(+),1:年费收入(+),2:提现(-),3:返利收益(+),10:绑定账户(+),11:余额返利支出(-),12:年费返利支出(-),20:商户收益流水(+)}
-    String getProfitTypeTips(Integer type) {
-        if (type.equals(0)) {
-            return "充值";
-        } else if (type.equals(1)) {
-            return "年费收入";              //平台年费收入
-        } else if (type.equals(2)) {           //会员提现支出
-            return "提现";
-        } else if (type.equals(3)) {           //平台或会员年费返利或余额返利收益
-            return "返利收益";
-        } else if (type.equals(10)) {
-            return "绑定账户";
-        } else if (type.equals(11)) {
-            return "余额返利支出";
-        } else if (type.equals(12)) {           //平台年费返利支出
-            return "年费返利支出";
-        } else if (type.equals(20)) {
-            return "商户收益流水";
-        } else {
-            return "";
-        }
-    }
 }

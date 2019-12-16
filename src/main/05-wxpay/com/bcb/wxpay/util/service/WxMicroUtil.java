@@ -2,8 +2,8 @@ package com.bcb.wxpay.util.service;
 
 import com.bcb.log.util.LogUtil;
 import com.bcb.util.CheckUtil;
+import com.bcb.util.FuncUtil;
 import com.bcb.wxpay.entity.WxMicroAccount;
-import com.bcb.wxpay.entity.WxMicroAccountLog;
 import com.bcb.wxpay.util.*;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 
@@ -30,7 +30,7 @@ public class WxMicroUtil {
             //平台证书序列号
             paramMap.put("cert_sn", "749535475D89DF9ECF413A6CA05F74FF4CEDDCB8");
             paramMap.put("mch_id", WXPayConfig.getMchId());
-            paramMap.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
+            paramMap.put("nonce_str", FuncUtil.getNonce("nonce", 16));
 
             //业务申请编号
             paramMap.put("business_code", wxMicroAccount.getBusinessCode());
@@ -103,7 +103,7 @@ public class WxMicroUtil {
         String resultXml = PostUtil.doPostWithCert(url, XmlUtil.Map2Xml(map));
 
         //正常操作返回的结果
-        Map<String, String> resultMap = XmlUtil.parse(resultXml);
+        Map<String, Object> resultMap = XmlUtil.parse(resultXml);
         System.out.println("result=>" + resultMap.toString());
         if (CheckUtil.isEmpty(resultMap)
                 || !resultMap.get("return_code").equals("SUCCESS")
@@ -111,7 +111,7 @@ public class WxMicroUtil {
             return null;
         }
         //返回applyment_id
-        return resultMap.get("applyment_id");
+        return resultMap.get("applyment_id").toString();
 
     }
 
@@ -146,15 +146,15 @@ public class WxMicroUtil {
         String resultXml = PostUtil.doPostFileDataWithCert(url, paramMap, "media", file);
 
         //正常操作返回的结果
-        Map<String, String> resultMap = XmlUtil.parse(resultXml);
+        Map<String, Object> resultMap = XmlUtil.parse(resultXml);
         if (CheckUtil.isEmpty(resultMap)
                 || !resultMap.get("return_code").equals("SUCCESS")
                 || !resultMap.get("result_code").equals("SUCCESS")) {
-            return "";
+            return null;
         }
         //{sign=9833D0D4FF18FC17D6ADE529AA593CD7, media_id=_qdPgxYeHjr20zZTSLO0ytytIW4WzQGYSjL9keglclA2AQyG_RoQhc87zbvCHC6B_zgcfMm7mi2zlOPEErgzFfy8z-koErfC1n0RAITyOCc, return_msg=OK, result_code=SUCCESS, return_code=SUCCESS}
         //返回media_id
-        return resultMap.get("media_id");
+        return resultMap.get("media_id").toString();
     }
 
     //查询入驻提交状态
@@ -163,7 +163,7 @@ public class WxMicroUtil {
         //接口版本号
         paramMap.put("version", "1.0");
         paramMap.put("mch_id", WXPayConfig.getMchId());
-        paramMap.put("nonce_str", WxPayUtil.getNonce("nonce", 16));
+        paramMap.put("nonce_str", FuncUtil.getNonce("nonce", 16));
         //商户申请单号
 //        paramMap.put("applyment_id", applyment_id);
         //业务申请编号
@@ -184,7 +184,7 @@ public class WxMicroUtil {
         //提交请求
         String resultXml = PostUtil.doPostWithCert(url, data);
         //正常操作返回的结果
-        Map<String, String> resultMap = XmlUtil.parse(resultXml);
+        Map<String, Object> resultMap = XmlUtil.parse(resultXml);
         //{nonce_str=zciinAeKFho1agXy, applyment_state=REJECTED,
         // sign=6D9A2C9C7B20453F16AD14DC76F3EDACE138D41E781B71BD571C4AD740A60F72,
         // applyment_state_desc=已驳回, return_msg=OK, result_code=SUCCESS,

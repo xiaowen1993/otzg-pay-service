@@ -55,16 +55,16 @@ public class WxMicroAccountUtil extends CheckDtoUtil<WxMicroAccountDto> {
             msg = "手机号(contactPhone)参数错误";
             return;
         }
-        if (checkParam(t.getIdCardCopy(), 256)) {
-            msg = "身份证人像面照片(idCardCopy)参数错误";
+        if (checkParam(t.getIdCardCopySrc(), 500)) {
+            msg = "身份证人像面照片(idCardCopySrc)参数错误";
             return;
         }
         if (checkParam(t.getIdCardName(), 64)) {
             msg = "身份证姓名(idCardName)参数错误";
             return;
         }
-        if (checkParam(t.getIdCardNational(), 256)) {
-            msg = "身份证国徽面照片(idCardNational)参数错误";
+        if (checkParam(t.getIdCardNationalSrc(), 500)) {
+            msg = "身份证国徽面照片(idCardNationalSrc)参数错误";
             return;
         }
         if (checkParam(t.getIdCardNumber(), 18)) {
@@ -75,8 +75,8 @@ public class WxMicroAccountUtil extends CheckDtoUtil<WxMicroAccountDto> {
             msg = "身份证有效期限(idCardValidTime)参数错误";
             return;
         }
-        if (checkParam(t.getIndoorPic(), 256)) {
-            msg = "店内环境照片(indoorPic)参数错误";
+        if (checkParam(t.getIndoorPicSrc(), 500)) {
+            msg = "店内环境照片(indoorPicSrc)参数错误";
             return;
         }
         if (checkParam(t.getMerchantShortName(), 50)) {
@@ -99,8 +99,8 @@ public class WxMicroAccountUtil extends CheckDtoUtil<WxMicroAccountDto> {
             msg = "门店省市编码(storeAddressCode)参数错误";
             return;
         }
-        if (checkParam(t.getStoreEntrancePic(), 256)) {
-            msg = "门店门口照片(storeEntrancePic)参数错误";
+        if (checkParam(t.getStoreEntrancePicSrc(), 500)) {
+            msg = "门店门口照片(storeEntrancePicSrc)参数错误";
             return;
         }
         if (checkParam(t.getStoreName(), 128)) {
@@ -129,18 +129,18 @@ public class WxMicroAccountUtil extends CheckDtoUtil<WxMicroAccountDto> {
         wxMicroAccount.setContact(t.getContact());
         wxMicroAccount.setContactPhone(t.getContactPhone());
         wxMicroAccount.setContactEmail(t.getContactEmail());
-        wxMicroAccount.setIdCardCopy(t.getIdCardCopy());
+        wxMicroAccount.setIdCardCopySrc(t.getIdCardCopySrc());
         wxMicroAccount.setIdCardName(t.getIdCardName());
         wxMicroAccount.setIdCardNumber(t.getIdCardNumber());
-        wxMicroAccount.setIdCardNational(t.getIdCardNational());
+        wxMicroAccount.setIdCardNationalSrc(t.getIdCardNationalSrc());
         wxMicroAccount.setIdCardValidTime(t.getIdCardValidTime());
-        wxMicroAccount.setIndoorPic(t.getIndoorPic());
+        wxMicroAccount.setIndoorPicSrc(t.getIndoorPicSrc());
         wxMicroAccount.setMerchantShortName(t.getMerchantShortName());
         wxMicroAccount.setProductDesc(t.getProductDesc());
         wxMicroAccount.setRate(t.getRate());
         wxMicroAccount.setServicePhone(t.getServicePhone());
         wxMicroAccount.setStoreAddressCode(t.getStoreAddressCode());
-        wxMicroAccount.setStoreEntrancePic(t.getStoreEntrancePic());
+        wxMicroAccount.setStoreEntrancePicSrc(t.getStoreEntrancePicSrc());
         wxMicroAccount.setStoreName(t.getStoreName());
         wxMicroAccount.setStoreStreet(t.getStoreStreet());
         return wxMicroAccount;

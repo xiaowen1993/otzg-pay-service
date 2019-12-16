@@ -10,6 +10,7 @@ import com.alipay.api.request.AlipayTradeFastpayRefundQueryRequest;
 import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
+import com.bcb.log.util.LogUtil;
 import com.bcb.pay.dto.RefundOrderDto;
 import com.bcb.pay.util.PayRefund;
 import com.bcb.util.FastJsonUtil;
@@ -24,17 +25,13 @@ import java.util.TreeMap;
  * @Date 2019/12/11 0011 上午 10:35
  */
 public class AliRefundUtil implements PayRefund {
-    RefundOrderDto refundOrderDto;
-
-    public AliRefundUtil(RefundOrderDto refundOrderDto) {
-        this.refundOrderDto = refundOrderDto;
-    }
-
     public AliRefundUtil() {
     }
 
     /**
      * 退款
+     *
+     * 注意此接口为可重入接口
      * 订单支付时传入的商户订单号,不能和 trade_no同时为空。
      * @return {"alipay_trade_refund_response":{"code":"10000","msg":"Success","
      * buyer_logon_id":"vvn***@sandbox.com","buyer_user_id":"2088102169133529",
@@ -46,11 +43,14 @@ public class AliRefundUtil implements PayRefund {
      */
 
     @Override
-    public Map refund(String payChannelAccount, String payOrderNo,String refundOrderNo) {
+    public Map refund(String payChannelAccount, String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
         try{
             AlipayTradeRefundModel model = new AlipayTradeRefundModel();
+            //按照收款业务单退款
             model.setOutTradeNo(payOrderNo);
-            model.setRefundAmount(FuncUtil.getDoubleScale(this.refundOrderDto.getAmount()).toString());
+            //标识一次退款请求，同一笔交易多次退款需要保证唯一，如需部分退款，则此参数必传。
+            model.setOutRequestNo(refundOrderNo);
+            model.setRefundAmount(FuncUtil.getDoubleScale(refundOrderDto.getAmount()).toString());
 
             AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
             //第三方应用授权
@@ -58,6 +58,13 @@ public class AliRefundUtil implements PayRefund {
             request.setBizModel(model);
 
             AlipayTradeRefundResponse response = getAlipayClient().execute(request);
+            LogUtil.saveTradeLog("支付渠道退款结果=>"+response.getBody());
+            //{"alipay_trade_refund_response":{"code":"10000","msg":"Success",
+            // "buyer_logon_id":"375***@qq.com","buyer_user_id":"2088002123336273",
+            // "fund_change":"N","gmt_refund_pay":"2019-12-12 09:58:22","out_trade_no":"20191212954213580745463060",
+            // "refund_detail_item_list":[{"amount":"0.01","fund_channel":"PCREDIT"}],
+            // "refund_fee":"0.01","send_back_fee":"0.01","trade_no":"2019121222001436275746629865"},
+            // "sign":"lwcmzUAhLT3AzDsz0iFUSzQBaGYI4UcIBgCbU/f8UC7CPgRwMm9bhsAZ5bYWTb9dXvoiKlJmOMav/EBbdZ85aOb0imtTq1tfLi4m6qIJIE0+7YxV5GaiGmXpAhiaUgXmQOauV1sLwWPaOXgtqlpAxff+XtZnoffy5Mjrt1fgGRanpfw2lhucCkSaFaHzKnNbehd7e5fWZ0lZmNi0GK8HDDIskmQIrY5ELtwIJP0YjiWhimgqJZXzvKCqDrU7Gb9hOPZDStsd6BNEB3czabjtkHt0+18TX40Gre9aD7+lS54PMF6mQEnijKoohZ7ZYC55IYnwX+yRNmQOWrl2ZEx/dw=="}
             if (response.isSuccess()) {
                 //如果成功应返回一个结构体payChannelNo
                 Map map = new TreeMap();

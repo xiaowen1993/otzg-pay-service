@@ -16,8 +16,10 @@ public class PayQueryUtil implements PayQuery {
     public PayQueryUtil(PayOrder payOrder) {
         if (payOrder.getPayChannel().equals(PayChannelType.wxpay.name())) {
             this.payQuery = new WxpayUtil();
-        }else {
+        }else if (payOrder.getPayChannel().equals(PayChannelType.alipay.name())) {
             this.payQuery = new AlipayUtil();
+        }else{
+            //TODO:邮储
         }
     }
 

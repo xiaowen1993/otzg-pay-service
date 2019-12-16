@@ -1,7 +1,8 @@
 package com.bcb.wxpay.util.sdk;
 
-import com.bcb.wxpay.util.WxPayUtil;
+import com.bcb.util.FuncUtil;
 import com.bcb.wxpay.util.XmlUtil;
+import com.bcb.wxpay.util.XmlUtils;
 import com.bcb.wxpay.util.service.SignType;
 import com.bcb.wxpay.util.service.WXPayConfig;
 import org.apache.http.HttpEntity;
@@ -52,7 +53,7 @@ public class WXPayRequest {
             reqData.put("sign_type", WXPayConstants.HMACSHA256);
         }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), config.getSignType()));
-//        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
+        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
         return XmlUtil.Map2Xml(reqData);
     }
 
@@ -70,7 +71,7 @@ public class WXPayRequest {
             reqData.put("sign_type", WXPayConstants.HMACSHA256);
         }
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), config.getSignType()));
-//        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
+        System.out.println("payData=>" + XmlUtil.Map2Xml(reqData));
         return XmlUtil.Map2Xml(reqData);
     }
 
@@ -149,7 +150,7 @@ public class WXPayRequest {
 
 
     private String request(String data, boolean useCert) throws Exception {
-        String uuid = WxPayUtil.getNonce("nonce", 16);
+        String uuid = FuncUtil.getNonce("nonce", 16);
         Exception exception = null;
         long elapsedTimeMillis = 0;
         long startTimestampMs = WXPayUtil.getCurrentTimestampMs();
@@ -244,15 +245,18 @@ public class WXPayRequest {
         throw exception;
     }
 
-    public Map<String, String> request(Map<String, String> data) throws Exception {
+    public Map<String, Object> request(Map<String, String> data) throws Exception {
         return XmlUtil.parse(request(this.fillRequestData(data),false));
     }
 
-    public Map<String, String> requestCert(Map<String, String> data) throws Exception {
-        return XmlUtil.parse(request(this.fillRequestData(data),true));
+    public Map<String, Object> requestCert(Map<String, String> data) throws Exception {
+        //返回多级的xml
+        return XmlUtils.parse(request(this.fillRequestData(data),true));
+
+//        return XmlUtil.parse(request(this.fillRequestData(data),true));
     }
 
-    public Map<String, String> requestCertNoAppId(Map<String, String> data) throws Exception {
+    public Map<String, Object> requestCertNoAppId(Map<String, String> data) throws Exception {
         return XmlUtil.parse(request(this.fillRequestDataNoAppId(data),true));
     }
 
@@ -263,10 +267,10 @@ public class WXPayRequest {
      * @return
      * @throws Exception
      */
-    public Map<String, String> requestTimes(Map<String, String> reqData) throws Exception {
+    public Map<String, Object> requestTimes(Map<String, String> reqData) throws Exception {
         int remainingTimeMs = 60*1000;
         long startTimestampMs = 0;
-        Map<String, String> lastResult = null;
+        Map<String, Object> lastResult = null;
         Exception lastException = null;
 
         while (true) {
@@ -275,10 +279,10 @@ public class WXPayRequest {
             if (readTimeoutMs > 1000) {
                 try {
                     lastResult = request(reqData);
-                    String returnCode = lastResult.get("return_code");
+                    String returnCode = lastResult.get("return_code").toString();
                     if (returnCode.equals("SUCCESS")) {
-                        String resultCode = lastResult.get("result_code");
-                        String errCode = lastResult.get("err_code");
+                        String resultCode = lastResult.get("result_code").toString();
+                        String errCode = lastResult.get("err_code").toString();
                         if (resultCode.equals("SUCCESS")) {
                             break;
                         }else {
@@ -327,7 +331,7 @@ public class WXPayRequest {
      * @return
      * @throws Exception
      */
-    public Map<String, String> requestNoAppId(Map<String, String> data) throws Exception {
+    public Map<String, Object> requestNoAppId(Map<String, String> data) throws Exception {
         return XmlUtil.parse(request(this.fillRequestDataNoAppId(data),false));
     }
 

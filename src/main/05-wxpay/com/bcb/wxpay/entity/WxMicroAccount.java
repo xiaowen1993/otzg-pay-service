@@ -1,5 +1,7 @@
 package com.bcb.wxpay.entity;
 
+import com.bcb.util.DateUtil;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,86 +20,107 @@ public class WxMicroAccount implements Serializable {
     @Id
     Long id;
     //申请商户id
-    @Column(name = "unit_id",nullable = false,length = 32,unique = true)
+    @Column(name = "unit_id", nullable = false, length = 32, unique = true)
     String unitId;
     /**
      * 业务申请编号
      * 服务商自定义的商户唯一编号。每个编号对应一个申请单，每个申请单审核通过后会生成一个微信支付商户号。
      */
-    @Column(name = "business_code",nullable = false,length = 32)
+    @Column(name = "business_code", nullable = false, length = 32)
     String businessCode;
+
     //身份证人像面照片
-    @Column(name = "id_card_copy",nullable = false,length = 256)
+    @Column(name = "id_card_copy_src", nullable = false, length = 500)
+    String idCardCopySrc;
+    //身份证人像面照片
+    @Column(name = "id_card_copy", length = 256)
     String idCardCopy;
+
     //身份证国徽面照片
-    @Column(name = "id_card_national",nullable = false,length = 256)
+    @Column(name = "id_card_national_src", nullable = false, length = 500)
+    String idCardNationalSrc;
+
+    //身份证国徽面照片
+    @Column(name = "id_card_national", length = 256)
     String idCardNational;
+
+
     //身份证姓名
-    @Column(name = "id_card_name",nullable = false,length = 64)
+    @Column(name = "id_card_name", nullable = false, length = 64)
     String idCardName;
     //身份证号码
-    @Column(name = "id_card_number",nullable = false,length = 18)
+    @Column(name = "id_card_number", nullable = false, length = 18)
     String idCardNumber;
     //身份证有效期限
-    @Column(name = "id_card_valid_time",nullable = false,length = 50)
+    @Column(name = "id_card_valid_time", nullable = false, length = 50)
     String idCardValidTime;
     //开户名称
-    @Column(name = "account_name",nullable = false,length = 50)
+    @Column(name = "account_name", nullable = false, length = 50)
     String accountName;
     //开户银行
-    @Column(name = "account_bank",nullable = false,length = 50)
+    @Column(name = "account_bank", nullable = false, length = 50)
     String accountBank;
 
     //开户银行省市编码
-    @Column(name = "bank_address_code",nullable = false,length = 6)
+    @Column(name = "bank_address_code", nullable = false, length = 6)
     String bankAddressCode;
     //银行账号
-    @Column(name = "account_number",nullable = false,length = 50)
+    @Column(name = "account_number", nullable = false, length = 50)
     String accountNumber;
     //门店名称
-    @Column(name = "store_name",nullable = false,length = 128)
+    @Column(name = "store_name", nullable = false, length = 128)
     String storeName;
     //门店省市编码
-    @Column(name = "store_address_code",nullable = false,length = 6)
+    @Column(name = "store_address_code", nullable = false, length = 6)
     String storeAddressCode;
     //门店街道名称
-    @Column(name = "store_street",nullable = false,length = 500)
+    @Column(name = "store_street", nullable = false, length = 500)
     String storeStreet;
     //门店门口照片
-    @Column(name = "store_entrance_pic",nullable = false,length = 256)
+    @Column(name = "store_entrance_pic_src", nullable = false, length = 500)
+    String storeEntrancePicSrc;
+
+    //门店门口照片
+    @Column(name = "store_entrance_pic",length = 256)
     String storeEntrancePic;
+
     //店内环境照片
-    @Column(name = "indoor_pic",nullable = false,length = 256)
+    @Column(name = "indoor_pic_src", nullable = false, length = 500)
+    String indoorPicSrc;
+    //店内环境照片
+    @Column(name = "indoor_pic", length = 256)
     String indoorPic;
+
+
     //商户简称
-    @Column(name = "merchant_short_name",nullable = false,length = 50)
+    @Column(name = "merchant_short_name", nullable = false, length = 50)
     String merchantShortName;
     //客服电话
-    @Column(name = "service_phone",nullable = false,length = 50)
+    @Column(name = "service_phone", nullable = false, length = 50)
     String servicePhone;
     //售卖商品/提供服务描述
-    @Column(name = "product_desc",nullable = false,length = 50)
+    @Column(name = "product_desc", nullable = false, length = 50)
     String productDesc;
     //费率
-    @Column(name = "rate",nullable = false,length = 50)
+    @Column(name = "rate", nullable = false, length = 50)
     String rate;
     //超级管理员姓名
-    @Column(name = "contact",nullable = false,length = 50)
+    @Column(name = "contact", nullable = false, length = 50)
     String contact;
     //手机号
-    @Column(name = "contact_phone",nullable = false,length = 50)
+    @Column(name = "contact_phone", nullable = false, length = 50)
     String contactPhone;
 
     //联系邮箱
-    @Column(name = "contact_email",length = 50)
+    @Column(name = "contact_email", length = 50)
     String contactEmail;
 
     //银行账号
-    @Column(name = "bank_name",length = 256)
+    @Column(name = "bank_name", length = 256)
     String bankName;
 
 
-    @Column(name = "applyment_id",length = 32)
+    @Column(name = "applyment_id", length = 32)
     String applymentId;
     //创建时间
     @Column(name = "create_time", nullable = false, length = 19)
@@ -106,8 +129,8 @@ public class WxMicroAccount implements Serializable {
     @Column(name = "update_time", nullable = false, length = 19)
     Date updateTime;
     //账户状态{-1:删除,0:冻结,1:正常}
-    @Column(name = "status",nullable = false,length = 1)
-    Integer status=1;
+    @Column(name = "status", nullable = false, length = 1)
+    Integer status = 1;
 
 
     public WxMicroAccount() {
@@ -345,6 +368,50 @@ public class WxMicroAccount implements Serializable {
         this.applymentId = applymentId;
     }
 
+
+    public String getIdCardCopySrc() {
+        return idCardCopySrc;
+    }
+
+    public void setIdCardCopySrc(String idCardCopySrc) {
+        this.idCardCopySrc = idCardCopySrc;
+    }
+
+    public String getIdCardNationalSrc() {
+        return idCardNationalSrc;
+    }
+
+    public void setIdCardNationalSrc(String idCardNationalSrc) {
+        this.idCardNationalSrc = idCardNationalSrc;
+    }
+
+    public String getStoreEntrancePicSrc() {
+        return storeEntrancePicSrc;
+    }
+
+    public void setStoreEntrancePicSrc(String storeEntrancePicSrc) {
+        this.storeEntrancePicSrc = storeEntrancePicSrc;
+    }
+
+    public String getIndoorPicSrc() {
+        return indoorPicSrc;
+    }
+
+    public void setIndoorPicSrc(String indoorPicSrc) {
+        this.indoorPicSrc = indoorPicSrc;
+    }
+
+    public boolean isMediaRead() {
+        if (null == getIdCardCopy()
+                || null == getIdCardNational()
+                || null == getIndoorPic()
+                || null == getStoreEntrancePic()
+        ) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", "{", "}")
@@ -374,8 +441,8 @@ public class WxMicroAccount implements Serializable {
                 .add("contactEmail:'" + contactEmail + "'")
                 .add("bankName:'" + bankName + "'")
                 .add("applymentId:'" + applymentId + "'")
-                .add("createTime:" + createTime)
-                .add("updateTime:" + updateTime)
+                .add("createTime:" + DateUtil.dateTime2Str(createTime))
+                .add("updateTime:" + DateUtil.dateTime2Str(updateTime))
                 .add("status:" + status)
                 .toString();
     }

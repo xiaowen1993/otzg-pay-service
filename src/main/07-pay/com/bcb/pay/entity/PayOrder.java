@@ -8,10 +8,8 @@ import com.bcb.util.DateUtil;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * 支付订单类
@@ -328,8 +326,13 @@ public class PayOrder implements Serializable {
         jo.put("payOrderNo", this.getPayOrderNo());
         jo.put("subject", this.getSubject());
         jo.put("amount", this.getAmount());
+        //支付时间
+        jo.put("createTime", DateUtil.dateTime2Str(this.getCreateTime()));
+        jo.put("updateTime", DateUtil.dateTime2Str(this.getUpdateTime()));
+
         //支付订单状态{-2:订单删除,-1:支付失败,0:正在支付,1:支付成功}
         jo.put("status", this.getStatus());
+        jo.put("statusTips", StatusType.tips(this.getStatus()));
         return jo;
     }
 
@@ -338,10 +341,6 @@ public class PayOrder implements Serializable {
         //业务信息
         jo.put("orderNo", Optional.ofNullable(this.getOrderNo()).orElse(""));
         jo.put("details", Optional.ofNullable(this.getDetails()).orElse(""));
-
-        //支付时间
-        jo.put("createTime", DateUtil.dateTime2Str(this.getCreateTime()));
-        jo.put("updateTime", DateUtil.dateTime2Str(this.getUpdateTime()));
 
 
         //支付渠道
@@ -360,6 +359,29 @@ public class PayOrder implements Serializable {
         jo.put("payNotify", Optional.ofNullable(this.getPayNotify()).orElse(""));
         return jo;
 
+    }
+
+
+    public enum StatusType {
+        FAIL(-1,"失败"),
+        WAIT(0,"等待"),
+        SUCC(1,"成功");
+
+        public Integer index;
+        public String name;
+        StatusType(Integer i, String n) {
+            this.index = i;
+            this.name = n;
+        }
+
+        //判断是否在枚举类型内的值
+        public final static String tips(Integer i){
+            return Arrays.stream(StatusType.values())
+                    .filter(statusType -> statusType.index.equals(i))
+                    .map(statusType -> statusType.name)
+                    .findFirst()
+                    .orElse("");
+        }
     }
 
 }

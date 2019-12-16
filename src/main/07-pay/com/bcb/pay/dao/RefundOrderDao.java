@@ -3,6 +3,7 @@ package com.bcb.pay.dao;
 import com.bcb.base.AbstractDao;
 import com.bcb.pay.entity.RefundOrder;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,5 +12,6 @@ import java.util.Optional;
  */
 public interface RefundOrderDao extends AbstractDao<RefundOrder,Long> {
 
+    List<RefundOrder> findByPayOrderNo(String payOrderNo);
     Optional<RefundOrder> findByRefundOrderNo(String refundOrderNo);
 }

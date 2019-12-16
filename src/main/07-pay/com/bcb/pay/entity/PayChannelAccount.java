@@ -66,7 +66,7 @@ public class PayChannelAccount implements Serializable {
      * 支付渠道授权码或子商户号
      *
      * 支付宝对应 authToken (支付宝授权码，第三方应用下面的子商户)
-     * 微信对应 mchid (公众号|app 商户号，对应服务商下的子商户号)
+     * 微信对应 subMchid (公众号|app 商户号，对应服务商下的子商户号)
      */
     @Column(name = "pay_channel_account",length = 64)
     String payChannelAccount;

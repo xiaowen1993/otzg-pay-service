@@ -1,7 +1,10 @@
 package com.bcb.wxpay.service;
 
 import com.bcb.base.AbstractServ;
+import com.bcb.log.util.LogUtil;
+import com.bcb.util.CheckUtil;
 import com.bcb.util.DateUtil;
+import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
 import com.bcb.wxpay.dao.WxMicroAccountDao;
 import com.bcb.wxpay.dao.WxMicroAccountLogDao;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,9 +33,16 @@ public class WxMicroAccountServImpl extends AbstractServ implements WxMicroAccou
     @Override
     @Transactional
     public int saveMicroAccount(WxMicroAccount wxMicroAccount) {
-        wxMicroAccount.setId(getId());
+        Optional<WxMicroAccount> op = wxMicroAccountDao.findByUnitId(wxMicroAccount.getUnitId());
+        if(op.isPresent()){
+            wxMicroAccount.setCreateTime(op.get().getCreateTime());
+            wxMicroAccount.setId(op.get().getId());
+        }else {
+            wxMicroAccount.setId(getId());
+            wxMicroAccount.setCreateTime(DateUtil.now());
+        }
+
         wxMicroAccount.setBusinessCode(getBusinessCode(wxMicroAccount.getUnitId()));
-        wxMicroAccount.setCreateTime(DateUtil.now());
         wxMicroAccount.setUpdateTime(DateUtil.now());
         wxMicroAccount.setStatus(0);
         wxMicroAccountDao.save(wxMicroAccount);
@@ -45,7 +56,81 @@ public class WxMicroAccountServImpl extends AbstractServ implements WxMicroAccou
         return DateUtil.yearMonthDayTimeShort() + FuncUtil.getRandInt(0001, 9999) + Math.abs(unitId.hashCode());
     }
 
+    //提交到微信
+    void doMediaSubmit(WxMicroAccount wxMicroAccount) {
+        if (null != wxMicroAccount.getIdCardCopySrc()
+                && null == wxMicroAccount.getIdCardCopy()) {
+
+            File file = new File(LogUtil.getFileSavePath() +wxMicroAccount.getIdCardCopySrc().substring(wxMicroAccount.getIdCardCopySrc().indexOf("upload")));
+            if (null == file)
+                return;
+
+            String mediaId = new WxMicroUtil().doUploadImg(file);
+            if (null == mediaId) {
+                return;
+            }
+            wxMicroAccount.setIdCardCopy(mediaId);
+        }
+
+        if (null != wxMicroAccount.getIdCardNationalSrc()
+                && null == wxMicroAccount.getIdCardNational()) {
+
+            File file = new File(LogUtil.getFileSavePath() +wxMicroAccount.getIdCardNationalSrc().substring(wxMicroAccount.getIdCardNationalSrc().indexOf("upload")));
+            if (null == file)
+                return;
+
+            String mediaId = new WxMicroUtil().doUploadImg(file);
+            if (null == mediaId) {
+                return;
+            }
+            wxMicroAccount.setIdCardNational(mediaId);
+        }
+
+        if (null != wxMicroAccount.getStoreEntrancePicSrc()
+                && null == wxMicroAccount.getStoreEntrancePic()) {
+
+            File file = new File(LogUtil.getFileSavePath() +wxMicroAccount.getStoreEntrancePicSrc().substring(wxMicroAccount.getStoreEntrancePicSrc().indexOf("upload")));
+            if (null == file)
+                return;
+
+            String mediaId = new WxMicroUtil().doUploadImg(file);
+            if (null == mediaId) {
+                return;
+            }
+            wxMicroAccount.setStoreEntrancePic(mediaId);
+        }
+
+        if (null != wxMicroAccount.getIndoorPicSrc()
+                && null == wxMicroAccount.getIndoorPic()) {
+
+            File file = new File(LogUtil.getFileSavePath() +wxMicroAccount.getIndoorPicSrc().substring(wxMicroAccount.getIndoorPicSrc().indexOf("upload")));
+            if (null == file)
+                return;
+
+            String mediaId = new WxMicroUtil().doUploadImg(file);
+            if (null == mediaId) {
+                return;
+            }
+            wxMicroAccount.setIndoorPic(mediaId);
+        }
+
+        wxMicroAccount.setUpdateTime(DateUtil.now());
+        wxMicroAccountDao.save(wxMicroAccount);
+    }
+
+    //提交到微信
     void doMicroSubmit(WxMicroAccount wxMicroAccount) {
+        if (!wxMicroAccount.isMediaRead()) {
+            doMediaSubmit(wxMicroAccount);
+        }
+
+        if (!wxMicroAccount.isMediaRead()) {
+            doMediaSubmit(wxMicroAccount);
+        }
+        if (!wxMicroAccount.isMediaRead()) {
+            return;
+        }
+
         String applyment_id = new WxMicroUtil().doMicroSubmit(wxMicroAccount);
         if (null != applyment_id) {
             return;
@@ -62,11 +147,11 @@ public class WxMicroAccountServImpl extends AbstractServ implements WxMicroAccou
             return null;
         }
 
-        return microAccountQuery(op.get().getUnitId(),op.get().getBusinessCode());
+        return microAccountQuery(op.get().getUnitId(), op.get().getBusinessCode());
     }
 
     //查询审批结果
-    Map microAccountQuery(String unitId,String businessCode) {
+    Map microAccountQuery(String unitId, String businessCode) {
         Optional<WxMicroAccountLog> op = wxMicroAccountLogDao.findByBusinessCode(businessCode);
         if (op.isPresent()) {
             return op.get().getJson();
@@ -88,7 +173,7 @@ public class WxMicroAccountServImpl extends AbstractServ implements WxMicroAccou
         wxMicroAccountLog.setUnitId(unitId);
 
         Map result = (Map) map.get("data");
-        P("小微进件审批成功 businessCode=>" + businessCode);
+        P("小微进件审批结果 businessCode=>" + businessCode);
 
         wxMicroAccountLog.setApplymentId(result.get("applyment_id").toString());
         wxMicroAccountLog.setApplymentState(result.get("applyment_state").toString());
@@ -96,14 +181,14 @@ public class WxMicroAccountServImpl extends AbstractServ implements WxMicroAccou
 
         //如果失败
         if (map.get("success").equals(false)
-                && null != result.get("audit_detail")){
-            wxMicroAccountLog.setAuditDetail(result.get("audit_detail").toString());
+                && !CheckUtil.isEmpty(result.get("audit_detail"))) {
+            wxMicroAccountLog.setAuditDetail(FastJsonUtil.getJson(result.get("audit_detail")).get("audit_detail").toString());
             wxMicroAccountLog.setStatus(0);
         }
         //如果成功
         if (map.get("success").equals(true)
                 && null != result.get("sub_mch_id")
-                && null != result.get("sign_url")){
+                && null != result.get("sign_url")) {
             wxMicroAccountLog.setSubMchId(result.get("sub_mch_id").toString());
             wxMicroAccountLog.setSignUrl(result.get("sign_url").toString());
             wxMicroAccountLog.setStatus(1);

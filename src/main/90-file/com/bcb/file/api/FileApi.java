@@ -27,7 +27,7 @@ public class FileApi extends AbstractController {
      * @param fileName
      * @param extName
      */
-    @RequestMapping(value = "/image/{root}/{fileName}.{extName}")
+    @RequestMapping(value = "/upload/{root}/{fileName}.{extName}")
     public void getImg(@PathVariable("root") String root,
                        @PathVariable("fileName") String fileName,
                        @PathVariable("extName") String extName) {

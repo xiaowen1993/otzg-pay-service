@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @Description TODO
  * @Author G./2018/2/28 11:51
  */
 @Service(value = "FileServ")
@@ -238,6 +237,7 @@ public class FileServImpl extends AbstractServ implements FileServ {
     }
 
     @Override
+    @Transactional
     public Map saveLink(MultipartFile file, String filePath, Integer folderId) {
         Folder folder = null;
         if(!CheckUtil.isEmpty(folderId)){
@@ -274,10 +274,8 @@ public class FileServImpl extends AbstractServ implements FileServ {
         }
     }
 
-
-
-
-    @Override @Transactional
+    @Override
+    @Transactional
     public FileIndex saveLocal(MultipartFile file,String filePath) {
         //原始文件名
         String fileName = file.getOriginalFilename();

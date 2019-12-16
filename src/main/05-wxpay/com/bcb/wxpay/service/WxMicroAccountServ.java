@@ -1,6 +1,5 @@
 package com.bcb.wxpay.service;
 
-import com.bcb.wxpay.dto.WxMicroAccountDto;
 import com.bcb.wxpay.entity.WxMicroAccount;
 
 import java.util.Map;

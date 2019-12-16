@@ -75,7 +75,7 @@ public class ProfitShareSubmit {
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, String> result = wxPayRequest.requestCert(map);
+        Map<String, Object> result = wxPayRequest.requestCert(map);
         System.out.println("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
         if (result.get("return_code") != null
@@ -86,9 +86,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code"), result.get("err_code_des"));
+            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -138,7 +138,7 @@ public class ProfitShareSubmit {
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingQueryUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
-        Map<String, String> result = wxPayRequest.requestNoAppId(map);
+        Map<String, Object> result = wxPayRequest.requestNoAppId(map);
         System.out.println("调用结果=" + result);
         if (result.get("return_code") != null
                 && result.get("return_code").equals("SUCCESS")
@@ -148,9 +148,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code"), result.get("err_code_des"));
+            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -202,7 +202,7 @@ public class ProfitShareSubmit {
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingAddReceiverUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, String> result = wxPayRequest.request(map);
+        Map<String, Object> result = wxPayRequest.request(map);
         System.out.println("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
         if (result.get("return_code") != null
@@ -213,9 +213,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code"), result.get("err_code_des"));
+            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -262,7 +262,7 @@ public class ProfitShareSubmit {
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingRemoveReceiverUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, String> result = wxPayRequest.request(map);
+        Map<String, Object> result = wxPayRequest.request(map);
         System.out.println("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
         if (result.get("return_code") != null
@@ -273,9 +273,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code"), result.get("err_code_des"));
+            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 

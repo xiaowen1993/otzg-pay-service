@@ -2,6 +2,7 @@ package com.bcb.pay.service;
 
 import com.bcb.base.Finder;
 import com.bcb.pay.entity.PayAccount;
+import com.bcb.pay.entity.PayChannelAccount;
 import net.sf.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -14,9 +15,6 @@ public interface PayAccountServ {
     //创建基本账户
     int create(String unitId,String name,String contact,String mobilePhone);
 
-
-
-
     //根据账户id获取基本账户
     PayAccount findById(Long id);
     //根据会员id获取基本账户
@@ -25,6 +23,9 @@ public interface PayAccountServ {
     PayAccount findByUnitId(String unitId);
     //获取平台账户信息(PayAccount)
     PayAccount findPlatform();
+
+    //账户查询
+    Map findByUnit(Finder finder, String unitId,String payChannel);
 
 
     /**
@@ -63,11 +64,6 @@ public interface PayAccountServ {
     int checkPayPassword(String password,String unitId,String memberId);
 
 
-    //==========================查询====================================//
-    /**
-     * 查询账户流水
-     */
-    Map findPayAccount(Finder finder,String accountId);
 
 
     //=============================管理端方法=======================================
@@ -76,11 +72,4 @@ public interface PayAccountServ {
     Map findPayAccountByAdmin(Finder finder,String memberId,String unitId);
 
 
-
-
-
-
-    boolean testLock();
-
-    Map testWatch(Integer k);
 }

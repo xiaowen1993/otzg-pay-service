@@ -28,7 +28,6 @@ import com.bcb.pay.util.PayReceive;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
 import com.bcb.util.RespTips;
-import com.bcb.wxpay.util.WxPayUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
@@ -138,7 +137,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         //交易类型
         paramMap.put("trade_type", "JSAPI");
         //本机的Ip
-        paramMap.put("spbill_create_ip", WxPayUtil.localIp());
+        paramMap.put("spbill_create_ip", FuncUtil.getLocalIp());
 
         if (null != payOrderDto.getAttach())
             paramMap.put("attach", payOrderDto.getAttach());
@@ -290,7 +289,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         //交易类型
         paramMap.put("trade_type", "JSAPI");
         //本机的Ip
-        paramMap.put("spbill_create_ip", WxPayUtil.localIp());
+        paramMap.put("spbill_create_ip", FuncUtil.getLocalIp());
 
         if (null != payOrderDto.getAttach())
             paramMap.put("attach", payOrderDto.getAttach());
@@ -323,7 +322,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         WXPayConfig wxPayConfig = new WXPayConfig();
         wxPayConfig.setUrl(WXPayConstants.getUnifiedOrderUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
-        Map<String, String> result = wxPayRequest.request(map);
+        Map<String, Object> result = wxPayRequest.request(map);
         LogUtil.saveTradeLog("调用结果=" + result.toString());
 
         if (result.get("return_code") != null
@@ -332,10 +331,10 @@ public class WxpayUtil implements PayReceive, PayQuery {
                 && result.get("result_code").equals("SUCCESS")
         ) {
             LogUtil.saveTradeLog("调用成功=" + result.toString());
-            return FastJsonUtil.get(true, result.get("result_code"), "调用成功", result);
+            return FastJsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
         } else {
             LogUtil.saveTradeLog("调用失败");
-            return FastJsonUtil.get(false, result.get("result_code"), "调用失败", result);
+            return FastJsonUtil.get(false, result.get("result_code").toString(), "调用失败", result);
         }
     }
 
@@ -396,7 +395,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         wxPayConfig.setUrl(WXPayConstants.getMicroPayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, String> result = wxPayRequest.requestTimes(map);
+        Map<String, Object> result = wxPayRequest.requestTimes(map);
 
         LogUtil.saveTradeLog("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
@@ -408,9 +407,9 @@ public class WxpayUtil implements PayReceive, PayQuery {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return FastJsonUtil.get(true, result.get("result_code"), result.get("return_msg"), jo);
+            return FastJsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return FastJsonUtil.get(false, result.get("result_code"), result.get("err_code_des"), result);
+            return FastJsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString(), result);
         }
     }
 
@@ -461,7 +460,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         WXPayConfig wxPayConfig = new WXPayConfig();
         wxPayConfig.setUrl(WXPayConstants.getOrderQueryUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
-        Map<String, String> result = wxPayRequest.request(map);
+        Map<String, Object> result = wxPayRequest.request(map);
 
         LogUtil.saveTradeLog("调用结果=" + result.toString());
         //2019-11-26 17:41
@@ -478,7 +477,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
         if (null == result.get("result_code")
                 || !result.get("result_code").equals("SUCCESS")) {
             LogUtil.saveTradeLog("支付结果错误");
-            return FastJsonUtil.get(false, result.get("err_code"), "支付结果错误");
+            return FastJsonUtil.get(false, result.get("err_code").toString(), "支付结果错误");
         }
 
         //如果返回支付结果
@@ -501,10 +500,10 @@ public class WxpayUtil implements PayReceive, PayQuery {
             jo.put("payChannelNo",result.get("transaction_id"));
             jo.put("payerId",result.get("openid"));
             jo.put("payeeId",result.get("sub_mch_id"));
-            return FastJsonUtil.get(true, result.get("trade_state"), "收款成功",jo);
+            return FastJsonUtil.get(true, result.get("trade_state").toString(), "收款成功",jo);
         } else {
             LogUtil.saveTradeLog("收款未成功");
-            return FastJsonUtil.get(false, result.get("trade_state"), "收款未成功");
+            return FastJsonUtil.get(false, result.get("trade_state").toString(), "收款未成功");
         }
     }
 

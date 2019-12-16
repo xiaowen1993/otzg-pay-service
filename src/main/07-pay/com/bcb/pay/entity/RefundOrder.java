@@ -6,7 +6,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -20,7 +22,7 @@ public class RefundOrder implements Serializable {
     Long id;
 
     //支付系统收款时候的业务单号
-    @Column(name = "pay_order_no", length = 64, nullable = false, unique = true)
+    @Column(name = "pay_order_no", length = 64, nullable = false)
     String payOrderNo;
 
     //支付系统退款业务单号
@@ -191,21 +193,44 @@ public class RefundOrder implements Serializable {
         this.refundOrderNo = refundOrderNo;
     }
 
-    @Override
-    public String toString() {
+
+    public String getJson() {
         return new StringJoiner(", ", "{", "}")
                 .add("id:" + id)
                 .add("payOrderNo:'" + payOrderNo + "'")
                 .add("payRefundOrderNo:'" + payRefundOrderNo + "'")
                 .add("orderNo:'" + orderNo + "'")
                 .add("refundOrderNo:'" + refundOrderNo + "'")
-                .add("memberId:'" + memberId + "'")
+                .add("memberId:'" + Optional.ofNullable(memberId).orElse("") + "'")
                 .add("unitId:'" + unitId + "'")
                 .add("subject:'" + subject + "'")
                 .add("amount:" + amount)
                 .add("payChannel:'" + payChannel + "'")
                 .add("payChannelAccount:'" + payChannelAccount + "'")
                 .add("status:" + status)
+                .add("statusTips:'" + StatusType.tips(status)+"'")
                 .toString();
+    }
+
+    public enum StatusType {
+        FAIL(-1,"失败"),
+        WAIT(0,"等待"),
+        SUCC(1,"成功");
+
+        public Integer index;
+        public String name;
+        StatusType(Integer i, String n) {
+            this.index = i;
+            this.name = n;
+        }
+
+        //判断是否在枚举类型内的值
+        public final static String tips(Integer i){
+            return Arrays.stream(StatusType.values())
+                    .filter(statusType -> statusType.index.equals(i))
+                    .map(statusType -> statusType.name)
+                    .findFirst()
+                    .orElse("");
+        }
     }
 }

@@ -61,7 +61,7 @@ public enum RespTips {
     PAYORDER_ERROR("7006","支付失败"),
 
     PAYCHANNEL_PAY_SUCCESS("7100","交易支付成功"),
-    PAYCHANNEL_SET_ERROR("7101","支付渠道账户未设置"),
+    PAYCHANNEL_SET_ERROR("7101","支付渠道账户未创建"),
     PAYCHANNLE_PAY_ERROR("7102","支付渠道返回错误"),
     PAYCHANNLE_PAY_WAIT("7103","等待用户支付"),
     PAYCHANNLE_PAY_CLOSED("7104","未付款交易超时关闭，或支付完成后全额退款"),
@@ -75,7 +75,7 @@ public enum RespTips {
 
 
     PAYACCOUNT_IS_UNAVAILABLE("7201","账户不可用"),
-    PAYACCOUNT_FOUND("7204","账户不可重复创建"),
+    PAYACCOUNT_FOUND("7204","账户已存在"),
     PAYACCOUNT_IS_FROZEN("7202","账户被冻结"),
     PAYACCOUNT_IS_INSUFFICIENT("7203","账户余额不足"),
     PAYACCOUNT_PROFIT_LESS("7205","收益余额不足"),

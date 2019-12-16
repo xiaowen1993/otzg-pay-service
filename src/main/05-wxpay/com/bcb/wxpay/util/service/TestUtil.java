@@ -109,18 +109,18 @@ public class TestUtil {
         wxMicroAccountDto.setContact("王志刚");
         wxMicroAccountDto.setContactPhone("13703957387");
         wxMicroAccountDto.setContactEmail("375214167@qq.com");
-        wxMicroAccountDto.setIdCardCopy("_qdPgxYeHjr20zZTSLO0ytytIW4WzQGYSjL9keglclA2AQyG_RoQhc87zbvCHC6B_zgcfMm7mi2zlOPEErgzFfy8z");
+        wxMicroAccountDto.setIdCardCopySrc("_qdPgxYeHjr20zZTSLO0ytytIW4WzQGYSjL9keglclA2AQyG_RoQhc87zbvCHC6B_zgcfMm7mi2zlOPEErgzFfy8z");
         wxMicroAccountDto.setIdCardName("王志刚");
         wxMicroAccountDto.setIdCardNumber("320106496903060011");
-        wxMicroAccountDto.setIdCardNational("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
+        wxMicroAccountDto.setIdCardNationalSrc("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
         wxMicroAccountDto.setIdCardValidTime("[\"1970-01-01\",\"长期\"]");
-        wxMicroAccountDto.setIndoorPic("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
+        wxMicroAccountDto.setIndoorPicSrc("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
         wxMicroAccountDto.setMerchantShortName("天天小吃");
         wxMicroAccountDto.setProductDesc("餐饮");
         wxMicroAccountDto.setRate("0.6%");
         wxMicroAccountDto.setServicePhone("13703957387");
         wxMicroAccountDto.setStoreAddressCode("110000");
-        wxMicroAccountDto.setStoreEntrancePic("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
+        wxMicroAccountDto.setStoreEntrancePicSrc("W56fsKod1rgFm3W7Xin0HIWYTvWcHWNN2l62P8myGhDeN7dwQ3Xzen1K3EdCEuzRIOHUpEky61GQ8lZQ3JjxDrZ_k23PUCJc9pQathUIR8I");
         wxMicroAccountDto.setStoreName("郑州天天小吃");
         wxMicroAccountDto.setStoreStreet("郑州市工人路100号");
 

@@ -1,8 +1,11 @@
 package com.bcb.pay.service;
 
+import com.bcb.base.Finder;
 import com.bcb.pay.dto.RefundOrderDto;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.RefundOrder;
+
+import java.util.Map;
 
 /**
  * @Author G.
@@ -38,4 +41,6 @@ public interface RefundOrderServ {
      * @return
      */
     int queryRefundOrderByUnit(RefundOrder refundOrder);
+
+    Map findRefundOrderByUnit(Finder finder, String unitId, String payChannel);
 }

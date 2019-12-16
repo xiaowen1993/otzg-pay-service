@@ -8,7 +8,7 @@
     fileSavePath: E:/log/
 #    fileSavePath: C:/Program Files/Apache Software Foundation/Tomcat 8.5/webapps/ROOT
 #    文件服务路径
-    servUrl: http://de4yrz.natappfree.cc
+    servUrl: http://ryptya.natappfree.cc
 
 #服务注册
   eureka:

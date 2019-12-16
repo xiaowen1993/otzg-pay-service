@@ -8,10 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
+import java.util.StringJoiner;
 
 /**
  * 平台基本账户
@@ -270,38 +270,21 @@ public class PayAccount implements Serializable {
         this.contact = contact;
     }
 
-    public Map getNameJson() {
-        Map jo = new TreeMap();
-        jo.put("id", this.id);
-        if (null != this.unitId) {
-            jo.put("unitId", this.unitId);
-        } else if (null != this.memberId) {
-            jo.put("memberId", this.memberId);
-        }
-        jo.put("name", this.getName());
-        jo.put("balance", this.getBalance());
-        jo.put("type", this.getType());
-        jo.put("status", this.getStatus());
-        return jo;
-    }
-
-    //押金
-    public Map getDepositeJson() {
-        Map jo = getNameJson();
-        jo.put("deposit", Optional.ofNullable(this.deposit).orElse(BigDecimal.ZERO));
-        jo.put("depositTime", Optional.ofNullable(this.depositTime).map(depositTime -> DateUtil.dateTime2Str(depositTime)).orElse(""));
-        return jo;
-    }
-
-    //收益和积分
-    public Map getProfitJson() {
-        Map jo = getNameJson();
-        jo.put("profitBalance", Optional.ofNullable(this.profitBalance).orElse(BigDecimal.ZERO));
-        jo.put("profitTotal", Optional.ofNullable(this.profitTotal).orElse(BigDecimal.ZERO));
-
-        jo.put("bonusPoints", Optional.ofNullable(this.bonusPoints).orElse(0L));
-        jo.put("creditRating", Optional.ofNullable(this.creditRating).orElse(0));
-        return jo;
+    public String getJson() {
+        return new StringJoiner(", ", "{", "}")
+                .add("id:" + id)
+                .add("memberId:'" + Optional.ofNullable(memberId).orElse("") + "'")
+                .add("unitId:'" + unitId + "'")
+                .add("name:'" + name + "'")
+                .add("mobilePhone:'" + mobilePhone + "'")
+                .add("contact:'" + contact + "'")
+                .add("type:" + type)
+                .add("typeTips:'" + AccountType.tips(type)+"'")
+                .add("balance:" + balance)
+                .add("status:" + status)
+                .add("createTime:'" + DateUtil.dateTime2Str(this.getCreateTime())+"'")
+                .add("createTime:'" + DateUtil.dateTime2Str(this.getUpdateTime())+"'")
+                .toString();
     }
 
     public boolean isUseable() {
@@ -311,4 +294,26 @@ public class PayAccount implements Serializable {
         return true;
     }
 
+    //{0:平台账户,1:会员账户,2:单位账户}
+    public enum AccountType {
+        PLATFORM(0,"平台账户"),
+        MEMBER(1,"会员账户"),
+        UNIT(2,"单位账户");
+
+        public Integer index;
+        public String name;
+        AccountType(Integer i, String n) {
+            this.index = i;
+            this.name = n;
+        }
+
+        //判断是否在枚举类型内的值
+        public final static String tips(Integer i){
+            return Arrays.stream(AccountType.values())
+                    .filter(accountType -> accountType.index.equals(i))
+                    .map(accountType -> accountType.name)
+                    .findFirst()
+                    .orElse("");
+        }
+    }
 }

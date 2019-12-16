@@ -1,6 +1,8 @@
 package com.bcb.pay.service;
 
 import com.bcb.base.AbstractServ;
+import com.bcb.base.Finder;
+import com.bcb.base.Page;
 import com.bcb.pay.dao.RefundOrderDao;
 import com.bcb.pay.dao.RefundOrderLogDao;
 import com.bcb.pay.dto.RefundOrderDto;
@@ -11,9 +13,7 @@ import com.bcb.pay.entity.RefundOrderLog;
 import com.bcb.pay.util.PayChannelType;
 import com.bcb.pay.util.PayRefund;
 import com.bcb.pay.util.PayRefundUtil;
-import com.bcb.util.DateUtil;
-import com.bcb.util.FuncUtil;
-import com.bcb.util.RespTips;
+import com.bcb.util.*;
 import com.bcb.wxpay.util.service.WxRefundUtil;
 import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import sun.security.krb5.internal.ktab.KeyTab;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -87,6 +89,11 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
                 return 1;
             }
 
+            //判断是否还可以退款
+            if(!checkCanRefund(payOrder,refundOrderDto.getAmount())){
+                return -1;
+            }
+
             //如果冻结账户不成功
             PT("冻结支付渠道账户退款余额");
             if (!payChannelAccountServ.freezeBalance(payChannelAccount, new BigDecimal(refundOrderDto.getAmount()))) {
@@ -99,9 +106,9 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
 
             //=======================================提交支付渠道退款===================================================
             //策略模式获取退款渠道
-            PayRefund payRefund = new PayRefundUtil(payOrder.getPayChannel(),refundOrderDto);
+            PayRefund payRefund = new PayRefundUtil(payOrder.getPayChannel());
             //提交支付渠道退款
-            Map map = payRefund.refund(payChannelAccount.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo());
+            Map map = payRefund.refund(payChannelAccount.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo(),refundOrderDto);
             //如果没有返回成功
             if (map.get("success").equals(false)) {
                 PT("退款业务执行失败,账户冻结余额解冻");
@@ -109,8 +116,10 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
                 return 4;
             }
 
-            PT("执行退款业务成功");
             Map result = ((Map) map.get("data"));
+            PT("执行退款业务成功 result data="+result);
+
+
             String payChannelNo = result.get("payChannelNo").toString();
             //更新退款单
             finishRefundOrder(refundOrder, payChannelNo);
@@ -131,6 +140,30 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         }
     }
 
+    /**
+     * 检查收款业务单是否还能退款
+     * @param payOrder
+     * @param amount
+     * @return
+     */
+    boolean checkCanRefund(PayOrder payOrder,Double amount){
+        List<RefundOrder> refundOrderList = refundOrderDao.findByPayOrderNo(payOrder.getPayOrderNo());
+        BigDecimal am = refundOrderList.stream().filter(refundOrder -> refundOrder.getStatus().equals(1)).map(RefundOrder::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
+        //如果没有退过款
+        if(am.equals(BigDecimal.ZERO)){
+            return true;
+        }
+
+        //退款金额加上已经退款的金额
+        am = FuncUtil.getBigDecimalScale(am.add(FuncUtil.getBigDecimalScale(new BigDecimal(amount))));
+
+
+        //如果退款金额大于已经退款的金额
+        if(am.compareTo(payOrder.getAmount())>0){
+            return false;
+        }
+        return true;
+    }
 
     //创建退款业务单,并返回退款单号
     RefundOrder createRefundOrder(String payChannel, String payChannelAccount,String payOrderNo, RefundOrderDto refundOrderDto) {
@@ -142,7 +175,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         //收款时候的业务单号
         refundOrder.setPayOrderNo(payOrderNo);
         //支付系统退款业务单号
-        refundOrder.setPayRefundOrderNo(getRefundOrderNo(refundOrderDto.getUnitId()));
+        refundOrder.setPayRefundOrderNo(getPayOrderNo(refundOrderDto.getUnitId()));
         //子系统收款时候的业务单号
         refundOrder.setOrderNo(refundOrderDto.getOrderNo());
         //子系统退款业务单号
@@ -164,11 +197,6 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
 
         //返回退款单号
         return refundOrder;
-    }
-
-    //自动生成退款业务单号
-    String getRefundOrderNo(String unitId) {
-        return DateUtil.yearMonthDayTimeShort() + FuncUtil.getRandInt(10001, 19999) + Math.abs(unitId.hashCode());
     }
 
     void finishRefundOrder(RefundOrder refundOrder, String payChannelNo) {
@@ -195,7 +223,6 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         refundOrderLogDao.save(refundOrderLog);
     }
 
-
     @Override
     @Transactional
     public int queryRefundOrderByUnit(RefundOrder refundOrder) {
@@ -213,6 +240,36 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         finishRefundOrder(refundOrder, result.get("data").toString());
 
         return 0;
+    }
+
+
+    @Override
+    public Map findRefundOrderByUnit(Finder finder, String unitId, String payChannel) {
+        Page page = findByUnit(finder,unitId,payChannel);
+        return FastJsonUtil.get(true,
+                RespTips.SUCCESS_CODE.code,
+                ((List<RefundOrder>) page.getItems())
+                        .stream()
+                        .map(refundOrder->FastJsonUtil.getJson(refundOrder.getJson()))
+                        .toArray(),
+                page.getTotalCount()
+        );
+    }
+
+    Page findByUnit(Finder finder, String unitId, String payChannel){
+        StringJoiner hql = new StringJoiner(" ");
+        hql.add("select ro from RefundOrder ro where ro.unitId='"+unitId+"'");
+        if(!CheckUtil.isEmpty(payChannel))
+            hql.add(" and ro.payChannel='"+payChannel+"'");
+        if(!CheckUtil.isEmpty(finder.getStatus()))
+            hql.add(" and ro.status="+finder.getStatus());
+        if(!CheckUtil.isEmpty(finder.getStartTime()))
+            hql.add(" and ro.createTime >= '"+finder.getStartTime()+"'");
+        if(!CheckUtil.isEmpty(finder.getEndTime()))
+            hql.add(" and ro.updateTime <= '"+finder.getEndTime()+"'");
+
+        hql.add("order by  ro.updateTime desc");
+        return refundOrderDao.findPageByHql(hql.toString(),finder.getPageSize(),finder.getStartIndex());
     }
 }
 

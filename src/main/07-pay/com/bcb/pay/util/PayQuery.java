@@ -8,6 +8,13 @@ import java.util.Map;
  */
 public interface PayQuery {
 
-    //String payChannelNo,String payerId,String payeeId
+    /**
+     * 查询接口
+     * @param payChannelAccount
+     * @param payOrderNo
+     * @return
+     *   成功返回 {success:true,code:0000,data:{payChannelNo:支付渠道单号,payerId:付款人id,payeeId:收款人id}}
+     *   失败返回 {success:false,code:0000,msg:失败原因}
+     */
     Map query(String payChannelAccount, String payOrderNo);
 }

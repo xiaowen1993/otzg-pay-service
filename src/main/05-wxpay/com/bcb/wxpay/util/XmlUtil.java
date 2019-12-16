@@ -3,20 +3,19 @@
  */
 package com.bcb.wxpay.util;
 
-import javax.xml.parsers.DocumentBuilder;   
-import javax.xml.parsers.DocumentBuilderFactory;   
+import org.dom4j.io.SAXReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
-import org.w3c.dom.Document;   
-import org.w3c.dom.Element;   
-import org.w3c.dom.Node;   
-import org.w3c.dom.NodeList;   
-
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.xml.sax.InputSource;   
 
 /**
  *  xml文件转换为map
@@ -24,8 +23,9 @@ import org.xml.sax.InputSource;
  *
  */
 public class XmlUtil{
-    public static Map<String,String> parse(String protocolXML) {
-    	Map<String,String> params = new HashMap<>();
+
+    public static Map<String,Object> parse(String protocolXML) {
+    	Map<String,Object> params = new HashMap<>();
     	try{   
     		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();   
     		DocumentBuilder builder = factory.newDocumentBuilder();   
@@ -35,8 +35,9 @@ public class XmlUtil{
             if(books != null){   
                 for (int i = 0; i < books.getLength(); i++) {   
                 	Node book = books.item(i);
-                	if(book.getFirstChild()!=null && book.getFirstChild().getNodeValue()!=null)
-                		params.put(book.getNodeName(),book.getFirstChild().getNodeValue());
+                	if(book.getFirstChild()!=null && book.getFirstChild().getNodeValue()!=null) {
+                        params.put(book.getNodeName(), book.getFirstChild().getNodeValue());
+                    }
                  }   
             }   
         }catch(Exception e){ 

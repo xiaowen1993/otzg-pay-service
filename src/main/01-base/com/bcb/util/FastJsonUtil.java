@@ -1,16 +1,24 @@
 package com.bcb.util;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @Author G.
  * @Date 2019/11/23 0023 下午 3:10
  */
 public class FastJsonUtil {
+
+    public static Map getJson(Object o){
+        return JSON.parseObject(o.toString());
+    }
+    public static JSONArray getJsonArray(Object o){
+        return JSON.parseArray(o.toString());
+    }
     /**
      * 遍历json树
      * @author G/2018年1月15日
@@ -98,7 +106,7 @@ public class FastJsonUtil {
     public static final JSONObject get(boolean b,String c){
         JSONObject result=new JSONObject();
         result.put("success",b);
-        if(!StringUtils.isEmpty(c)){
+        if(!CheckUtil.isEmpty(c)){
             result.put("code",c);
         }
         return result;
@@ -155,7 +163,7 @@ public class FastJsonUtil {
     public static final JSONObject get(boolean b,String c,Object data,Long count){
         JSONObject result=new JSONObject();
         result.put("success",b);
-        if(!StringUtils.isEmpty(c)){
+        if(!CheckUtil.isEmpty(c)){
             result.put("code",c);
         }
         result.put("count",count);

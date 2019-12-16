@@ -1,6 +1,7 @@
 package com.bcb.wxpay.dto;
 
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 /**
  * @Author G.
@@ -11,139 +12,139 @@ public class WxMicroAccountDto implements Serializable {
     /**
      * 身份证人像面照片
      * 必填
-     * length(256)
+     * String(500)
      */
-    String idCardCopy;
+    String idCardCopySrc;
     /**
      * 身份证国徽面照片
      * 必填
-     * length(256)
+     * String(500)
      */
-    String idCardNational;
+    String idCardNationalSrc;
     /**
      * 身份证姓名
      * 必填
-     * length(64)
+     * String(64)
      */
     String idCardName;
     /**
      * 身份证号码
      * 必填
-     * length(18)
+     * String(18)
      */
     String idCardNumber;
     /**
      * 身份证有效期限
      * 例子："[\"1970-01-01\",\"长期\"]"
      * 必填
-     * length(50)
+     * String(50)
      */
     String idCardValidTime;
     /**
      * 开户名称
      * 必填
-     * length(50)
+     * String(50)
      */
     String accountName;
     /**
      * 开户银行
      * 必填
-     * length(50)
+     * String(50)
      */
     String accountBank;
 
     /**
      * 开户银行省市编码
      * 必填
-     * length(6)
+     * String(6)
      */
     String bankAddressCode;
     /**
      * 银行账号
      * 必填
-     * length(50)
+     * String(50)
      */
     String accountNumber;
     /**
      * 门店名称
      * 必填
-     * length(128)
+     * String(128)
      */
     String storeName;
     /**
      * 门店省市编码
      * 例子："110000"
      * 必填
-     * length(6)
+     * String(6)
      */
     String storeAddressCode;
     /**
      * 门店街道名称
      * 必填
-     * length(500)
+     * String(500)
      */
     String storeStreet;
     /**
      * 门店门口照片
      * 必填
-     * length(256)
+     * String(500)
      */
-    String storeEntrancePic;
+    String storeEntrancePicSrc;
     /**
      * 店内环境照片
      * 必填
-     * length(256)
+     * String(500)
      */
-    String indoorPic;
+    String indoorPicSrc;
     /**
      * 商户简称
      * 必填
-     * length(50)
+     * String(50)
      */
     String merchantShortName;
     /**
      * 客服电话
      * 必填
-     * length(50)
+     * String(50)
      */
     String servicePhone;
     /**
      * 售卖商品/提供服务描述
      * 必填
-     * length(50)
+     * String(50)
      */
     String productDesc;
     /**
      * 费率
+     * 例子："0.6%"
      * 必填
-     * length(50)
+     * String(50)
      */
     String rate;
     /**
      * 超级管理员姓名
-     * 例子："0.6%"
      * 必填
-     * length(50)
+     * String(50)
      */
     String contact;
     /**
      * 手机号
      * 必填
-     * length(50)
+     * String(50)
      */
     String contactPhone;
 
     /**
      * 联系邮箱
      * 非必填
-     * length(50)
+     * String(50)
      */
     String contactEmail;
 
     /**
      * 开户银行全称（含支行）
      * 非必填
-     * length(256)
+     * String(256)
      */
     String bankName;
 
@@ -151,20 +152,20 @@ public class WxMicroAccountDto implements Serializable {
     }
 
 
-    public String getIdCardCopy() {
-        return idCardCopy;
+    public String getIdCardCopySrc() {
+        return idCardCopySrc;
     }
 
-    public void setIdCardCopy(String idCardCopy) {
-        this.idCardCopy = idCardCopy;
+    public void setIdCardCopySrc(String idCardCopySrc) {
+        this.idCardCopySrc = idCardCopySrc;
     }
 
-    public String getIdCardNational() {
-        return idCardNational;
+    public String getIdCardNationalSrc() {
+        return idCardNationalSrc;
     }
 
-    public void setIdCardNational(String idCardNational) {
-        this.idCardNational = idCardNational;
+    public void setIdCardNationalSrc(String idCardNationalSrc) {
+        this.idCardNationalSrc = idCardNationalSrc;
     }
 
     public String getIdCardName() {
@@ -247,20 +248,20 @@ public class WxMicroAccountDto implements Serializable {
         this.storeStreet = storeStreet;
     }
 
-    public String getStoreEntrancePic() {
-        return storeEntrancePic;
+    public String getStoreEntrancePicSrc() {
+        return storeEntrancePicSrc;
     }
 
-    public void setStoreEntrancePic(String storeEntrancePic) {
-        this.storeEntrancePic = storeEntrancePic;
+    public void setStoreEntrancePicSrc(String storeEntrancePicSrc) {
+        this.storeEntrancePicSrc = storeEntrancePicSrc;
     }
 
-    public String getIndoorPic() {
-        return indoorPic;
+    public String getIndoorPicSrc() {
+        return indoorPicSrc;
     }
 
-    public void setIndoorPic(String indoorPic) {
-        this.indoorPic = indoorPic;
+    public void setIndoorPicSrc(String indoorPicSrc) {
+        this.indoorPicSrc = indoorPicSrc;
     }
 
     public String getMerchantShortName() {
@@ -326,4 +327,5 @@ public class WxMicroAccountDto implements Serializable {
     public void setBankName(String bankName) {
         this.bankName = bankName;
     }
+
 }

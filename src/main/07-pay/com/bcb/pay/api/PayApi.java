@@ -1,6 +1,7 @@
 package com.bcb.pay.api;
 
 import com.bcb.alipay.util.AlipayUtil;
+import com.bcb.base.Finder;
 import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.entity.PayAccount;
 import com.bcb.pay.entity.PayChannelAccount;
@@ -15,6 +16,7 @@ import com.bcb.util.UrlUtil;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
 import com.bcb.wxpay.util.service.WXPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -79,7 +81,6 @@ public class PayApi extends AbstractController {
         }
 
     }
-
 
     /**
      * 微信回调地址
@@ -149,6 +150,7 @@ public class PayApi extends AbstractController {
     //收款业务
     @RequestMapping(value = "/pay/receive")
     public void payReceive(PayOrderDto payOrderDto) {
+//    public void payReceive(@RequestBody PayOrderDto payOrderDto) {
         if (CheckUtil.isEmpty(payOrderDto)) {
             sendParamError();
             return;
@@ -163,7 +165,7 @@ public class PayApi extends AbstractController {
         }
 
         //判断业务单号是否已经生成
-        if (payOrderServ.checkByOrderNo(payOrderDto.getUnitId(), payOrderDto.getOrderNo())) {
+        if (payOrderServ.checkByOrderNo(payOrderDto.getOrderNo())) {
             sendJson(false, RespTips.PAYORDER_FOUND.code, RespTips.PAYORDER_FOUND.tips);
             return;
         }
@@ -195,6 +197,17 @@ public class PayApi extends AbstractController {
 
         //如果成功
         sendSuccess(result.get("data"));
+
+    }
+
+    @RequestMapping(value = "/payOrder/find")
+    public void payOrderFind(String unitId, String payChannel, Finder finder) {
+        if (CheckUtil.isEmpty(unitId)) {
+            sendParamError();
+            return;
+        }
+        //如果成功
+        sendJson(payOrderServ.findPayOrderByUnit(finder,unitId,payChannel));
 
     }
 
