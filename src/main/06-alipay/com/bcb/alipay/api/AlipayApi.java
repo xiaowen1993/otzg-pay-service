@@ -33,6 +33,7 @@ public class AlipayApi extends AbstractController {
     //获取app_auth_code
     //商户授权成功后，PC 或者钱包客户端会跳转至开发者定义的回调页面（即 redirect_uri 参数对应的 url ）
     // 在回调页面请求中会带上当次授权的授权码 app_auth_code 和开发者的 app_id
+    //
 
     /**
      * 支付宝授权回调接口
@@ -82,9 +83,9 @@ public class AlipayApi extends AbstractController {
      * 支付宝获取授权链接接口
      */
     @RequestMapping(value = "/alipay/authTokenUrl/get")
-    public final void alipayAuthUrl(String unitId) throws UnsupportedEncodingException {
+    public final void alipayAuthUrl(String unitId){
         if (CheckUtil.isEmpty(unitId)) {
-            sendRedirect("/error.html");
+            sendRedirect("/alipay/auth/error.html");
             return;
         }
 
@@ -92,7 +93,11 @@ public class AlipayApi extends AbstractController {
         PayAccount payAccount = payAccountServ.findByUnitId(unitId);
         if (null == payAccount
                 || !payAccount.isUseable()) {
-            sendRedirect("/error.html?msg=" + java.net.URLEncoder.encode(RespTips.PAYACCOUNT_IS_UNAVAILABLE.tips, "UTF-8"));
+            try {
+                sendRedirect("/alipay/auth/error.html?msg=" + java.net.URLEncoder.encode(RespTips.PAYACCOUNT_IS_UNAVAILABLE.tips, "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             return;
         }
 

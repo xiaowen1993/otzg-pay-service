@@ -88,7 +88,7 @@ public enum RespTips {
 
 
     APP_PAY_NOTIFY_FAIL("app_pay_notify_fail","子系统支付回调接口未设置"),
-    REFUND_DATA_FOUND("10007","订单已经退款"),
+    REFUND_DATA_FOUND("10007","已经退款"),
 
     PAYTYPE_WXPAY("wxpay","微信支付"),
     PAYTYPE_ALIPAY("alipay","支付宝支付"),

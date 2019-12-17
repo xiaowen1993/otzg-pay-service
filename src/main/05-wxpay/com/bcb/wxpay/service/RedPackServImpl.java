@@ -40,26 +40,28 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
     @Autowired
     private PayChannelAccountServ payChannelAccountServ;
 
+    /**
+     * 微信发红包是可重入接口
+     * @param payAccountId
+     * @param wxRedPackDto
+     * @return
+     */
     @Override
     @Transactional
     public int sendRedPack(Long payAccountId,WxRedPackDto wxRedPackDto) {
-        Optional<WxRedPack> op = wxRedPackDao.findByRedPackOrderNo(wxRedPackDto.getRedpackOrderNo());
-        //微信发红包是可重入接口
+        Optional<WxRedPack> op = wxRedPackDao.findByRedPackOrderNo(wxRedPackDto.getRedPackOrderNo());
+        //如果没有查到对应单号的红包
         if(!op.isPresent()){
             return sendFirst(payAccountId,wxRedPackDto);
         }
 
-        //如果已经失败
-        if(op.get().getStatus().equals(-1)){
-            return -1;
-        }
-
         //如果已经发送{-1:发送失败,0:发送中,1:已发送,2:已接收,3:已退款}
-        if(op.get().getStatus()>1){
-            return 0;
+        if(op.get().getStatus()< 0
+                || op.get().getStatus()>1){
+            return op.get().getStatus();
         }
 
-        //需要再次查询确定
+        //如果结果等于0或者等于1，需要再次查询确定
         new WxRedPackUtil().pay(op.get());
         return query(op.get().getRedPackOrderNo());
     }
@@ -69,7 +71,7 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
         PayChannelAccount payChannelAccount = payChannelAccountServ.findByAccountAndPayChannel(payAccountId, "wxpay");
         if (null == payChannelAccount
                 || null == payChannelAccount.getPayChannelAccount()) {
-            return 1;
+            return -4;
         }
 
         //发红包金额
@@ -79,7 +81,7 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
 
         //如果微信账户余额不足返回
         if(payChannelAccount.getBalance().compareTo(amount)<0){
-            return 2;
+            return -5;
         }
 
 
@@ -88,7 +90,7 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
             boolean l = lock.tryLock(30, TimeUnit.SECONDS);
             if (!l) {
                 P("redisson lock false");
-                return 1;
+                return -6;
             }
 
             String payRedPackOrderNo = getPayOrderNo(wxRedPackDto.getUnitId());
@@ -118,7 +120,7 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
 
         }catch (Exception e){
             e.printStackTrace();
-            return 3;
+            return -7;
         }finally {
             lock.unlock();
         }
@@ -136,7 +138,7 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
         wxRedPack.setTotalNum(wxRedPackDto.getTotalNum());
         wxRedPack.setClientIp(wxRedPackDto.getClientIp());
         wxRedPack.setWishing(wxRedPackDto.getWishing());
-        wxRedPack.setRedPackOrderNo(wxRedPackDto.getRedpackOrderNo());
+        wxRedPack.setRedPackOrderNo(wxRedPackDto.getRedPackOrderNo());
         wxRedPack.setSceneId(wxRedPackDto.getSceneId());
     }
 
@@ -168,10 +170,10 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
     public int query(String redPackOrderNo) {
         Optional<WxRedPack> op = wxRedPackDao.findByRedPackOrderNo(redPackOrderNo);
         if(op.isPresent()
-                && !op.get().getStatus().equals(0)
-                && op.get().getTotalNum().equals(1)    //普通红包只查一次
-                && !op.get().getStatus().equals(1)){    //如果成功则返回
-            return 3;
+                && op.get().getTotalNum().equals(1)    //如果是普通红包并且已经得到最终结果
+                && !op.get().getStatus().equals(0)      //不等于零和1表示：{-1:已失败,2:已收款,3:已退款}
+                && !op.get().getStatus().equals(1)){
+            return op.get().getStatus();                //返回结果状态
         }
 
         WxRedPack wxRedPack = op.get();
@@ -203,13 +205,13 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
         if("RECEIVED".equals(status)){
             wxRedPack.setStatus(WxRedPack.StatusType.RECEIVED.index);
             //存记录
-            saveLog(status,wxRedPack,jo.getJSONArray("hbinfo").toString());
+            saveLog(status,wxRedPack,jo.get("hbinfo").toString());
         }
 
         //更新时间
         wxRedPack.setUpdateTime(DateUtil.now());
         wxRedPackDao.save(wxRedPack);
-        return 0;
+        return op.get().getStatus();
 
     }
 
@@ -245,6 +247,12 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
         hql.add("select w from WxRedPack w where w.unitId='"+unitId+"'");
         if(!CheckUtil.isEmpty(finder.getStatus()))
             hql.add(" and w.status="+finder.getStatus());
+
+        if(!CheckUtil.isEmpty(finder.getStartTime()))
+            hql.add(" and w.createTime >= '"+finder.getStartTime()+"'");
+        if(!CheckUtil.isEmpty(finder.getEndTime()))
+            hql.add(" and w.updateTime <= '"+finder.getEndTime()+"'");
+
         hql.add("order by w.updateTime desc");
         return wxRedPackDao.findPageByHql(hql.toString(),finder.getPageSize(),finder.getStartIndex());
     }

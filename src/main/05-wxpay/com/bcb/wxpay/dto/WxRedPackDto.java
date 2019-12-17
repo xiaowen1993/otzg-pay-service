@@ -1,7 +1,6 @@
 package com.bcb.wxpay.dto;
 
 import java.io.Serializable;
-import java.util.StringJoiner;
 
 /**
  * @Author G.
@@ -14,14 +13,14 @@ public class WxRedPackDto implements Serializable {
      * (可填服务商自己的appid或子商户的appid)
      *
      * 非必填
-     * len(32)
+     * String(32)
      */
     String msgAppId;
 
     /**
      * 商户名称
      * 必填
-     * len(32)
+     * String(32)
      */
     String sendName;
 
@@ -34,7 +33,7 @@ public class WxRedPackDto implements Serializable {
     /**
      * 红包祝福语
      * 必填
-     * len(128)
+     * String(128)
      */
     String wishing;
 
@@ -45,7 +44,7 @@ public class WxRedPackDto implements Serializable {
     String clientIp;
 
     /**
-     * 红包分配方式(裂变红包必填)
+     * 红包分配方式
      * <p>
      * 微信规则
      * 红包金额设置方式
@@ -54,13 +53,23 @@ public class WxRedPackDto implements Serializable {
     String amtType;
 
 
-    //活动名称
+    /**
+     * 活动名称
+     * String(32)
+     */
     String actName;
-    //备注
+    /**
+     * 备注
+     */
     String remark;
-    //发放金额
+    /**
+     * 发放金额
+     */
     Double totalAmount;
-    //红包发放总人数
+    /**
+     *
+     * 红包数量
+     */
     Integer totalNum;
 
     /**
@@ -78,13 +87,23 @@ public class WxRedPackDto implements Serializable {
     String sceneId;
 
 
-    //发起人id
+    /**
+     * 发起人id
+     * String(32)
+     */
     String memberId;
 
-    //收单商户id
+    /**
+     * 商户id
+     * String(32)
+     */
     String unitId;
 
-    String redpackOrderNo;
+    /**
+     * 子系统发红包业务单号
+     * String(32)
+     */
+    String redPackOrderNo;
 
     public String getMsgAppId() {
         return msgAppId;
@@ -190,31 +209,11 @@ public class WxRedPackDto implements Serializable {
         this.unitId = unitId;
     }
 
-    public String getRedpackOrderNo() {
-        return redpackOrderNo;
+    public String getRedPackOrderNo() {
+        return redPackOrderNo;
     }
 
-    public void setRedpackOrderNo(String redpackOrderNo) {
-        this.redpackOrderNo = redpackOrderNo;
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", "{", "}")
-                .add("msgAppId:'" + msgAppId + "'")
-                .add("sendName:'" + sendName + "'")
-                .add("reOpenId:'" + reOpenId + "'")
-                .add("wishing:'" + wishing + "'")
-                .add("clientIp:'" + clientIp + "'")
-                .add("amtType:'" + amtType + "'")
-                .add("actName:'" + actName + "'")
-                .add("remark:'" + remark + "'")
-                .add("totalAmount:" + totalAmount)
-                .add("totalNum:" + totalNum)
-                .add("sceneId:'" + sceneId + "'")
-                .add("memberId:'" + memberId + "'")
-                .add("unitId:'" + unitId + "'")
-                .add("redpackOrderNo:'" + redpackOrderNo + "'")
-                .toString();
+    public void setRedPackOrderNo(String redPackOrderNo) {
+        this.redPackOrderNo = redPackOrderNo;
     }
 }

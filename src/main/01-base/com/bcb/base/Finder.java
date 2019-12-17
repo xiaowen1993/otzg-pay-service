@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class Finder implements Serializable {
 
 	//查询关键词
-	private String keyword;
+	String keyword;
 	
 	/**
 	 * 支持layer的分页参数
@@ -21,10 +21,39 @@ public class Finder implements Serializable {
 	 */
 
 	//查询起始页数
-	private int page=1;
+	int page=1;
 	//每页显示记录数
-	private int pageSize = 10;
-	
+	int pageSize = 10;
+
+	//开始时间
+	String startTime;
+	//结束时间
+	String endTime;
+	//到结束日期的最后1秒
+	static String sj = " 23:59:59";
+	//控制查询状态
+	Integer status;
+	//控制查询范围
+	String scop;
+	//控制排序
+	String sorter;
+
+	//地区代码
+	String areaCode;
+	String areaName;
+	//低价
+	String loPrice;
+	//高价
+	String hiPrice;
+	//维度
+	String lat;
+	//经度
+	String lng;
+
+
+	public Finder() {
+	}
+
 	public final void setPage(int page) {
 		this.page = page;
 	}
@@ -41,36 +70,6 @@ public class Finder implements Serializable {
 	public final int getStartIndex() {
 		return this.pageSize*(page>0?page-1:0);
 	}
-
-	//开始时间
-	private String startTime;
-	//结束时间
-	private String endTime;
-	//到结束日期的最后1秒
-	private static String sj = " 23:59:59";
-	//控制查询状态
-	private Integer status;
-	//控制查询范围
-	private String scop;
-	//控制排序
-	private String sorter;
-
-	//地区代码
-	private String areaCode;
-	private String areaName;
-	//低价
-	private String loPrice;
-	//高价
-	private String hiPrice;
-	//维度
-	private String lat;
-	//经度
-	private String lng;
-
-
-	public Finder() {
-	}
-
 	public final void setScop(String scop) {
 		this.scop = scop;
 	}
@@ -137,12 +136,12 @@ public class Finder implements Serializable {
 		this.pageSize = pageSize;
 	}
 
-	public static String getSj() {
+	public String getSj() {
 		return sj;
 	}
 
-	public static void setSj(String sj) {
-		Finder.sj = sj;
+	public void setSj(String sj) {
+		this.sj = sj;
 	}
 
 	public String getAreaCode() {

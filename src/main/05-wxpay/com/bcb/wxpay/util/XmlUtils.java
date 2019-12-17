@@ -26,7 +26,7 @@ public abstract class XmlUtils{
     public static Map parse(String xmlStr){
         try{
             StringReader reader = new StringReader(xmlStr);
-            return (Map)XmlUtils.xmlToMap( new InputSource( reader ) ).get("xml");
+            return (Map)xmlToMap( new InputSource( reader ) ).get("xml");
         }catch (Exception e){
             e.printStackTrace();
             return null;

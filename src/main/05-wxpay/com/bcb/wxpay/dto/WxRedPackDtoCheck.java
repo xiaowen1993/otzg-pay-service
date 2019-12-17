@@ -15,8 +15,8 @@ public class WxRedPackDtoCheck extends CheckDtoUtil<WxRedPackDto> {
 
     @Override
     protected void check() {
-        if (checkParam(t.getRedpackOrderNo(), 28)) {
-            msg = "业务单号(redpackOrderNo)参数必填";
+        if (checkParam(t.getRedPackOrderNo(), 28)) {
+            msg = "业务单号(redPackOrderNo)参数必填";
             code = RespTips.PARAM_ERROR.code;
             pass = false;
             return;
@@ -57,7 +57,7 @@ public class WxRedPackDtoCheck extends CheckDtoUtil<WxRedPackDto> {
         }
 
         if(t.getTotalNum().equals(1)
-                && checkEmpty(t.getClientIp())){
+                && checkParam(t.getClientIp(),15)){
             msg = "终端ip地址(clientIp)参数必填";
             code = RespTips.PARAM_ERROR.code;
             pass = false;
@@ -70,7 +70,7 @@ public class WxRedPackDtoCheck extends CheckDtoUtil<WxRedPackDto> {
             pass = false;
             return;
         }
-        if(checkParam(t.getRemark(),32)){
+        if(checkParam(t.getRemark(),256)){
             msg = "备注信息(remark)参数必填";
             code = RespTips.PARAM_ERROR.code;
             pass = false;

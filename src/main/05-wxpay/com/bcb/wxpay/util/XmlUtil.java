@@ -3,7 +3,6 @@
  */
 package com.bcb.wxpay.util;
 
-import org.dom4j.io.SAXReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

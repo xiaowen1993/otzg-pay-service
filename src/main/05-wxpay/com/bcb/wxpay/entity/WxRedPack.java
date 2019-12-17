@@ -361,7 +361,7 @@ public class WxRedPack implements Serializable {
 
         //判断是否在枚举类型内的值
         public final static String tips(Integer i){
-            return Arrays.asList(PayOrder.StatusType.values())
+            return Arrays.asList(StatusType.values())
                     .stream()
                     .filter(statusType -> statusType.index.equals(i))
                     .map(statusType -> statusType.name)
