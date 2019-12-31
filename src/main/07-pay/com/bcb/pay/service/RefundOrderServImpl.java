@@ -93,7 +93,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
             if (!payChannelAccountServ.freezeBalance(payChannelAccount, new BigDecimal(payRefundOrderDto.getAmount()))) {
                 return 3;
             }
-            PT("冻结支付渠道账户退款余额成功。开始执行退款业务=> refundOrderDto.orderNo="+ payRefundOrderDto.getOrderNo());
+            PT("冻结支付渠道账户退款余额成功。开始执行退款业务=> refundOrderDto.orderNo="+ payRefundOrderDto.getSubOrderNo());
 
             RefundOrder refundOrder = createRefundOrder(payOrder.getPayChannel(), payOrder.getPayChannelAccount(), payOrder.getPayOrderNo(), payRefundOrderDto);
             PT("创建退款业务单成功=> refundOrder.getRefundOrderNo="+refundOrder.getRefundOrderNo());
@@ -171,7 +171,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         //支付系统退款业务单号
         refundOrder.setPayRefundOrderNo(getPayOrderNo(payRefundOrderDto.getUnitId()));
         //子系统收款时候的业务单号
-        refundOrder.setOrderNo(payRefundOrderDto.getOrderNo());
+        refundOrder.setSubOrderNo(payRefundOrderDto.getSubOrderNo());
         //子系统退款业务单号
         refundOrder.setRefundOrderNo(payRefundOrderDto.getRefundOrderNo());
 
@@ -204,7 +204,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         refundOrderLog.setId(getId());
 
         refundOrderLog.setPayRefundOrderNo(refundOrder.getPayRefundOrderNo());
-        refundOrderLog.setOrderNo(refundOrder.getOrderNo());
+        refundOrderLog.setSubOrderNo(refundOrder.getSubOrderNo());
         refundOrderLog.setRefundOrderNo(refundOrder.getRefundOrderNo());
         refundOrderLog.setAmount(refundOrder.getAmount());
         refundOrderLog.setCreateTime(DateUtil.now());

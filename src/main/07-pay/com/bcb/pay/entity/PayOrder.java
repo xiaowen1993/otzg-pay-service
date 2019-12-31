@@ -92,8 +92,8 @@ public class PayOrder implements Serializable {
     String payOrderNo;
 
     //子系统业务单号(由子系统业务生成)
-    @Column(name = "order_no", length = 64, nullable = false, unique = true)
-    String orderNo;
+    @Column(name = "sub_order_no", length = 64, nullable = false, unique = true)
+    String subOrderNo;
 
     //支付业务发起端id
     @Column(name = "app_id", length = 64)
@@ -155,7 +155,7 @@ public class PayOrder implements Serializable {
 
 
         this.setPayOrderNo(payOrderNo);
-        this.setOrderNo(payOrderDto.getOrderNo());
+        this.setSubOrderNo(payOrderDto.getSubOrderNo());
         this.setSubject(payOrderDto.getSubject());
         this.setAmount(new BigDecimal(payOrderDto.getAmount()));
 
@@ -284,12 +284,12 @@ public class PayOrder implements Serializable {
         this.payChannel = payChannel;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public String getSubOrderNo() {
+        return subOrderNo;
     }
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
+    public void setSubOrderNo(String subOrderNo) {
+        this.subOrderNo = subOrderNo;
     }
 
     public String getAppId() {
@@ -339,7 +339,7 @@ public class PayOrder implements Serializable {
     public Map<String, Object> getJson() {
         Map<String, Object> jo = getBaseJson();
         //业务信息
-        jo.put("orderNo", Optional.ofNullable(this.getOrderNo()).orElse(""));
+        jo.put("subOrderNo", Optional.ofNullable(this.getSubOrderNo()).orElse(""));
         jo.put("details", Optional.ofNullable(this.getDetails()).orElse(""));
 
 

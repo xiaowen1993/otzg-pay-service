@@ -38,8 +38,8 @@ public class PayOrderLog implements Serializable {
     String payOrderNo;
 
     //子系统业务单号(由子系统业务生成)
-    @Column(name = "order_no",length = 64,nullable = false)
-    String orderNo;
+    @Column(name = "sub_order_no",length = 64,nullable = false)
+    String subOrderNo;
 
 
     //支付发生额
@@ -115,13 +115,7 @@ public class PayOrderLog implements Serializable {
         this.payOrderNo = payOrderNo;
     }
 
-    public String getOrderNo() {
-        return orderNo;
-    }
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
-    }
 
     public Date getCreateTime() {
         return createTime;
@@ -180,6 +174,15 @@ public class PayOrderLog implements Serializable {
         this.status = status;
     }
 
+
+    public String getSubOrderNo() {
+        return subOrderNo;
+    }
+
+    public void setSubOrderNo(String subOrderNo) {
+        this.subOrderNo = subOrderNo;
+    }
+
     public Map getJson(){
         Map<String,Object> jo = new TreeMap<>();
         jo.put("id",this.getId());
@@ -188,7 +191,7 @@ public class PayOrderLog implements Serializable {
         //支付单号
         jo.put("payOrderNo",this.getPayOrderNo());
         //子系统业务单号
-        jo.put("orderNo",this.getOrderNo());
+        jo.put("subOrderNo",this.getSubOrderNo());
         jo.put("amount",this.getAmount());
 
         //支付渠道

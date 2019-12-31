@@ -40,7 +40,7 @@ public class RefundApi extends AbstractController {
         if (CheckUtil.isEmpty(payRefundOrderDto)
                 ||CheckUtil.isEmpty(payRefundOrderDto.getSubject())
                 ||CheckUtil.isEmpty(payRefundOrderDto.getAmount())
-                ||CheckUtil.isEmpty(payRefundOrderDto.getOrderNo())
+                ||CheckUtil.isEmpty(payRefundOrderDto.getSubOrderNo())
                 ||CheckUtil.isEmpty(payRefundOrderDto.getRefundOrderNo())
                 ||CheckUtil.isEmpty(payRefundOrderDto.getUnitId())){
 
@@ -49,7 +49,7 @@ public class RefundApi extends AbstractController {
         }
 
         //判断是否有对应的而且成功的收款单号
-        PayOrder payOrder = payOrderServ.getSuccessByOrderNo(payRefundOrderDto.getOrderNo());
+        PayOrder payOrder = payOrderServ.getSuccessByOrderNo(payRefundOrderDto.getSubOrderNo());
         if(null == payOrder){
             sendJson(false, RespTips.PAYORDER_NOTFINISHED.code,RespTips.PAYORDER_NOTFINISHED.tips);
             return;

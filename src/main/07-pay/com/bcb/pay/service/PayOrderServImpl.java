@@ -84,7 +84,7 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
     @Override
     public PayOrder findByUnitAndOrderNo(String unitId, String orderNo) {
-        return payOrderDao.findByUnitIdAndOrderNo(unitId,orderNo).orElse(null);
+        return payOrderDao.findByUnitIdAndSubOrderNo(unitId,orderNo).orElse(null);
     }
 
     @Override
@@ -115,13 +115,13 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
 
     @Override
-    public boolean checkByOrderNo(String orderNo) {
-        return payOrderDao.findByOrderNo(orderNo).isPresent();
+    public boolean checkByOrderNo(String subOrderNo) {
+        return payOrderDao.findBySubOrderNo(subOrderNo).isPresent();
     }
 
     @Override
-    public PayOrder getSuccessByOrderNo(String orderNo) {
-        Optional<PayOrder> op = payOrderDao.findByOrderNo(orderNo);
+    public PayOrder getSuccessByOrderNo(String subOrderNo) {
+        Optional<PayOrder> op = payOrderDao.findBySubOrderNo(subOrderNo);
         if(op.isPresent() && op.get().getStatus()==1){
             return op.get();
         }
@@ -190,7 +190,7 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         payChannelAccountServ.add(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
 
         //通知子系统收款已成功
-        sendSubNotify(payOrder.getOrderNo(),payOrder.getPayNotify());
+        sendSubNotify(payOrder.getSubOrderNo(),payOrder.getPayNotify());
     }
 
 
@@ -211,7 +211,7 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         payOrderLog.setCreateTime(DateUtil.now());
         payOrderLog.setPayOrderNo(payOrder.getPayOrderNo());
         //子系统业务单号
-        payOrderLog.setOrderNo(payOrder.getOrderNo());
+        payOrderLog.setSubOrderNo(payOrder.getSubOrderNo());
         payOrderLog.setPayChannel(payOrder.getPayChannel());
 
         //支付渠道付款人账号
@@ -239,8 +239,8 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
     @Override
     @Transactional
-    public boolean subReceiveNotify(String orderNo) {
-        Optional<PayOrder> op = payOrderDao.findByOrderNo(orderNo);
+    public boolean subReceiveNotify(String subOrderNo) {
+        Optional<PayOrder> op = payOrderDao.findBySubOrderNo(subOrderNo);
         if(!op.isPresent()                              //没有对应支付单
                 || op.get().getStatus()!=1){            //没有支付
             return false;

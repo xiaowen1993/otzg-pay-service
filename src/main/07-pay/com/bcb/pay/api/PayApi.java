@@ -165,7 +165,7 @@ public class PayApi extends AbstractController {
         }
 
         //判断业务单号是否已经生成
-        if (payOrderServ.checkByOrderNo(payOrderDto.getOrderNo())) {
+        if (payOrderServ.checkByOrderNo(payOrderDto.getSubOrderNo())) {
             sendJson(false, RespTips.PAYORDER_FOUND.code, RespTips.PAYORDER_FOUND.tips);
             return;
         }

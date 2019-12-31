@@ -12,8 +12,8 @@ public interface PayOrderDao extends AbstractDao<PayOrder,Long> {
     //根据支付业务单查询
     Optional<PayOrder> findByPayOrderNo(String payOrderNo);
     //根据子系统收款单查询
-    Optional<PayOrder> findByOrderNo(String orderNo);
+    Optional<PayOrder> findBySubOrderNo(String subOrderNo);
 
-    Optional<PayOrder> findByUnitIdAndOrderNo(String unitId,String orderNo);
+    Optional<PayOrder> findByUnitIdAndSubOrderNo(String unitId,String subOrderNo);
     Optional<PayOrder> findByUnitIdAndPayOrderNo(String unitId,String payOrderNo);
 }

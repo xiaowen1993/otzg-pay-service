@@ -8,9 +8,9 @@ import java.io.Serializable;
  *
  * 1.必填参数通过构造函数创建
  *
- * v1.0.2
+ * v1.0.3
  * @Author G.
- * @Date 2019/12/30 下午 17:57
+ * @Date 2019/12/31 下午 18:10
  */
 public class PayOrderDto implements Serializable {
 
@@ -43,7 +43,7 @@ public class PayOrderDto implements Serializable {
      * 必填
      * length(32)
      */
-    String orderNo;
+    String subOrderNo;
 
     /**
      * 支付项目
@@ -149,13 +149,13 @@ public class PayOrderDto implements Serializable {
     }
 
     //通过构造函数创建
-    public PayOrderDto(String orderNo,
+    public PayOrderDto(String subOrderNo,
                        String payType,
                        String subject,
                        String unitId,
                        String payChannel,
                        Double amount) {
-        this.orderNo = orderNo;
+        this.subOrderNo = subOrderNo;
         this.payType = payType;
         this.subject = subject;
         this.unitId = unitId;
@@ -196,8 +196,8 @@ public class PayOrderDto implements Serializable {
         this.isProfitSharing = isProfitSharing;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public String getSubOrderNo() {
+        return subOrderNo;
     }
 
     public String getPayType() {

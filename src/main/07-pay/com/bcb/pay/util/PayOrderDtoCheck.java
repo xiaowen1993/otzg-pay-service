@@ -37,8 +37,8 @@ public abstract class PayOrderDtoCheck extends CheckDtoUtil<PayOrderDto> {
      */
     protected void baseCheck() {
         //子系统的业务单号必填
-        if (checkParam(t.getOrderNo(), 32)) {
-            msg = "业务单号(orderNo)参数必填";
+        if (checkParam(t.getSubOrderNo(), 32)) {
+            msg = "业务单号(subOrderNo)参数必填";
             return;
         }
         //支付渠道不能为空,且支付系统支持

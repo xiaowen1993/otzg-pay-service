@@ -4,7 +4,9 @@ import java.io.Serializable;
 
 /**
  * @Author G.
- * @Date 2019/11/27 0027 上午 10:32
+ * v1.0.3
+ * @Author G.
+ * @Date 2019/12/31 下午 18:10
  */
 public class PayRefundOrderDto implements Serializable {
     /**
@@ -35,7 +37,7 @@ public class PayRefundOrderDto implements Serializable {
      * 必填
      * length(32)
      */
-    String orderNo;
+    String subOrderNo;
 
     /**
      * 子系统退款业务单号
@@ -57,11 +59,11 @@ public class PayRefundOrderDto implements Serializable {
     private PayRefundOrderDto() {
     }
 
-    public PayRefundOrderDto(String unitId, String memberId, Double amount, String orderNo, String refundOrderNo, String subject) {
+    public PayRefundOrderDto(String unitId, String memberId, Double amount, String subOrderNo, String refundOrderNo, String subject) {
         this.unitId = unitId;
         this.memberId = memberId;
         this.amount = amount;
-        this.orderNo = orderNo;
+        this.subOrderNo = subOrderNo;
         this.refundOrderNo = refundOrderNo;
         this.subject = subject;
     }
@@ -78,8 +80,8 @@ public class PayRefundOrderDto implements Serializable {
         return amount;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public String getSubOrderNo() {
+        return subOrderNo;
     }
 
     public String getSubject() {

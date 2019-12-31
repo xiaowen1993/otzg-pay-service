@@ -30,8 +30,8 @@ public class RefundOrder implements Serializable {
     String payRefundOrderNo;
 
     //子系统收款时候的业务单号
-    @Column(name = "order_no", length = 64, nullable = false)
-    String orderNo;
+    @Column(name = "sub_order_no", length = 64, nullable = false)
+    String subOrderNo;
 
     //子系统退款业务单号(由子系统业务生成)
     @Column(name = "refund_order_no", length = 64, nullable = false, unique = true)
@@ -89,12 +89,12 @@ public class RefundOrder implements Serializable {
         this.id = id;
     }
 
-    public String getOrderNo() {
-        return orderNo;
+    public String getSubOrderNo() {
+        return subOrderNo;
     }
 
-    public void setOrderNo(String orderNo) {
-        this.orderNo = orderNo;
+    public void setSubOrderNo(String subOrderNo) {
+        this.subOrderNo = subOrderNo;
     }
 
     public String getMemberId() {
@@ -199,7 +199,7 @@ public class RefundOrder implements Serializable {
                 .add("id:" + id)
                 .add("payOrderNo:'" + payOrderNo + "'")
                 .add("payRefundOrderNo:'" + payRefundOrderNo + "'")
-                .add("orderNo:'" + orderNo + "'")
+                .add("subOrderNo:'" + subOrderNo + "'")
                 .add("refundOrderNo:'" + refundOrderNo + "'")
                 .add("memberId:'" + Optional.ofNullable(memberId).orElse("") + "'")
                 .add("unitId:'" + unitId + "'")
