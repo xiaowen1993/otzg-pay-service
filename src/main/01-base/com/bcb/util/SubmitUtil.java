@@ -266,7 +266,9 @@ public class SubmitUtil {
 //	private final static String url = "http://cs-yuedanping.fangshangqu.cn/answer/record/findListOne?token=E9E9DAE3DBC1E573CB738110F3C792EDFBE992BC735785FDEB06D01C7E25D990&testPaperId=1&recordId=73";
 //	private final static String url = "http://cs-yuedanping.fangshangqu.cn/user/login?account=13703957387&password=123456";
 //	private final static String url = "https://yonghu.fangshangqu.cn/login/wechat?appid=7648eb564c58c07a&unionId=&openId=oHZB8wYWjc0cqmMVO3cNhhKplptI&promotionId=";
-	private final static String url = "http://127.0.0.1:8030/test2";
+//	private final static String url = "http://127.0.0.1:8030/test2";
+//	private final static String url = "http://127.0.0.1:8070/order/goods/buy?token=EB0318BF7A016AACF1E71707EECF598B7E40547D7692F1573BE9284D10778CF8FBE992BC735785FDEB06D01C7E25D990&goodsId=1&quantity=2&addressId=1&memo=%E7%AB%8B%E9%A9%AC%E5%8F%91%E8%B4%A7&couponCode=";
+	private final static String url = "http://127.0.0.1:8050/unit/register?token=EB0318BF7A016AACF1E71707EECF598B35EBCAFFECCC3F1105328A9C6D3EAE65FBE992BC735785FDEB06D01C7E25D990&mobile=13703957317&areaCode=4101&areaName=%E6%B2%B3%E5%8D%97%E9%83%91%E5%B7%9E&name=%E7%8E%8B%E5%A4%A7%E9%99%86&street=%E5%B7%A5%E4%BA%BA%E8%B7%AF100%E5%8F%B7";
 	public static class sendMultiHttp implements Runnable{
 		private int i;
 		public sendMultiHttp(int i){
@@ -307,7 +309,7 @@ public class SubmitUtil {
 	}
 
 	public static void main(String args[]){
-		testConcurrent(1000);
+		testConcurrent(10);
 
 //		testForeach();
 //		String appid="7186b1e96b7847d5";

@@ -3,7 +3,7 @@
 ####
 
   server:
-    port: 8030
+    port: 8031
 #    服务器本地路径
     fileSavePath: E:/log/
 #    fileSavePath: C:/Program Files/Apache Software Foundation/Tomcat 8.5/webapps/ROOT
@@ -108,6 +108,7 @@
       hibernate:
         ddl-auto: update
 #        ddl-auto: create
+      database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
 
     http:
       encoding:

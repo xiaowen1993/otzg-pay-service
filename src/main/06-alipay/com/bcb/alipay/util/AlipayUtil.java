@@ -86,7 +86,6 @@ public class AlipayUtil implements PayReceive, PayQuery {
     public Map precreatePay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
 
         try {
-
             AlipayTradePrecreateModel model = new AlipayTradePrecreateModel();
             model.setOutTradeNo(payOrderNo);
             model.setSubject(payOrderDto.getSubject());
@@ -159,6 +158,8 @@ public class AlipayUtil implements PayReceive, PayQuery {
              */
             ExtendParams extendParams = new ExtendParams();
             extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            if (null != payOrderDto.getHbFqNum())
+                extendParams.setHbFqNum(payOrderDto.getHbFqNum());
             model.setExtendParams(extendParams);
 
             AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
@@ -228,6 +229,8 @@ public class AlipayUtil implements PayReceive, PayQuery {
              */
             ExtendParams extendParams = new ExtendParams();
             extendParams.setSysServiceProviderId(AlipayConfig.pid);
+            if (null != payOrderDto.getHbFqNum())
+                extendParams.setHbFqNum(payOrderDto.getHbFqNum());
             model.setExtendParams(extendParams);
 
             AlipayTradePayRequest request = new AlipayTradePayRequest();
@@ -687,17 +690,17 @@ public class AlipayUtil implements PayReceive, PayQuery {
             //支付成功需返回结果
             //String payChannelNo,String payerId,String payeeId;
             JSONObject jo = new JSONObject();
-            jo.put("payChannelNo",response.getTradeNo());
-            jo.put("payerId",response.getBuyerUserId());
-            jo.put("payeeId",appAuthToken);
+            jo.put("payChannelNo", response.getTradeNo());
+            jo.put("payerId", response.getBuyerUserId());
+            jo.put("payeeId", appAuthToken);
 
             //交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）、TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）、TRADE_SUCCESS（交易支付成功）、TRADE_FINISHED（交易结束，不可退款）
             if (response.getTradeStatus().equals("TRADE_SUCCESS")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNEL_PAY_SUCCESS.code, RespTips.PAYCHANNEL_PAY_SUCCESS.tips,jo);
+                return FastJsonUtil.get(true, RespTips.PAYCHANNEL_PAY_SUCCESS.code, RespTips.PAYCHANNEL_PAY_SUCCESS.tips, jo);
             } else if (response.getTradeStatus().equals("TRADE_CLOSED")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_CLOSED.code, RespTips.PAYCHANNLE_PAY_CLOSED.tips,jo);
+                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_CLOSED.code, RespTips.PAYCHANNLE_PAY_CLOSED.tips, jo);
             } else if (response.getTradeStatus().equals("TRADE_FINISHED")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_FINISHED.code, RespTips.PAYCHANNLE_PAY_FINISHED.tips,jo);
+                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_FINISHED.code, RespTips.PAYCHANNLE_PAY_FINISHED.tips, jo);
             } else {
                 return FastJsonUtil.get(false, response.getCode(), "支付失败", response.getBody());
             }

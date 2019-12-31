@@ -1,7 +1,7 @@
 package com.bcb.wxpay.util.service;
 
 import com.bcb.log.util.LogUtil;
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.util.PayRefund;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
@@ -41,7 +41,7 @@ public class WxRefundUtil implements PayRefund {
                                                 String payOrderNo,
                                                 String refundOrderNo,
                                                 Double totalAmount,
-                                                RefundOrderDto refundOrderDto) {
+                                                PayRefundOrderDto payRefundOrderDto) {
         Map<String, String> paramMap = new HashMap<>();
         //子商户号
         paramMap.put("sub_mch_id", subMchId);
@@ -57,7 +57,7 @@ public class WxRefundUtil implements PayRefund {
         //订单金额
         paramMap.put("total_fee", "" + Math.round(totalAmount * 100));
         //退款金额
-        paramMap.put("refund_fee", "" + Math.round(refundOrderDto.getAmount() * 100));
+        paramMap.put("refund_fee", "" + Math.round(payRefundOrderDto.getAmount() * 100));
         //仅针对老资金流商户使用
         //REFUND_SOURCE_UNSETTLED_FUNDS---未结算资金退款（默认使用未结算资金退款）
         //REFUND_SOURCE_RECHARGE_FUNDS---可用余额退款
@@ -117,14 +117,14 @@ public class WxRefundUtil implements PayRefund {
      * @return
      */
     @Override
-    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
+    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
         Map map = getInitMap();
         try {
             WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name(),true);
             wxPayConfig.setUrl(WXPayConstants.getPayRefundUrl());
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
-            Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, refundOrderDto.getAmount(), refundOrderDto);
+            Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, payRefundOrderDto.getAmount(), payRefundOrderDto);
             map = wxPayRequest.requestCert(data);
             LogUtil.saveTradeLog("调用结果=" + map);
             //2019-11-27 16:52

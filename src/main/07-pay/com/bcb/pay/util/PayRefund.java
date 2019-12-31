@@ -1,6 +1,6 @@
 package com.bcb.pay.util;
 
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 
 import java.util.Map;
 
@@ -17,7 +17,7 @@ public interface PayRefund {
      * @return
      *       payChannelNo       成功必须返回支付渠道单号
      */
-    Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, RefundOrderDto refundOrderDto);
+    Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto);
 
     /**
      * 退款结果查询

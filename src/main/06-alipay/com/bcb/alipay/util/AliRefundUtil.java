@@ -1,7 +1,5 @@
 package com.bcb.alipay.util;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeFastpayRefundQueryModel;
@@ -11,7 +9,7 @@ import com.alipay.api.request.AlipayTradeRefundRequest;
 import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.bcb.log.util.LogUtil;
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.util.PayRefund;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
@@ -43,14 +41,14 @@ public class AliRefundUtil implements PayRefund {
      */
 
     @Override
-    public Map refund(String payChannelAccount, String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
+    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
         try{
             AlipayTradeRefundModel model = new AlipayTradeRefundModel();
             //按照收款业务单退款
             model.setOutTradeNo(payOrderNo);
             //标识一次退款请求，同一笔交易多次退款需要保证唯一，如需部分退款，则此参数必传。
             model.setOutRequestNo(refundOrderNo);
-            model.setRefundAmount(FuncUtil.getDoubleScale(refundOrderDto.getAmount()).toString());
+            model.setRefundAmount(FuncUtil.getDoubleScale(payRefundOrderDto.getAmount()).toString());
 
             AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
             //第三方应用授权

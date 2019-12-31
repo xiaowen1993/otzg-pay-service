@@ -1,7 +1,7 @@
 package com.bcb.pay.service;
 
 import com.bcb.base.Finder;
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.RefundOrder;
 
@@ -29,10 +29,10 @@ public interface RefundOrderServ {
      * 3.执行退款业务
      * @param payAccountId  基本账户id,可以获取支付渠道账户
      * @param payOrder
-     * @param refundOrderDto
+     * @param payRefundOrderDto
      * @return
      */
-    int refundByUnit(Long payAccountId,PayOrder payOrder, RefundOrderDto refundOrderDto);
+    int refundByUnit(Long payAccountId,PayOrder payOrder, PayRefundOrderDto payRefundOrderDto);
 
     /**
      * 查询退款结果

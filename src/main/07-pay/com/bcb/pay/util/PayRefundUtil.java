@@ -1,7 +1,7 @@
 package com.bcb.pay.util;
 
 import com.bcb.alipay.util.AliRefundUtil;
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.wxpay.util.service.WxRefundUtil;
 
 import java.util.Map;
@@ -27,8 +27,8 @@ public class PayRefundUtil implements PayRefund {
     }
 
     @Override
-    public Map refund(String payChannelAccount,String payOrderNo,String refundOrderNo,RefundOrderDto refundOrderDto) {
-        return this.payRefund.refund(payChannelAccount,payOrderNo,refundOrderNo,refundOrderDto);
+    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
+        return this.payRefund.refund(payChannelAccount,payOrderNo,refundOrderNo, payRefundOrderDto);
     }
 
     @Override

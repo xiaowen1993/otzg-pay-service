@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @Author G.
  * @Date 2019/11/27 0027 上午 10:32
  */
-public class RefundOrderDto implements Serializable {
+public class PayRefundOrderDto implements Serializable {
     /**
      * 子系统单位(商户)id
      *
@@ -54,10 +54,10 @@ public class RefundOrderDto implements Serializable {
      */
     String subject;
 
-    private RefundOrderDto() {
+    private PayRefundOrderDto() {
     }
 
-    public RefundOrderDto(String unitId, String memberId, Double amount, String orderNo, String refundOrderNo, String subject) {
+    public PayRefundOrderDto(String unitId, String memberId, Double amount, String orderNo, String refundOrderNo, String subject) {
         this.unitId = unitId;
         this.memberId = memberId;
         this.amount = amount;

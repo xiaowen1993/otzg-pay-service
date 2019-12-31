@@ -11,7 +11,7 @@ import java.util.Map;
  * @Author G.
  * @Date 2019/11/23 0023 下午 3:28
  */
-public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
+public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck {
 
     public PayOrderDtoWxpayCheck(PayOrderDto t) {
         super(t);
@@ -24,12 +24,10 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
 
     @Override
     public void check() {
-        super.check();
+        super.baseCheck();
 
         if (!TradeType.has(t.getPayType())) {
             msg = "微信支付类型(payType)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
 
@@ -45,13 +43,14 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
         } else if (t.getPayType().equals(TradeType.NATIVE.name())) {     //主扫
             nativePayCheck();
         }
+        pass = true;
+        code = RespTips.SUCCESS_CODE.code;
+
     }
 
     void nativePayCheck() {
         if (checkParam(t.getProductId(), 32)) {
             msg = "商品id(productId)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         notifyCheck();
@@ -60,8 +59,6 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     void microPayCheck() {
         if (checkParam(t.getAuthCode(), 128)) {
             msg = "商户应用id(appId)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         ipAddressCheck();
@@ -70,8 +67,6 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     void appPayCheck() {
         if (checkParam(t.getAppId(), 32)) {
             msg = "商户应用id(appId)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         notifyCheck();
@@ -83,8 +78,6 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     void jsapiPayCheck() {
         if (checkParam(t.getMemberId(), 32)) {
             msg = "付款人openid(memberId)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         ipAddressCheck();
@@ -94,8 +87,6 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     void notifyCheck() {
         if (checkParam(t.getPayNotify(), 255)) {
             msg = "回调地址(payNotify)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
     }
@@ -103,8 +94,6 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck{
     void ipAddressCheck() {
         if (checkParam(t.getIpAddress(), 64)) {
             msg = "终端ip地址(ipAddress)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
     }

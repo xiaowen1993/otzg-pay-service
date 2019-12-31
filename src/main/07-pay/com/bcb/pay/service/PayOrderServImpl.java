@@ -1,8 +1,10 @@
 package com.bcb.pay.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
 import com.bcb.base.Page;
+import com.bcb.base.SyncQue;
 import com.bcb.pay.dao.PayOrderDao;
 import com.bcb.pay.dao.PayOrderLogDao;
 import com.bcb.pay.dto.PayOrderDto;
@@ -16,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.StringJoiner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,6 +33,8 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     PayOrderLogDao payOrderLogDao;
     @Autowired
     PayChannelAccountServ payChannelAccountServ;
+    @Autowired
+    SyncQue syncPayQue;
 
     @Override
     @Transactional
@@ -188,10 +189,8 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         //更新支付渠道账户及账户记录
         payChannelAccountServ.add(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
 
-        //todo 通知子系统收款已成功
-        if(!CheckUtil.isEmpty(payOrder.getPayNotify())){
-            new Thread(()->sendSubNotify(payOrder.getOrderNo(),payOrder.getPayNotify())).start();
-        }
+        //通知子系统收款已成功
+        sendSubNotify(payOrder.getOrderNo(),payOrder.getPayNotify());
     }
 
 
@@ -231,7 +230,35 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
      * @param notifyUrl
      */
     void sendSubNotify(String outTraderNo,String notifyUrl){
-        P("发送收款成功=>"+notifyUrl);
+        JSONObject jo = new JSONObject();
+        jo.put("success",true);
+        jo.put("outTraderNo",outTraderNo);
+        //走消息队列通知子系统
+        new Thread(()->syncPayQue.send(jo.toString())).start();
+    }
+
+    @Override
+    @Transactional
+    public boolean subReceiveNotify(String orderNo) {
+        Optional<PayOrder> op = payOrderDao.findByOrderNo(orderNo);
+        if(!op.isPresent()                              //没有对应支付单
+                || op.get().getStatus()!=1){            //没有支付
+            return false;
+        }
+
+        PayOrder payOrder = op.get();
+        payOrder.setPayNotifyStatus(1);
+        payOrder.setPayNotifyTimes(1);
+        payOrderDao.save(payOrder);
+        return true;
+    }
+
+
+
+
+    @Override
+    public void testNotify(String orderNo){
+        sendSubNotify(orderNo,null);
     }
 
 

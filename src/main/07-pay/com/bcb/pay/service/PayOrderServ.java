@@ -3,6 +3,7 @@ package com.bcb.pay.service;
 import com.bcb.base.Finder;
 import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.entity.PayOrder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
@@ -112,7 +113,6 @@ public interface PayOrderServ {
      */
     Map findPayOrderByUnit(Finder f, String unitId, String payChannel);
 
-
     /**
      * 处理支付回调业务
      * 1.支付成功：更新支付单状态：payOrder.status=1
@@ -127,4 +127,15 @@ public interface PayOrderServ {
      */
     boolean handleNotify(String payOrderNo, String payChannelNo, String resultCode, String payerId, String payeeId);
 
+
+    /**
+     * 子系统确认收到支付结果
+     * @param orderNo
+     * @return
+     */
+    boolean subReceiveNotify(String orderNo);
+
+
+
+    void testNotify(String orderNo);
 }

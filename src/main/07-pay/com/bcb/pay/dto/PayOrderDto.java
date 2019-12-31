@@ -8,8 +8,9 @@ import java.io.Serializable;
  *
  * 1.必填参数通过构造函数创建
  *
+ * v1.0.2
  * @Author G.
- * @Date 2019/11/23 上午 10:36
+ * @Date 2019/12/30 下午 17:57
  */
 public class PayOrderDto implements Serializable {
 
@@ -138,6 +139,11 @@ public class PayOrderDto implements Serializable {
      */
     String deviceInfo;
 
+    /**
+     * 支付宝花呗分期数（目前仅支持3、6、12）
+     */
+    String hbFqNum;
+
     private PayOrderDto() {
 
     }
@@ -260,5 +266,13 @@ public class PayOrderDto implements Serializable {
 
     public void setDeviceInfo(String deviceInfo) {
         this.deviceInfo = deviceInfo;
+    }
+
+    public String getHbFqNum() {
+        return hbFqNum;
+    }
+
+    public void setHbFqNum(String hbFqNum) {
+        this.hbFqNum = hbFqNum;
     }
 }

@@ -1,24 +1,21 @@
 package com.bcb.pay.api;
 
 import com.bcb.base.Finder;
-import com.bcb.pay.dto.RefundOrderDto;
+import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.entity.PayAccount;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.RefundOrder;
 import com.bcb.pay.service.PayAccountServ;
-import com.bcb.pay.service.PayChannelAccountServ;
 import com.bcb.pay.service.PayOrderServ;
 import com.bcb.pay.service.RefundOrderServ;
 import com.bcb.util.CheckUtil;
 import com.bcb.util.FuncUtil;
-import com.bcb.util.LockUtil;
 import com.bcb.util.RespTips;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 /**
  * @Author G.
@@ -36,36 +33,36 @@ public class RefundApi extends AbstractController {
 
     /**
      * 退款接口
-     * @param refundOrderDto
+     * @param payRefundOrderDto
      */
     @RequestMapping(value = "/pay/refund")
-    public void refund(RefundOrderDto refundOrderDto) {
-        if (CheckUtil.isEmpty(refundOrderDto)
-                ||CheckUtil.isEmpty(refundOrderDto.getSubject())
-                ||CheckUtil.isEmpty(refundOrderDto.getAmount())
-                ||CheckUtil.isEmpty(refundOrderDto.getOrderNo())
-                ||CheckUtil.isEmpty(refundOrderDto.getRefundOrderNo())
-                ||CheckUtil.isEmpty(refundOrderDto.getUnitId())){
+    public void refund(PayRefundOrderDto payRefundOrderDto) {
+        if (CheckUtil.isEmpty(payRefundOrderDto)
+                ||CheckUtil.isEmpty(payRefundOrderDto.getSubject())
+                ||CheckUtil.isEmpty(payRefundOrderDto.getAmount())
+                ||CheckUtil.isEmpty(payRefundOrderDto.getOrderNo())
+                ||CheckUtil.isEmpty(payRefundOrderDto.getRefundOrderNo())
+                ||CheckUtil.isEmpty(payRefundOrderDto.getUnitId())){
 
             sendParamError();
             return;
         }
 
         //判断是否有对应的而且成功的收款单号
-        PayOrder payOrder = payOrderServ.getSuccessByOrderNo(refundOrderDto.getOrderNo());
+        PayOrder payOrder = payOrderServ.getSuccessByOrderNo(payRefundOrderDto.getOrderNo());
         if(null == payOrder){
             sendJson(false, RespTips.PAYORDER_NOTFINISHED.code,RespTips.PAYORDER_NOTFINISHED.tips);
             return;
         }
 
         //退款金额不能大于订单收款金额
-        if(FuncUtil.getBigDecimalScale(payOrder.getAmount()).compareTo(FuncUtil.getBigDecimalScale(new BigDecimal(refundOrderDto.getAmount())))<0){
+        if(FuncUtil.getBigDecimalScale(payOrder.getAmount()).compareTo(FuncUtil.getBigDecimalScale(new BigDecimal(payRefundOrderDto.getAmount())))<0){
             sendJson(false, RespTips.PAYACCOUNT_REFUND_LESS.code,RespTips.PAYACCOUNT_REFUND_LESS.tips);
             return;
         }
 
         //判断商户基本账户是否被禁用
-        PayAccount payAccount = payAccountServ.findByUnitId(refundOrderDto.getUnitId());
+        PayAccount payAccount = payAccountServ.findByUnitId(payRefundOrderDto.getUnitId());
         if(null==payAccount
                 || !payAccount.isUseable()){
             sendJson(false,RespTips.PAYACCOUNT_IS_UNAVAILABLE.code,RespTips.PAYACCOUNT_IS_UNAVAILABLE.tips);
@@ -73,7 +70,7 @@ public class RefundApi extends AbstractController {
         }
 
         //获取退款结果立即返回,退款是否成功提供退款查询接口
-        int r = refundOrderServ.refundByUnit(payAccount.getId(),payOrder, refundOrderDto);
+        int r = refundOrderServ.refundByUnit(payAccount.getId(),payOrder, payRefundOrderDto);
         //如果没有对应的渠道
         if(r==0){
             //退款成功

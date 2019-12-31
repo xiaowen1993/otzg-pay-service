@@ -8,8 +8,8 @@ import java.util.Map;
  */
 public abstract class CheckDtoUtil<T> {
     protected T t;
-    protected boolean pass = true;
-    protected String code = RespTips.SUCCESS_CODE.code;
+    protected boolean pass = false;
+    protected String code = RespTips.PARAM_ERROR.code;
     protected String msg = "";
     //构造函数
     public CheckDtoUtil(T t) {
@@ -18,7 +18,6 @@ public abstract class CheckDtoUtil<T> {
 
     //校验不成功返回null(创建支付单失败)
     public T get() {
-        check();
         if (!pass) {
             return null;
         }

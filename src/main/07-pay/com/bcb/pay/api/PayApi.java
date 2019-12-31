@@ -9,6 +9,7 @@ import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.service.PayAccountServ;
 import com.bcb.pay.service.PayChannelAccountServ;
 import com.bcb.pay.service.PayOrderServ;
+import com.bcb.pay.util.PayOrderDtoCheckImpl;
 import com.bcb.pay.util.PayOrderDtoCheckUtil;
 import com.bcb.util.CheckUtil;
 import com.bcb.util.RespTips;
@@ -16,7 +17,6 @@ import com.bcb.util.UrlUtil;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
 import com.bcb.wxpay.util.service.WXPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -149,15 +149,15 @@ public class PayApi extends AbstractController {
 
     //收款业务
     @RequestMapping(value = "/pay/receive")
-    public void payReceive(PayOrderDto payOrderDto) {
 //    public void payReceive(@RequestBody PayOrderDto payOrderDto) {
+    public void payReceive(PayOrderDto payOrderDto) {
         if (CheckUtil.isEmpty(payOrderDto)) {
             sendParamError();
             return;
         }
 
         //策略模式校验参数
-        PayOrderDtoCheckUtil payOrderDtoCheck = new PayOrderDtoCheckUtil(payOrderDto);
+        PayOrderDtoCheckUtil payOrderDtoCheck = new PayOrderDtoCheckImpl(payOrderDto);
         payOrderDto = payOrderDtoCheck.get();
         if (null == payOrderDto) {
             sendJson(payOrderDtoCheck.getMsg());
@@ -210,6 +210,29 @@ public class PayApi extends AbstractController {
         sendJson(payOrderServ.findPayOrderByUnit(finder,unitId,payChannel));
 
     }
+
+    @RequestMapping(value = "/payOrder/sub/receive")
+    public void subReceiveNotify(String orderNo){
+        if(CheckUtil.isEmpty(orderNo)){
+            sendParamError();
+            return;
+        }
+
+        if(payOrderServ.subReceiveNotify(orderNo)){
+            sendSuccess();
+        }else{
+            sendFail();
+        }
+
+    }
+
+
+    @RequestMapping(value = "/payOrder/testNotify")
+    public void testNotify(String orderNo){
+        payOrderServ.testNotify(orderNo);
+        sendSuccess(orderNo);
+    }
+
 
 }
 

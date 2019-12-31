@@ -28,54 +28,45 @@ public abstract class PayOrderDtoCheck extends CheckDtoUtil<PayOrderDto> {
     //构造函数
     public PayOrderDtoCheck(PayOrderDto payOrderDto) {
         super(payOrderDto);
+        check();
     }
 
     /**
      * 校验收款业务单参数
      *
      */
-    protected void check() {
+    protected void baseCheck() {
         //子系统的业务单号必填
         if (checkParam(t.getOrderNo(), 32)) {
             msg = "业务单号(orderNo)参数必填";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         //支付渠道不能为空,且支付系统支持
         if (checkParam(t.getPayChannel(), 16)) {
             msg = "支付渠道(payChannel)参数必填";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         //支付项目名称必填
         if (checkParam(t.getSubject(), 64)) {
             msg = "支付项目(subject)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         //支付金额必填
         if (checkAmount(t.getAmount())) {
             msg = "支付金额(amount)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
         //支付业务类型必填
         if (checkParam(t.getPayType(), 16)) {
             msg = "支付业务类型(payType)参数错误";
-            code = RespTips.PARAM_ERROR.code;
             return;
         }
         //收款商户id必填
         if (checkParam(t.getUnitId(), 32)) {
             msg = "收款商户id(unitId)参数错误";
-            code = RespTips.PARAM_ERROR.code;
-            pass = false;
             return;
         }
     }
 
+    protected abstract void check();
 }
