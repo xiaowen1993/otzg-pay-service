@@ -77,7 +77,7 @@ public class PayAccountApi extends AbstractController {
             return;
         }
 
-        sendJson(payAccountServ.findByUnit(finder,unitId,payChannel));
+        sendSuccess(payAccountServ.findByUnit(finder,unitId,payChannel));
     }
 
 

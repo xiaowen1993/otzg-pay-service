@@ -32,70 +32,58 @@ public class PayOrderDtoWxpayCheck extends PayOrderDtoCheck {
         }
 
         if (t.getPayType().equals(TradeType.JSAPI.name())) {  //微信及小程序
-            jsapiPayCheck();
+            if (checkParam(t.getMemberId(), 32)) {
+                msg = "付款人openid(memberId)参数错误";
+                return;
+            }
+            if (checkParam(t.getIpAddress(), 64)) {
+                msg = "终端ip地址(ipAddress)参数错误";
+                return;
+            }
+//            if (checkParam(t.getPayNotify(), 255)) {
+//                msg = "回调地址(payNotify)参数错误";
+//                return;
+//            }
         } else if (t.getPayType().equals(TradeType.APP.name())) {   //app
-            appPayCheck();
+            if (checkParam(t.getAppId(), 32)) {
+                msg = "商户应用id(appId)参数错误";
+                return;
+            }
+//            if (checkParam(t.getPayNotify(), 255)) {
+//                msg = "回调地址(payNotify)参数错误";
+//                return;
+//            }
         } else if (t.getPayType().equals(TradeType.MWEB.name())) {   //h5收款校验
-            ipAddressCheck();
-            notifyCheck();
+            if (checkParam(t.getIpAddress(), 64)) {
+                msg = "终端ip地址(ipAddress)参数错误";
+                return;
+            }
+//            if (checkParam(t.getPayNotify(), 255)) {
+//                msg = "回调地址(payNotify)参数错误";
+//                return;
+//            }
         } else if (t.getPayType().equals(TradeType.MICROPAY.name())) {   //刷脸及扫码收款校验
-            microPayCheck();
+            if (checkParam(t.getAuthCode(), 128)) {
+                msg = "用户条码(authCode)参数错误";
+                return;
+            }
+            if (checkParam(t.getIpAddress(), 64)) {
+                msg = "终端ip地址(ipAddress)参数错误";
+                return;
+            }
         } else if (t.getPayType().equals(TradeType.NATIVE.name())) {     //主扫
-            nativePayCheck();
+            if (checkParam(t.getProductId(), 32)) {
+                msg = "商品id(productId)参数错误";
+                return;
+            }
+//            if (checkParam(t.getPayNotify(), 255)) {
+//                msg = "回调地址(payNotify)参数错误";
+//                return;
+//            }
         }
         pass = true;
         code = RespTips.SUCCESS_CODE.code;
 
-    }
-
-    void nativePayCheck() {
-        if (checkParam(t.getProductId(), 32)) {
-            msg = "商品id(productId)参数错误";
-            return;
-        }
-        notifyCheck();
-    }
-
-    void microPayCheck() {
-        if (checkParam(t.getAuthCode(), 128)) {
-            msg = "商户应用id(appId)参数错误";
-            return;
-        }
-        ipAddressCheck();
-    }
-
-    void appPayCheck() {
-        if (checkParam(t.getAppId(), 32)) {
-            msg = "商户应用id(appId)参数错误";
-            return;
-        }
-        notifyCheck();
-    }
-
-    /**
-     * jsapi参数校验
-     */
-    void jsapiPayCheck() {
-        if (checkParam(t.getMemberId(), 32)) {
-            msg = "付款人openid(memberId)参数错误";
-            return;
-        }
-        ipAddressCheck();
-        notifyCheck();
-    }
-
-    void notifyCheck() {
-        if (checkParam(t.getPayNotify(), 255)) {
-            msg = "回调地址(payNotify)参数错误";
-            return;
-        }
-    }
-
-    void ipAddressCheck() {
-        if (checkParam(t.getIpAddress(), 64)) {
-            msg = "终端ip地址(ipAddress)参数错误";
-            return;
-        }
     }
 
     public enum TradeType {

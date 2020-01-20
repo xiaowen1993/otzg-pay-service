@@ -25,6 +25,7 @@ import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.util.PayOrderDtoWxpayCheck;
 import com.bcb.pay.util.PayQuery;
 import com.bcb.pay.util.PayReceive;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
 import com.bcb.util.RespTips;
@@ -34,7 +35,6 @@ import com.bcb.wxpay.util.sdk.WXPayUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * 适用于境内服务商收款接口
@@ -318,7 +318,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
      * prepay_id=wx09174830845779aca89c32d40421876724}
      * @author G/2016年10月27日 上午9:04:42
      */
-    final Map postReceive(Map<String, String> map) throws Exception {
+    final PayResult postReceive(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig();
         wxPayConfig.setUrl(WXPayConstants.getUnifiedOrderUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -331,10 +331,12 @@ public class WxpayUtil implements PayReceive, PayQuery {
                 && result.get("result_code").equals("SUCCESS")
         ) {
             LogUtil.saveTradeLog("调用成功=" + result.toString());
-            return FastJsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
+//            return FastJsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
+            return new PayResult(0, result.toString());
         } else {
             LogUtil.saveTradeLog("调用失败");
-            return FastJsonUtil.get(false, result.get("result_code").toString(), "调用失败", result);
+//            return FastJsonUtil.get(false, result.get("result_code").toString(), "调用失败", result);
+            return new PayResult(-1);
         }
     }
 
@@ -390,26 +392,44 @@ public class WxpayUtil implements PayReceive, PayQuery {
      * mch_id=1519839251, return_code=SUCCESS}
      * @author G/2016年10月27日 上午9:04:42
      */
-    final Map postMicroPay(Map<String, String> map) throws Exception {
+    final PayResult postMicroPay(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig();
         wxPayConfig.setUrl(WXPayConstants.getMicroPayUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
         //内置60秒的轮询
-        Map<String, Object> result = wxPayRequest.requestTimes(map);
+//        Map<String, Object> result = wxPayRequest.requestTimes(map);
+
+        //不使用轮询
+        Map<String, Object> result = wxPayRequest.request(map);
 
         LogUtil.saveTradeLog("调用结果=" + result);
         //调用结果={transaction_id=4164583679620190411182047672979, nonce_str=LbQjExfMQquvNd7A7hapTT4SzjesdobU, bank_type=CMC, openid=085e9858e9914da9a0da5522a, sign=64DA7555B343847E35A316B3E1E10322, err_code=SUCCESS, err_code_des=ok, return_msg=OK, fee_type=CNY, mch_id=1519839251, cash_fee=1, device_info=001, out_trade_no=134520174432770725, cash_fee_type=CNY, total_fee=1, appid=wx4dc8cb7f0eb12288, trade_type=MICROPAY, result_code=SUCCESS, time_end=20190411182047, attach=测试刷卡付, is_subscribe=Y, return_code=SUCCESS}
+        //2020-01-04
+        //{nonce_str=rZvyVJqCIzKn7VDc, out_trade_no=2020141528327765745463060,
+        // trade_state=PAYERROR, appid=wxa574b9142c67f42e, sign=5540E46024AA4711F08B0C1A7C33BEEF,
+        // trade_state_desc=支付失败，请撤销订单, return_msg=OK, result_code=SUCCESS,
+        // attach=, mch_id=1513549201, sub_mch_id=1525006091, return_code=SUCCESS}
         if (result.get("return_code") != null
                 && result.get("return_code").equals("SUCCESS")
                 && result.get("result_code") != null
                 && result.get("result_code").equals("SUCCESS")
         ) {
-            JSONObject jo = new JSONObject();
-            jo.put("transaction_id", result.get("transaction_id"));
-            jo.put("openid", result.get("openid"));
-            return FastJsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+//            JSONObject jo = new JSONObject();
+//            jo.put("transaction_id", result.get("transaction_id"));
+//            jo.put("openid", result.get("openid"));
+//            return FastJsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+
+            //如果返回支付结果
+            if (result.get("trade_state") != null
+                    && result.get("trade_state").equals("SUCCESS")) {
+                LogUtil.saveTradeLog("收款成功=" + result.toString());
+                return new PayResult(1);
+            } else {
+                return new PayResult(-1);
+            }
         } else {
-            return FastJsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString(), result);
+//            return FastJsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString(), result);
+            return new PayResult(-1);
         }
     }
 
@@ -456,7 +476,7 @@ public class WxpayUtil implements PayReceive, PayQuery {
      * PAYERROR--支付失败(其他原因，如银行返回失败)
      * @author G/2016年10月27日 上午9:04:42
      */
-    final Map postPayQuery(Map<String, String> map) throws Exception {
+    final PayResult postPayQuery(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig();
         wxPayConfig.setUrl(WXPayConstants.getOrderQueryUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -467,23 +487,36 @@ public class WxpayUtil implements PayReceive, PayQuery {
         //{nonce_str=0chyfIZe9ENsYPZ3, trade_state=NOTPAY, sign=33D5DE519B07D4D1BBA90EBDF355F980, return_msg=OK, mch_id=1513549201, sub_mch_id=1525006091, device_info=, out_trade_no=2019112617355246141867378635, appid=wxa574b9142c67f42e, total_fee=1, trade_state_desc=订单未支付, result_code=SUCCESS, return_code=SUCCESS}
         //{nonce_str=jO9ZItXaoRewh1o3, appid=wxa574b9142c67f42e, sign=4F04D482C13F5FD14712D1730354983D, err_code=ORDERNOTEXIST, return_msg=OK, result_code=FAIL, err_code_des=订单不存在, mch_id=1513549201, sub_mch_id=1525006091, return_code=SUCCESS}
         //{transaction_id=4200000423201911268573008667, nonce_str=Htuf1711NiY17XXd, trade_state=SUCCESS, bank_type=OTHERS, openid=olFJwwNOyw5v5OpMq-2Ex959r5is, sign=130164F6749E46A9F85C5C12C426388E, return_msg=OK, fee_type=CNY, mch_id=1513549201, sub_mch_id=1525006091, cash_fee=1, out_trade_no=2019112617331281031867378635, cash_fee_type=CNY, appid=wxa574b9142c67f42e, total_fee=1, trade_state_desc=支付成功, trade_type=NATIVE, result_code=SUCCESS, attach=, time_end=20191126173621, is_subscribe=Y, return_code=SUCCESS}
+
+        //{nonce_str=sWgHGMySzRRqfB4d, trade_state=NOTPAY,
+        // sign=85102AC90AC1681152E53C6691B16C56, return_msg=OK,
+        // mch_id=1513549201, sub_mch_id=1525006091, device_info=,
+        // out_trade_no=2020141040202900745463060, appid=wxa574b9142c67f42e,
+        // total_fee=1000000, trade_state_desc=订单未支付, result_code=SUCCESS, return_code=SUCCESS}
+
+        //{nonce_str=1I6ZXlHxrcajrmsr, out_trade_no=2020141528327765745463060, trade_state=PAYERROR,
+        // appid=wxa574b9142c67f42e, sign=1FF1C741B9B9AC51ED5EF13153458E93, trade_state_desc=支付失败，
+        // 请撤销订单, return_msg=OK, result_code=SUCCESS, attach=, mch_id=1513549201,
+        // sub_mch_id=1525006091, return_code=SUCCESS}
+
         if (null == result.get("return_code")
                 || !result.get("return_code").equals("SUCCESS")) {
             LogUtil.saveTradeLog("调用接口失败");
-            return FastJsonUtil.get(false, RespTips.ERROR_CODE.code, "调用接口失败");
+//            return FastJsonUtil.get(false, RespTips.ERROR_CODE.code, "调用接口失败");
+            return new PayResult(-1);
         }
 
         //如果不正常返回
         if (null == result.get("result_code")
                 || !result.get("result_code").equals("SUCCESS")) {
             LogUtil.saveTradeLog("支付结果错误");
-            return FastJsonUtil.get(false, result.get("err_code").toString(), "支付结果错误");
+//            return FastJsonUtil.get(false, result.get("err_code").toString(), "支付结果错误");
+            return new PayResult(-1);
         }
 
         //如果返回支付结果
         if (result.get("trade_state") != null
-                && result.get("trade_state").equals("SUCCESS")
-        ) {
+                && result.get("trade_state").equals("SUCCESS")) {
             LogUtil.saveTradeLog("收款成功=" + result.toString());
             //{transaction_id=4200000423201911268573008667, nonce_str=Htuf1711NiY17XXd, trade_state=SUCCESS, bank_type=OTHERS,
             // openid=olFJwwNOyw5v5OpMq-2Ex959r5is, sign=130164F6749E46A9F85C5C12C426388E, return_msg=OK, fee_type=CNY,
@@ -496,57 +529,56 @@ public class WxpayUtil implements PayReceive, PayQuery {
              * result.get("transaction_id").toString(),result.get("openid").toString(),result.get("sub_mch_id").toString();
              * String payChannelNo,String payerId,String payeeId;
              */
-            JSONObject jo = new JSONObject();
-            jo.put("payChannelNo",result.get("transaction_id"));
-            jo.put("payerId",result.get("openid"));
-            jo.put("payeeId",result.get("sub_mch_id"));
-            return FastJsonUtil.get(true, result.get("trade_state").toString(), "收款成功",jo);
+//            JSONObject jo = new JSONObject();
+//            jo.put("payChannelNo",result.get("transaction_id"));
+//            jo.put("payerId",result.get("openid"));
+//            jo.put("payeeId",result.get("sub_mch_id"));
+//            return FastJsonUtil.get(true, result.get("trade_state").toString(), "收款成功",jo);
+            return new PayResult(1);
+
+        } else if (result.get("trade_state") != null
+                && result.get("trade_state").equals("PAYERROR")) {
+            return new PayResult(-1);
         } else {
             LogUtil.saveTradeLog("收款未成功");
-            return FastJsonUtil.get(false, result.get("trade_state").toString(), "收款未成功");
+//            return FastJsonUtil.get(false, result.get("trade_state").toString(), "收款未成功");
+            return new PayResult(0);
         }
     }
 
-    //初始化一个返回值
-    final Map getInitMap() {
-        Map map = new TreeMap();
-        map.put("success", false);
-        return map;
-    }
+    PayResult payResult;
 
     //微信支付收款业务入口
-    public final Map pay(String subMchId, String payOrderNo, PayOrderDto payOrderDto) {
-        Map map = getInitMap();
+    public final PayResult pay(String subMchId, String payOrderNo, PayOrderDto payOrderDto) {
         try {
             if (payOrderDto.getPayType().equals(PayOrderDtoWxpayCheck.TradeType.JSAPI.name())) {
-                map = postReceive(receiveJsapiData(subMchId, payOrderNo, payOrderDto));
+                payResult = postReceive(receiveJsapiData(subMchId, payOrderNo, payOrderDto));
             } else if (payOrderDto.getPayType().equals(PayOrderDtoWxpayCheck.TradeType.APP.name())) {
-                map = postReceive(receiveAppData(subMchId, payOrderNo, payOrderDto));
+                payResult = postReceive(receiveAppData(subMchId, payOrderNo, payOrderDto));
             } else if (payOrderDto.getPayType().equals(PayOrderDtoWxpayCheck.TradeType.MWEB.name())) {   //h5收款校验
-                map = postReceive(receiveH5Data(subMchId, payOrderNo, payOrderDto));
+                payResult = postReceive(receiveH5Data(subMchId, payOrderNo, payOrderDto));
             } else if (payOrderDto.getPayType().equals(PayOrderDtoWxpayCheck.TradeType.MICROPAY.name())) {   //扫码收款校验
-                map = postMicroPay(microPayData(subMchId, payOrderNo, payOrderDto));
+                payResult = postMicroPay(microPayData(subMchId, payOrderNo, payOrderDto));
             } else if (payOrderDto.getPayType().equals(PayOrderDtoWxpayCheck.TradeType.NATIVE.name())) {     //主扫
-                map = postReceive(receiveNativeData(subMchId, payOrderNo, payOrderDto));
+                payResult = postReceive(receiveNativeData(subMchId, payOrderNo, payOrderDto));
             }
 
-            LogUtil.saveTradeLog("微信支付结果=>" + map.toString());
-            return map;
+            LogUtil.saveTradeLog("微信支付结果=>" + payResult.toString());
+            return payResult;
 
         } catch (Exception e) {
             LogUtil.saveTradeLog("微信支付错误=>" + e.toString());
-            return map;
+            return payResult;
         }
     }
 
     //微信支付收款查询接口
-    public final Map query(String subMchId, String payOrderNo) {
-        Map map = getInitMap();
+    public final PayResult query(String subMchId, String payOrderNo) {
         try {
             return postPayQuery(payQueryData(subMchId, payOrderNo));
         } catch (Exception e) {
             LogUtil.saveTradeLog("微信收款查询错误=>" + e.toString());
-            return map;
+            return payResult;
         }
     }
 

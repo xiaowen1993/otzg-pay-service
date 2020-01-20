@@ -123,8 +123,7 @@ public class PayOrder implements Serializable {
 
 
     /**
-     * 是否需要分账
-     * {0:否,1:是}
+     * 是否需要分账{0:否,1:是}
      */
     @Column(name = "is_profit_sharing", nullable = false, length = 1)
     Integer isProfitSharing = 0;
@@ -136,6 +135,16 @@ public class PayOrder implements Serializable {
      */
     @Column(name = "status", nullable = false, length = 1)
     Integer status = 0;
+
+
+    /**
+     * 订单支付数据保存
+     * 1.创建支付单后，获取预支付信息，保存到支付单
+     * 2.如果子系统没有拉起支付或者链接失败可以重新获取
+     */
+    @Column(name = "pay_body",length = 1000)
+    String payBody;
+
 
     public PayOrder() {
     }
@@ -318,6 +327,14 @@ public class PayOrder implements Serializable {
 
     public void setIsProfitSharing(Integer isProfitSharing) {
         this.isProfitSharing = isProfitSharing;
+    }
+
+    public String getPayBody() {
+        return payBody;
+    }
+
+    public void setPayBody(String payBody) {
+        this.payBody = payBody;
     }
 
     public Map<String, Object> getBaseJson() {

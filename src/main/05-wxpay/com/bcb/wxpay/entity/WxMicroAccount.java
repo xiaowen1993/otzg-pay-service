@@ -12,6 +12,23 @@ import java.util.StringJoiner;
 
 /**
  * 小微商户基本信息
+ *
+ * 参考链接
+ * https://pay.weixin.qq.com/index.php/core/affiliate/micro_intro
+ *
+ * 小微商户支付权限
+ * JSAPI支付
+ * Native支付
+ * 付款码支付
+ *
+ * 普通商户支付权限
+ * JSAPI支付
+ * Native支付
+ * 付款码支付
+ * H5支付
+ * APP支付
+ *
+ *
  */
 @Entity
 @Table
@@ -101,10 +118,10 @@ public class WxMicroAccount implements Serializable {
     //售卖商品/提供服务描述
     @Column(name = "product_desc", nullable = false, length = 50)
     String productDesc;
-    //费率
+    //费率枚举值{0.38%、0.39%、0.4%、0.45%、0.48%、0.49%、0.5%、0.55%、0.58%、0.59%、0.6%}
     @Column(name = "rate", nullable = false, length = 50)
     String rate;
-    //超级管理员姓名
+    //超级管理员姓名 和身份证姓名一致
     @Column(name = "contact", nullable = false, length = 50)
     String contact;
     //手机号
@@ -119,7 +136,7 @@ public class WxMicroAccount implements Serializable {
     @Column(name = "bank_name", length = 256)
     String bankName;
 
-
+    //商户申请单号
     @Column(name = "applyment_id", length = 32)
     String applymentId;
     //创建时间

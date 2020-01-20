@@ -1,8 +1,10 @@
 package com.bcb.wxpay.util.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.bcb.base.ResultUtil;
+import com.bcb.pay.util.PayResult;
+import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
-import com.bcb.util.JsonUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
@@ -49,7 +51,7 @@ public class DepositSubmit {
     /**
      * 刷脸交押金
      */
-    public final static Map<String, Object> postDepositPay(Map<String, String> map) throws Exception {
+    public final static JSONObject postDepositPay(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig();
 
 //        wxPayConfig.setUseSandBox(true);
@@ -69,9 +71,9 @@ public class DepositSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), result.get("return_msg").toString(),jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
+            return ResultUtil.getJson(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 

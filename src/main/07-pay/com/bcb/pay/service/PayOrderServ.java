@@ -77,32 +77,41 @@ public interface PayOrderServ {
     PayOrder findByPayOrderNo(String unitId, String payOrderNo);
 
     /**
+     * 返回支付单结构
+     * @param subOrderNo
+     * @return
+     */
+    PayOrder findBySubOrderNo(String subOrderNo);
+
+    /**
+     * 取消支付单
+     * @param subOrderNo
+     * @return
+     */
+    boolean payOrderCancel(String subOrderNo);
+
+    /**
      * 子系统支付单查询
      *
      * @param unitId
      * @param orderNo
      * @return
      */
-    PayOrder findByUnitAndOrderNo(String unitId, String orderNo);
+    PayOrder findByUnitAndSubOrderNo(String unitId, String orderNo);
 
     //微信查询支付结果并更新数据
     Map queryByPayChannel(PayOrder payOrder);
 
-    /**
-     * 根据子系统的支付业务单查询是否已经创建
-     *
-     * @param orderNo
-     * @return
-     */
-    boolean checkByOrderNo(String orderNo);
+
+
 
     /**
      * 判断是否收款成功
      *
-     * @param orderNo
+     * @param subOrderNo
      * @return
      */
-    PayOrder getSuccessByOrderNo(String orderNo);
+    PayOrder getSuccessBySubOrderNo(String subOrderNo);
 
     /**
      * 查询商户的支付单
@@ -130,12 +139,14 @@ public interface PayOrderServ {
 
     /**
      * 子系统确认收到支付结果
-     * @param orderNo
+     * @param subOrderNo
      * @return
      */
-    boolean subReceiveNotify(String orderNo);
+    boolean subReceiveNotify(String subOrderNo);
 
 
 
-    void testNotify(String orderNo);
+    void testNotify(String subOrderNo);
+
+
 }

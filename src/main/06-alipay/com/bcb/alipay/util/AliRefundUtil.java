@@ -11,6 +11,7 @@ import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.bcb.log.util.LogUtil;
 import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.util.PayRefund;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
 import com.bcb.util.RespTips;
@@ -41,7 +42,7 @@ public class AliRefundUtil implements PayRefund {
      */
 
     @Override
-    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
+    public PayResult refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
         try{
             AlipayTradeRefundModel model = new AlipayTradeRefundModel();
             //按照收款业务单退款
@@ -65,15 +66,16 @@ public class AliRefundUtil implements PayRefund {
             // "sign":"lwcmzUAhLT3AzDsz0iFUSzQBaGYI4UcIBgCbU/f8UC7CPgRwMm9bhsAZ5bYWTb9dXvoiKlJmOMav/EBbdZ85aOb0imtTq1tfLi4m6qIJIE0+7YxV5GaiGmXpAhiaUgXmQOauV1sLwWPaOXgtqlpAxff+XtZnoffy5Mjrt1fgGRanpfw2lhucCkSaFaHzKnNbehd7e5fWZ0lZmNi0GK8HDDIskmQIrY5ELtwIJP0YjiWhimgqJZXzvKCqDrU7Gb9hOPZDStsd6BNEB3czabjtkHt0+18TX40Gre9aD7+lS54PMF6mQEnijKoohZ7ZYC55IYnwX+yRNmQOWrl2ZEx/dw=="}
             if (response.isSuccess()) {
                 //如果成功应返回一个结构体payChannelNo
-                Map map = new TreeMap();
-                map.put("payChannelNo",response.getTradeNo());
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), map);
+//                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), map);
+                return new PayResult(1,response.getTradeNo());
             } else {
-                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+//                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+                return new PayResult(-1);
             }
         }catch (Exception e){
             e.printStackTrace();
-            return FastJsonUtil.get(false, RespTips.ERROR_CODE.code, e.getMessage());
+//            return FastJsonUtil.get(false, RespTips.ERROR_CODE.code, e.getMessage());
+            return new PayResult(0);
         }
     }
 
@@ -90,10 +92,14 @@ public class AliRefundUtil implements PayRefund {
 
     /**
      * 退款查询
-     * @return {"alipay_trade_fastpay_refund_query_response":{"code":"10000","msg":"Success","out_request_no":"191018154556136588113","out_trade_no":"191018154556136588113","refund_amount":"1.00","total_amount":"1.00","trade_no":"2019010922001433520200660680"},"sign":"j8OcS61wlzGJ0Zb7wUMplSTmtRDqet/vuJUUDPxCefyMZjnBWbI3tNiN4QeVwhHT1ugP0H2IdNGOJueswboEqT20Cy5fqrZj1WnzxpT1YpCGbL+eAo69A5oZLI0W4hbZnepbR0MpxnOA70A7vD3SSouPn34LQqMF9VX/cbp14zgWNDil0oEKhaoYkKX3ggpyYInE0QpMxFh4hmN5zYcQH088p4yOny8L315AN066imFBrgTLgmyu/48l1Vn89RzOfXTc88XJ7tyvHxmooR21icar5zBhGT6+8PnBcMN7d734bB+d/qZE7pKKbL8+7weMBPxpdLtx1mCbBMqE3VSyFg=="}
+     * @return {"alipay_trade_fastpay_refund_query_response":
+     * {"code":"10000","msg":"Success","out_request_no":"191018154556136588113",
+     * "out_trade_no":"191018154556136588113","refund_amount":"1.00","total_amount":"1.00",
+     * "trade_no":"2019010922001433520200660680"},
+     * "sign":"j8OcS61wlzGJ0Zb7wUMplSTmtRDqet/vuJUUDPxCefyMZjnBWbI3tNiN4QeVwhHT1ugP0H2IdNGOJueswboEqT20Cy5fqrZj1WnzxpT1YpCGbL+eAo69A5oZLI0W4hbZnepbR0MpxnOA70A7vD3SSouPn34LQqMF9VX/cbp14zgWNDil0oEKhaoYkKX3ggpyYInE0QpMxFh4hmN5zYcQH088p4yOny8L315AN066imFBrgTLgmyu/48l1Vn89RzOfXTc88XJ7tyvHxmooR21icar5zBhGT6+8PnBcMN7d734bB+d/qZE7pKKbL8+7weMBPxpdLtx1mCbBMqE3VSyFg=="}
      */
     @Override
-    public Map query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
+    public PayResult query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
         try{
             AlipayTradeFastpayRefundQueryModel model = new AlipayTradeFastpayRefundQueryModel();
             //订单支付时传入的商户订单号,和支付宝交易号不能同时为空。 trade_no,out_trade_no如果同时存在优先取trade_no
@@ -108,13 +114,16 @@ public class AliRefundUtil implements PayRefund {
 
             AlipayTradeFastpayRefundQueryResponse response = getAlipayClient().execute(request);
             if (response.isSuccess()) {
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg());
+//                return FastJsonUtil.get(true, response.getCode(), response.getMsg());
+                return new PayResult(1,response.getTradeNo());
             } else {
-                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+//                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+                return new PayResult(-1);
             }
         }catch (Exception e){
             e.printStackTrace();
-            return FastJsonUtil.get(false,RespTips.ERROR_CODE.code, e.getMessage());
+//            return FastJsonUtil.get(false,RespTips.ERROR_CODE.code, e.getMessage());
+            return new PayResult(0);
         }
     }
 }

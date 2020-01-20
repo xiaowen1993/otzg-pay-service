@@ -17,7 +17,7 @@ public interface PayRefund {
      * @return
      *       payChannelNo       成功必须返回支付渠道单号
      */
-    Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto);
+    PayResult refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto);
 
     /**
      * 退款结果查询
@@ -26,5 +26,5 @@ public interface PayRefund {
      * @param refundOrderNo     退款业务单号(平台)
      * @return
      */
-    Map query(String payChannelAccount, String payOrderNo, String refundOrderNo);
+    PayResult query(String payChannelAccount, String payOrderNo, String refundOrderNo);
 }

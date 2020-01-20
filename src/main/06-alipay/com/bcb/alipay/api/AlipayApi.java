@@ -37,7 +37,9 @@ public class AlipayApi extends AbstractController {
 
     /**
      * 支付宝授权回调接口
-     * app_auth_code  应用授权的 app_auth_code 是唯一的；app_auth_code 使用一次后失效，单个授权的有效期为一天（从生成 app_auth_code 开始的24小时）未被使用自动过期；批量授权的有效期为 10 分钟。     *
+     * app_auth_code  应用授权的 app_auth_code 是唯一的；app_auth_code 使用一次后失效，
+     * 单个授权的有效期为一天（从生成 app_auth_code 开始的24小时）
+     * 未被使用自动过期；批量授权的有效期为 10 分钟。     *
      * app_auth_token 永久有效。
      * 和开发者的 app_id
      *

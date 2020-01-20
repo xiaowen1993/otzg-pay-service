@@ -43,6 +43,7 @@ public class RefundOrderLog implements Serializable {
     @Column(name = "amount", precision = 8, scale = 2,nullable = false)
     BigDecimal amount;
 
+//
 
     //=============================支付渠道=============================//
     /**

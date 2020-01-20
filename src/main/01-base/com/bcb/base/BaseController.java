@@ -66,16 +66,7 @@ public abstract class BaseController extends BaseBean {
 			P("sendJson is wrong :"+ex);
 		}
 	}
-	
-	/**
-	 * 发送json格式的操作结果
-	 * @param b success:true|false 表示操作是否成功
-	 * @param c code:"操作码"
-	 */
-	protected final void sendJson(boolean b,String c){
-		sendJson(JsonUtil.get(b,c));
-	}
-	
+
 	/**
 	 * 发送json数据
 	 * @param b true|false
@@ -83,34 +74,13 @@ public abstract class BaseController extends BaseBean {
 	 * @param m 提示信息
 	 */
 	protected final void sendJson(boolean b,String c,String m){
-		sendJson(JsonUtil.get(b,c,m));
+		sendJson(ResultUtil.getJson(b,c,m));
 	}
 
 	protected final void sendJson(boolean b,String c,String m,Object o){
-		sendJson(JsonUtil.get(b,c,m,o));
+		sendJson(ResultUtil.getJson(b,c,m,o));
 	}
 
-	/**
-	 * 发送完整的json格式
-	 * WEBSERVER发送JSON
-	 * @param b success:true|false 表示操作是否成功
-	 * @param c message:"关于操作结果的说明"
-	 * @param o 返回结果集合
-	 */
-	protected final void sendJson(boolean b,String c,Object o){
-		sendJson(JsonUtil.get(b,c,o));
-	}
-
-	/**
-	 * 发送完整的json格式
-	 * WEBSERVER发送JSON
-	 * @param b success:true|false 表示操作是否成功
-	 * @param c message:"关于操作结果的说明"
-	 * @param o 返回结果集合
-	 */
-	protected final void sendJson(boolean b,String c,Object o,Long count){
-		sendJson(JsonUtil.get(b,c,o,count));
-	}
    	/**
    	 * 发送html
    	 */
@@ -332,14 +302,7 @@ public abstract class BaseController extends BaseBean {
 	 * @author G/2018年1月6日
 	 */
 	protected final void sendSuccess(Object o){
-		sendJson(true, RespTips.SUCCESS_CODE.code, o);
+		sendJson(true, RespTips.SUCCESS_CODE.code, RespTips.SUCCESS_CODE.tips, o);
 	}
 
-	/**
-	 * 向浏览器发送操作成功(0.8 rate)
-	 * @author G/2018年1月6日
-	 */
-	protected final void sendSuccess(Object o,Long count){
-		sendJson(true, RespTips.SUCCESS_CODE.code, o,count);
-	}
 }

@@ -14,8 +14,8 @@
   eureka:
     client:
       service-url:
-        defaultZone: http://192.168.3.112:8090/eureka
-    #        defaultZone: http://zhuce.fangshangqu.cn/eureka
+#        defaultZone: http://192.168.3.112:8090/eureka
+        defaultZone: http://root:123456@39.107.118.1:8761/eureka/
     instance:
       #      lease-renewal-interval-in-seconds: 10
       #      lease-expiration-duration-in-seconds: 5

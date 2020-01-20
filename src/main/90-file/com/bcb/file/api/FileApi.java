@@ -75,7 +75,7 @@ public class FileApi extends AbstractController {
         }
 
         //返回成功并且包含路径
-        sendJson(true, RespTips.SUCCESS_CODE.code, jo);
+        sendSuccess(jo);
     }
 
     /**

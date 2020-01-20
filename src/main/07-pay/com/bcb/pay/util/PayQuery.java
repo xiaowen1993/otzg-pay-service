@@ -16,5 +16,5 @@ public interface PayQuery {
      *   成功返回 {success:true,code:0000,data:{payChannelNo:支付渠道单号,payerId:付款人id,payeeId:收款人id}}
      *   失败返回 {success:false,code:0000,msg:失败原因}
      */
-    Map query(String payChannelAccount, String payOrderNo);
+    PayResult query(String payChannelAccount, String payOrderNo);
 }

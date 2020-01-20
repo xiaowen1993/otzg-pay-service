@@ -1,25 +1,20 @@
 package com.bcb.pay.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.bcb.base.AbstractServ;
-import com.bcb.base.Finder;
-import com.bcb.base.Page;
-import com.bcb.base.SyncQue;
+import com.bcb.base.*;
 import com.bcb.pay.dao.PayOrderDao;
 import com.bcb.pay.dao.PayOrderLogDao;
 import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.entity.PayOrderLog;
-import com.bcb.pay.util.PayQueryUtil;
-import com.bcb.pay.util.PayReceiveUtil;
+import com.bcb.pay.util.*;
 import com.bcb.util.*;
-import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author G./2018/7/3 10:38
@@ -39,35 +34,55 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     @Override
     @Transactional
     public Map createPayOrderByUnit(String payChannelAccount, PayOrderDto payOrderDto) {
-        RLock lock = redisson.getLock(payChannelAccount);
+        RReadWriteLock lock = redisson.getReadWriteLock(LockUtil.ORDERPRESTR + payOrderDto.getSubOrderNo());
         try {
-            boolean l = lock.tryLock(30, TimeUnit.SECONDS);
-            if (!l) {
-                P("redisson lock false");
-                return null;
+            lock.writeLock().lock();
+            P("加锁成功");
+
+            //判断业务单号是否已经生成
+            PayOrder old = findBySubOrderNo(payOrderDto.getSubOrderNo());
+            if (null != old && old.getStatus()>-1) {
+                //返回支付结果{-1:支付失败,0:未支付,1:支付成功}
+                return new PayResult(old.getStatus(), old.getPayBody()).getJson();
+            }
+
+            //策略模式收款方法
+            PayReceiveUtil payReceiveUtil = new PayReceiveUtil(payOrderDto);
+            if (null == payReceiveUtil) {
+                throw new Exception();
             }
 
             String payOrderNo = getPayOrderNo(payOrderDto.getUnitId());
+
+            //根据创建支付单
             PayOrder payOrder = new PayOrder(payOrderNo, payChannelAccount, payOrderDto);
             payOrder.setId(getId());
             //状态未支付
             payOrder.setStatus(0);
             payOrderDao.save(payOrder);
 
-            //策略模式收款方法
-            PayReceiveUtil payReceiveUtil= new PayReceiveUtil(payOrderDto);
-            if(null==payReceiveUtil){
-                throw new Exception();
+            //如果是微信或支付宝扫码付
+            if (PayOrderDtoWxpayCheck.TradeType.MICROPAY.name().equals(payOrderDto.getPayType())
+                    || PayOrderDtoAlipayCheck.TradeType.BARCODE.name().equals(payOrderDto.getPayType())) {
+
+                new Thread(() -> payReceiveUtil.pay(payChannelAccount, payOrderNo, payOrderDto)).start();
+                return new PayResult(0).getJson();
+
+            } else {
+                //去支付
+                PayResult pr = payReceiveUtil.pay(payChannelAccount, payOrderNo, payOrderDto);
+                //如果有返回信息则保存
+                if (null != pr.getBody()) {
+                    payOrder.setPayBody(pr.getBody().toString());
+                }
+                return pr.getJson();
             }
-
-            return payReceiveUtil.pay(payChannelAccount, payOrderNo, payOrderDto);
-
-        }catch (Exception e){
+        } catch (Exception e) {
             rollBack();
             P("error");
-            return null;
+            return new PayResult(-1).getJson();
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
             P("redisson lock unlock");
         }
     }
@@ -83,8 +98,8 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     }
 
     @Override
-    public PayOrder findByUnitAndOrderNo(String unitId, String orderNo) {
-        return payOrderDao.findByUnitIdAndSubOrderNo(unitId,orderNo).orElse(null);
+    public PayOrder findByUnitAndSubOrderNo(String unitId, String subOrderNo) {
+        return payOrderDao.findByUnitIdAndSubOrderNo(unitId, subOrderNo).orElse(null);
     }
 
     @Override
@@ -95,66 +110,82 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     //微信查询支付结果并更新数据
     @Override
     @Transactional
-    public Map queryByPayChannel(PayOrder payOrder){
+    public Map queryByPayChannel(PayOrder payOrder) {
         //策略模式收款方法
         PayQueryUtil payQueryUtil = new PayQueryUtil(payOrder);
-        Map map = payQueryUtil.query(payOrder.getPayChannelAccount(),payOrder.getPayOrderNo());
-        P("支付渠道查账结果=>"+map.toString());
-        if(null==map
-                || map.get("success").equals(false)
-                || null == map.get("data")){
-            return map;
+        PayResult payResult = payQueryUtil.query(payOrder.getPayChannelAccount(), payOrder.getPayOrderNo());
+        P("支付渠道查账结果=>"+payResult.getJson());
+
+        if (payResult.getResult() == -1) {
+            payOrderCancel(payOrder.getSubOrderNo());
+        } else if (payResult.getResult() == 1) {
+            saveSuccess(payOrder, payOrder.getPayChannel(), payOrder.getMemberId(), payOrder.getUnitId());
         }
-        //支付成功
-        Map result = (Map)map.get("data");
-        //String payChannelNo,String payerId,String payeeId;
-        //执行收款操作
-        saveSuccess(payOrder,result.get("payChannelNo").toString(),result.get("payerId").toString(),result.get("payeeId").toString());
-        return map;
-    }
 
-
-    @Override
-    public boolean checkByOrderNo(String subOrderNo) {
-        return payOrderDao.findBySubOrderNo(subOrderNo).isPresent();
+        return payResult.getJson();
     }
 
     @Override
-    public PayOrder getSuccessByOrderNo(String subOrderNo) {
-        Optional<PayOrder> op = payOrderDao.findBySubOrderNo(subOrderNo);
-        if(op.isPresent() && op.get().getStatus()==1){
-            return op.get();
-        }
-        return null;
+    public PayOrder findBySubOrderNo(String subOrderNo) {
+        return payOrderDao.findBySubOrderNo(subOrderNo)
+                .stream()
+                .sorted(Comparator.comparing(PayOrder::getUpdateTime).reversed())
+                .findFirst()
+                .orElse(null);
+    }
+
+    PayOrder findWaitBySubOrderNo(String subOrderNo) {
+        return payOrderDao.findBySubOrderNo(subOrderNo)
+                .stream().filter(payOrder -> payOrder.getStatus().equals(PayOrder.StatusType.WAIT.index))
+                .sorted(Comparator.comparing(PayOrder::getUpdateTime))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public boolean payOrderCancel(String subOrderNo) {
+        payOrderDao.findBySubOrderNo(subOrderNo)
+                .stream().filter(payOrder -> payOrder.getStatus().equals(PayOrder.StatusType.WAIT.index))
+                .forEach(payOrder -> {
+                    payOrder.setStatus(-1);
+                    payOrder.setUpdateTime(DateUtil.now());
+                    payOrderDao.save(payOrder);
+                });
+        return true;
+    }
+
+    @Override
+    public PayOrder getSuccessBySubOrderNo(String subOrderNo) {
+        return payOrderDao.findBySubOrderNo(subOrderNo)
+                .stream().filter(payOrder -> payOrder.getStatus().equals(PayOrder.StatusType.SUCC.index))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public Map findPayOrderByUnit(Finder finder, String unitId, String payChannel) {
-        Page page = findByUnit(finder,unitId,payChannel);
-        return FastJsonUtil.get(true,
-                RespTips.SUCCESS_CODE.code,
-                ((List<PayOrder>) page.getItems())
-                        .stream()
-                        .map(PayOrder::getBaseJson)
-                        .toArray(),
-                page.getTotalCount()
-        );
+        Page page = findByUnit(finder, unitId, payChannel);
+        return ResultUtil.getPageJson(page.getTotalPages(),page.getTotalCount(),((List<PayOrder>) page.getItems())
+                .stream()
+                .map(PayOrder::getBaseJson)
+                .toArray());
     }
 
-    Page findByUnit(Finder finder, String unitId, String payChannel){
+    Page findByUnit(Finder finder, String unitId, String payChannel) {
         StringJoiner hql = new StringJoiner(" ");
-        hql.add("select po from PayOrder po where po.unitId='"+unitId+"'");
-        if(!CheckUtil.isEmpty(payChannel))
-            hql.add(" and po.payChannel='"+payChannel+"'");
-        if(!CheckUtil.isEmpty(finder.getStatus()))
-            hql.add(" and po.status="+finder.getStatus());
-        if(!CheckUtil.isEmpty(finder.getStartTime()))
-            hql.add(" and po.createTime >= '"+finder.getStartTime()+"'");
-        if(!CheckUtil.isEmpty(finder.getEndTime()))
-            hql.add(" and po.updateTime <= '"+finder.getEndTime()+"'");
+        hql.add("select po from PayOrder po where po.unitId='" + unitId + "'");
+        if (!CheckUtil.isEmpty(payChannel))
+            hql.add(" and po.payChannel='" + payChannel + "'");
+        if (!CheckUtil.isEmpty(finder.getStatus()))
+            hql.add(" and po.status=" + finder.getStatus());
+        if (!CheckUtil.isEmpty(finder.getStartTime()))
+            hql.add(" and po.createTime >= '" + finder.getStartTime() + "'");
+        if (!CheckUtil.isEmpty(finder.getEndTime()))
+            hql.add(" and po.updateTime <= '" + finder.getEndTime() + "'");
 
         hql.add("order by  po.updateTime desc");
-        return payOrderDao.findPageByHql(hql.toString(),finder.getPageSize(),finder.getStartIndex());
+        return payOrderDao.findPageByHql(hql.toString(), finder.getPageSize(), finder.getStartIndex());
     }
 
     @Override
@@ -169,12 +200,12 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
         PayOrder payOrder = op.get();
 
         //如果已经完成返回成功
-        if(payOrder.getStatus()==1){
+        if (payOrder.getStatus() == 1) {
             return true;
         }
 
         //执行收款操作
-        saveSuccess(payOrder,payChannelNo,payerId,payeeId);
+        saveSuccess(payOrder, payChannelNo, payerId, payeeId);
 
         //返回支付成功
         return true;
@@ -182,26 +213,26 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
 
     //收款成功操作
-    void saveSuccess(PayOrder payOrder,String payChannelNo,String payerId,String payeeId){
+    void saveSuccess(PayOrder payOrder, String payChannelNo, String payerId, String payeeId) {
         //保存交易日志
-        savePayOrderLog(payOrder,payOrder.getPayOrderNo(),payChannelNo,payerId,payeeId);
+        savePayOrderLog(payOrder, payOrder.getPayOrderNo(), payChannelNo, payerId, payeeId);
 
         //更新支付渠道账户及账户记录
-        payChannelAccountServ.add(payOrder.getUnitId(),payOrder.getPayOrderNo(),payOrder.getSubject(),payOrder.getPayChannel(),payChannelNo,payOrder.getAmount());
+        payChannelAccountServ.add(payOrder.getUnitId(), payOrder.getPayOrderNo(), payOrder.getSubject(), payOrder.getPayChannel(), payChannelNo, payOrder.getAmount());
 
         //通知子系统收款已成功
-        sendSubNotify(payOrder.getSubOrderNo(),payOrder.getPayNotify());
+        sendSubNotify(payOrder.getSubOrderNo(), payOrder.getPayNotify());
     }
 
 
     //更新支付单及支付单记录
-    void savePayOrderLog(PayOrder payOrder,String payOrderNo,String payChannelNo,String payerId,String payeeId) {
+    void savePayOrderLog(PayOrder payOrder, String payOrderNo, String payChannelNo, String payerId, String payeeId) {
         //保存支付
         payOrder.setStatus(1);
         payOrder.setUpdateTime(DateUtil.now());
         payOrder.setMemberId(payerId);
         payOrderDao.save(payOrder);
-        PT("保存收款单成功 payOrderNo="+payOrderNo);
+        PT("保存收款单成功 payOrderNo=" + payOrderNo);
 
         PayOrderLog payOrderLog = new PayOrderLog();
         payOrderLog.setId(getId());
@@ -226,27 +257,26 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
 
     /**
      * 通知子系统收款成功
+     *
      * @param outTraderNo
      * @param notifyUrl
      */
-    void sendSubNotify(String outTraderNo,String notifyUrl){
+    void sendSubNotify(String outTraderNo, String notifyUrl) {
         JSONObject jo = new JSONObject();
-        jo.put("success",true);
-        jo.put("outTraderNo",outTraderNo);
+        jo.put("success", true);
+        jo.put("outTraderNo", outTraderNo);
         //走消息队列通知子系统
-        new Thread(()->syncPayQue.send(jo.toString())).start();
+        new Thread(() -> syncPayQue.send(jo.toString())).start();
     }
 
     @Override
     @Transactional
     public boolean subReceiveNotify(String subOrderNo) {
-        Optional<PayOrder> op = payOrderDao.findBySubOrderNo(subOrderNo);
-        if(!op.isPresent()                              //没有对应支付单
-                || op.get().getStatus()!=1){            //没有支付
+        PayOrder payOrder = getSuccessBySubOrderNo(subOrderNo);
+        if (null == payOrder) {            //没有支付
             return false;
         }
 
-        PayOrder payOrder = op.get();
         payOrder.setPayNotifyStatus(1);
         payOrder.setPayNotifyTimes(1);
         payOrderDao.save(payOrder);
@@ -254,11 +284,9 @@ public class PayOrderServImpl extends AbstractServ implements PayOrderServ {
     }
 
 
-
-
     @Override
-    public void testNotify(String orderNo){
-        sendSubNotify(orderNo,null);
+    public void testNotify(String subOrderNo) {
+        sendSubNotify(subOrderNo, null);
     }
 
 

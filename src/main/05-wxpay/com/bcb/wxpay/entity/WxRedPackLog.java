@@ -1,7 +1,5 @@
 package com.bcb.wxpay.entity;
 
-import org.apache.commons.lang3.builder.ToStringExclude;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;

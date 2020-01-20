@@ -11,13 +11,16 @@ import com.bcb.pay.service.PayChannelAccountServ;
 import com.bcb.pay.service.PayOrderServ;
 import com.bcb.pay.util.PayOrderDtoCheckImpl;
 import com.bcb.pay.util.PayOrderDtoCheckUtil;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.CheckUtil;
 import com.bcb.util.RespTips;
 import com.bcb.util.UrlUtil;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
 import com.bcb.wxpay.util.service.WXPayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +45,7 @@ public class PayApi extends AbstractController {
     /**
      * 支付宝回调
      * 回调频率 25小时8次回调 0m, 4m,10m,10m,1h,2h,6h,15h
+     *
      * @throws UnsupportedEncodingException
      */
     @RequestMapping(value = "/pay/alipay/notify")
@@ -85,6 +89,7 @@ public class PayApi extends AbstractController {
     /**
      * 微信回调地址
      * 回调频率：（15/15/30/180/1800/1800/1800/1800/3600，单位：秒）
+     *
      * @throws Exception
      */
     @RequestMapping(value = "/pay/wx/notify")
@@ -116,41 +121,33 @@ public class PayApi extends AbstractController {
 
     //收款业务查询
     @RequestMapping(value = "/pay/query")
-    public void payOrderQuery(String unitId, String orderNo) {
-        if (CheckUtil.isEmpty(unitId)
-                || CheckUtil.isEmpty(orderNo)) {
+    public void payOrderQuery(String subOrderNo) {
+        if (CheckUtil.isEmpty(subOrderNo)) {
             sendParamError();
             return;
         }
 
         //查询收款订单
-        PayOrder payOrder = payOrderServ.findByUnitAndOrderNo(unitId, orderNo);
-        if (CheckUtil.isEmpty(payOrder)) {
-            PT("没有对应的支付订单");
-            sendJson(false, RespTips.DATA_NULL.code, "没有预生成的订单");
+        PayOrder payOrder = payOrderServ.findBySubOrderNo(subOrderNo);
+        if (CheckUtil.isEmpty(payOrder)
+                || payOrder.getStatus().equals(-1)) {
+            PT("没有对应的支付订单或者支付失败");
+            sendSuccess(new PayResult(-1).getJson());
             return;
-        }
-
-        if (payOrder.getStatus().equals(1)) {
+        }else if (payOrder.getStatus().equals(1)) {
             PT("订单支付已成功");
-            sendJson(true, RespTips.SUCCESS_CODE.code, "订单支付已成功");
+            sendSuccess(new PayResult(1).getJson());
             return;
-        }
-
-        //如果没有收款成功，调支付渠道接口查询
-        if (payOrder.getStatus() == 0) {
-            sendJson(payOrderServ.queryByPayChannel(payOrder));
-            return;
-        } else {
-            PT("订单支付失败");
-            sendJson(false, RespTips.PAYORDER_ERROR.code, RespTips.PAYORDER_ERROR.tips);
+        } else{
+            //如果没有收款成功，调支付渠道接口查询
+            sendSuccess(payOrderServ.queryByPayChannel(payOrder));
         }
     }
 
     //收款业务
     @RequestMapping(value = "/pay/receive")
-//    public void payReceive(@RequestBody PayOrderDto payOrderDto) {
-    public void payReceive(PayOrderDto payOrderDto) {
+    public void payReceive(@RequestBody PayOrderDto payOrderDto) {
+//    public void payReceive(PayOrderDto payOrderDto) {
         if (CheckUtil.isEmpty(payOrderDto)) {
             sendParamError();
             return;
@@ -161,12 +158,6 @@ public class PayApi extends AbstractController {
         payOrderDto = payOrderDtoCheck.get();
         if (null == payOrderDto) {
             sendJson(payOrderDtoCheck.getMsg());
-            return;
-        }
-
-        //判断业务单号是否已经生成
-        if (payOrderServ.checkByOrderNo(payOrderDto.getSubOrderNo())) {
-            sendJson(false, RespTips.PAYORDER_FOUND.code, RespTips.PAYORDER_FOUND.tips);
             return;
         }
 
@@ -187,17 +178,7 @@ public class PayApi extends AbstractController {
         }
 
         //获取支付结果
-        Map result = payOrderServ.createPayOrderByUnit(payChannelAccount.getPayChannelAccount(), payOrderDto);
-
-        //如果返回失败
-        if (result.get("success").equals(false)) {
-            sendFail(result.get("msg").toString());
-            return;
-        }
-
-        //如果成功
-        sendSuccess(result.get("data"));
-
+        sendSuccess(payOrderServ.createPayOrderByUnit(payChannelAccount.getPayChannelAccount(), payOrderDto));
     }
 
     @RequestMapping(value = "/payOrder/find")
@@ -207,30 +188,45 @@ public class PayApi extends AbstractController {
             return;
         }
         //如果成功
-        sendJson(payOrderServ.findPayOrderByUnit(finder,unitId,payChannel));
+        sendSuccess(payOrderServ.findPayOrderByUnit(finder, unitId, payChannel));
 
     }
 
     @RequestMapping(value = "/payOrder/sub/receive")
-    public void subReceiveNotify(String orderNo){
-        if(CheckUtil.isEmpty(orderNo)){
+    public void subReceiveNotify(String subOrderNo) {
+        if (CheckUtil.isEmpty(subOrderNo)) {
             sendParamError();
             return;
         }
 
-        if(payOrderServ.subReceiveNotify(orderNo)){
+        if (payOrderServ.subReceiveNotify(subOrderNo)) {
             sendSuccess();
-        }else{
+        } else {
             sendFail();
         }
 
     }
 
+    @RequestMapping(value = "/payOrder/sub/cancel")
+    public void payOrderCancel(String subOrderNo){
+        if (CheckUtil.isEmpty(subOrderNo)) {
+            sendParamError();
+            return;
+        }
+
+        if (payOrderServ.payOrderCancel(subOrderNo)) {
+            sendSuccess();
+        } else {
+            sendFail();
+        }
+    }
+
+
 
     @RequestMapping(value = "/payOrder/testNotify")
-    public void testNotify(String orderNo){
-        payOrderServ.testNotify(orderNo);
-        sendSuccess(orderNo);
+    public void testNotify(String subOrderNo) {
+        payOrderServ.testNotify(subOrderNo);
+        sendSuccess(subOrderNo);
     }
 
 

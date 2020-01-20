@@ -2,7 +2,9 @@ package com.bcb.pay.dao;
 
 import com.bcb.base.AbstractDao;
 import com.bcb.pay.entity.PayOrder;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,8 +13,10 @@ import java.util.Optional;
 public interface PayOrderDao extends AbstractDao<PayOrder,Long> {
     //根据支付业务单查询
     Optional<PayOrder> findByPayOrderNo(String payOrderNo);
+
     //根据子系统收款单查询
-    Optional<PayOrder> findBySubOrderNo(String subOrderNo);
+    @Query("select po from PayOrder po where po.subOrderNo=?1")
+    List<PayOrder> findBySubOrderNo(String subOrderNo);
 
     Optional<PayOrder> findByUnitIdAndSubOrderNo(String unitId,String subOrderNo);
     Optional<PayOrder> findByUnitIdAndPayOrderNo(String unitId,String payOrderNo);

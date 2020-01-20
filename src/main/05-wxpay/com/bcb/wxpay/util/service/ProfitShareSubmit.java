@@ -1,11 +1,11 @@
 package com.bcb.wxpay.util.service;
 
-import com.bcb.util.JsonUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.bcb.base.ResultUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -70,7 +70,7 @@ public class ProfitShareSubmit {
         return paramMap;
     }
 
-    public final static Map<String, String> profitSharing(Map<String, String> map) throws Exception {
+    public final static JSONObject profitSharing(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name(), true);
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -86,9 +86,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
+            return ResultUtil.getJson(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -133,7 +133,7 @@ public class ProfitShareSubmit {
      * @return
      * @throws Exception
      */
-    public final static Map<String, String> profitSharingQuery(Map<String, String> map) throws Exception {
+    public final static JSONObject profitSharingQuery(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name());
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingQueryUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -148,9 +148,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
+            return ResultUtil.getJson(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -197,7 +197,7 @@ public class ProfitShareSubmit {
      * @return
      * @throws Exception
      */
-    public final static Map<String, String> addProfitSharingReceiver(Map<String, String> map) throws Exception {
+    public final static JSONObject addProfitSharingReceiver(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name());
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingAddReceiverUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -213,9 +213,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
+            return ResultUtil.getJson(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -257,7 +257,7 @@ public class ProfitShareSubmit {
         return paramMap;
     }
 
-    public final static Map<String, String> deleteProfitsharingReceiver(Map<String, String> map) throws Exception {
+    public final static JSONObject deleteProfitsharingReceiver(Map<String, String> map) throws Exception {
         WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name());
         wxPayConfig.setUrl(WXPayConstants.getProfitSharingRemoveReceiverUrl());
         WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
@@ -273,9 +273,9 @@ public class ProfitShareSubmit {
             JSONObject jo = new JSONObject();
             jo.put("transaction_id", result.get("transaction_id"));
             jo.put("openid", result.get("openid"));
-            return JsonUtil.get(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), result.get("return_msg").toString(), jo);
         } else {
-            return JsonUtil.get(false, result.get("result_code").toString(), result.get("err_code_des").toString());
+            return ResultUtil.getJson(false, result.get("result_code").toString(), result.get("err_code_des").toString());
         }
     }
 
@@ -302,7 +302,7 @@ public class ProfitShareSubmit {
         jsonObject.put("name", "河南乐之途电子科技有限公司");
         jsonObject.put("relation_type", "STORE_OWNER");
         Map<String, String> payData = addProfitSharingReceiverData(subMchId, jsonObject);
-        Map<String, String> result = addProfitSharingReceiver(payData);
+        Map result = addProfitSharingReceiver(payData);
         System.out.println("result=" + result);
 
         //2019-11-21 09:15
@@ -332,7 +332,7 @@ public class ProfitShareSubmit {
         jsonObject.put("name", "河南乐之途电子科技有限公司");
 
         Map<String, String> payData = deleteProfitsharingReceiverData(subMchId, jsonObject);
-        Map<String, String> result = deleteProfitsharingReceiver(payData);
+        Map result = deleteProfitsharingReceiver(payData);
         System.out.println("result=" + result);
 
         //2019-11-21 16:30
@@ -364,7 +364,7 @@ public class ProfitShareSubmit {
         jo.put("description", "分到商户");
         ja.add(jo);
         Map<String, String> payData = profitSharingData(subMchId, transactionId, outOrderNo, ja);
-        Map<String, String> result = profitSharing(payData);
+        Map result = profitSharing(payData);
         System.out.println("result=" + result);
         //2019-11-21 17:35
         //{return_msg=分账金额未设置, return_code=FAIL}
@@ -380,7 +380,7 @@ public class ProfitShareSubmit {
         String transactionId = "4200000443201911210989941373";
         String outOrderNo = "2019112115757673002";
         Map<String, String> payData = profitSharingQueryData(subMchId, transactionId, outOrderNo);
-        Map<String, String> result = profitSharingQuery(payData);
+        Map result = profitSharingQuery(payData);
         System.out.println("result=" + result);
         //2019-11-21 17:26
         //{return_msg=transaction_id未设置, return_code=FAIL}

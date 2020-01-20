@@ -1,5 +1,7 @@
 package com.bcb.util;
 
+import com.bcb.base.ResultUtil;
+
 import java.util.Map;
 
 /**
@@ -30,7 +32,7 @@ public abstract class CheckDtoUtil<T> {
 
     //返回参数校验结果
     public Map getMsg() {
-        return FastJsonUtil.get(pass, code, msg);
+        return ResultUtil.getJson(pass, code, msg);
     }
 
     /**

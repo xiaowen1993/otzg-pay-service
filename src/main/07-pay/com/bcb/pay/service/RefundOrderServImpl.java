@@ -3,6 +3,7 @@ package com.bcb.pay.service;
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
 import com.bcb.base.Page;
+import com.bcb.base.ResultUtil;
 import com.bcb.pay.dao.RefundOrderDao;
 import com.bcb.pay.dao.RefundOrderLogDao;
 import com.bcb.pay.dto.PayRefundOrderDto;
@@ -12,6 +13,7 @@ import com.bcb.pay.entity.RefundOrder;
 import com.bcb.pay.entity.RefundOrderLog;
 import com.bcb.pay.util.PayRefund;
 import com.bcb.pay.util.PayRefundUtil;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.*;
 import org.redisson.api.RLock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,19 +104,18 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
             //策略模式获取退款渠道
             PayRefund payRefund = new PayRefundUtil(payOrder.getPayChannel());
             //提交支付渠道退款
-            Map map = payRefund.refund(payChannelAccount.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo(), payRefundOrderDto);
+            PayResult payResult = payRefund.refund(payChannelAccount.getPayChannelAccount(), payOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo(), payRefundOrderDto);
             //如果没有返回成功
-            if (map.get("success").equals(false)) {
+            if (payResult.getResult()==-1) {
                 PT("退款业务执行失败,账户冻结余额解冻");
                 payChannelAccountServ.unFreezeBalance(payChannelAccount, new BigDecimal(payRefundOrderDto.getAmount()), true);
                 return 4;
             }
 
-            Map result = ((Map) map.get("data"));
-            PT("执行退款业务成功 result data="+result);
+            PT("执行退款业务成功 result data="+payResult.getBody());
 
 
-            String payChannelNo = result.get("payChannelNo").toString();
+            String payChannelNo = payResult.getBody().toString();
             //更新退款单
             finishRefundOrder(refundOrder, payChannelNo);
 
@@ -221,9 +222,9 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
     @Transactional
     public int queryRefundOrderByUnit(RefundOrder refundOrder) {
         PayRefund payRefund = new PayRefundUtil(refundOrder.getPayChannel());
-        Map result = payRefund.query(refundOrder.getPayChannelAccount(), refundOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo());
-        P("微信退款查询结果=>" + result);
-        if (!result.get("success").equals(true)) {
+        PayResult payResult = payRefund.query(refundOrder.getPayChannelAccount(), refundOrder.getPayOrderNo(),refundOrder.getPayRefundOrderNo());
+        P("微信退款查询结果=>" + payResult.getJson());
+        if (payResult.getResult()!=1) {
             return 1;
         }
 
@@ -231,7 +232,7 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
         //{"msg":"调用失败","code":"FAIL","success":false}
 
         //更新退款单
-        finishRefundOrder(refundOrder, result.get("data").toString());
+        finishRefundOrder(refundOrder, payResult.getBody().toString());
 
         return 0;
     }
@@ -240,14 +241,10 @@ public class RefundOrderServImpl extends AbstractServ implements RefundOrderServ
     @Override
     public Map findRefundOrderByUnit(Finder finder, String unitId, String payChannel) {
         Page page = findByUnit(finder,unitId,payChannel);
-        return FastJsonUtil.get(true,
-                RespTips.SUCCESS_CODE.code,
-                ((List<RefundOrder>) page.getItems())
-                        .stream()
-                        .map(refundOrder->FastJsonUtil.getJson(refundOrder.getJson()))
-                        .toArray(),
-                page.getTotalCount()
-        );
+        return ResultUtil.getPageJson(page.getTotalPages(),page.getTotalCount(),((List<RefundOrder>) page.getItems())
+                .stream()
+                .map(refundOrder->FastJsonUtil.getJson(refundOrder.getJson()))
+                .toArray());
     }
 
     Page findByUnit(Finder finder, String unitId, String payChannel){

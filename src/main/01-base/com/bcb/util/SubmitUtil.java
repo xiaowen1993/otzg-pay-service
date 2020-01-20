@@ -268,7 +268,9 @@ public class SubmitUtil {
 //	private final static String url = "https://yonghu.fangshangqu.cn/login/wechat?appid=7648eb564c58c07a&unionId=&openId=oHZB8wYWjc0cqmMVO3cNhhKplptI&promotionId=";
 //	private final static String url = "http://127.0.0.1:8030/test2";
 //	private final static String url = "http://127.0.0.1:8070/order/goods/buy?token=EB0318BF7A016AACF1E71707EECF598B7E40547D7692F1573BE9284D10778CF8FBE992BC735785FDEB06D01C7E25D990&goodsId=1&quantity=2&addressId=1&memo=%E7%AB%8B%E9%A9%AC%E5%8F%91%E8%B4%A7&couponCode=";
-	private final static String url = "http://127.0.0.1:8050/unit/register?token=EB0318BF7A016AACF1E71707EECF598B35EBCAFFECCC3F1105328A9C6D3EAE65FBE992BC735785FDEB06D01C7E25D990&mobile=13703957317&areaCode=4101&areaName=%E6%B2%B3%E5%8D%97%E9%83%91%E5%B7%9E&name=%E7%8E%8B%E5%A4%A7%E9%99%86&street=%E5%B7%A5%E4%BA%BA%E8%B7%AF100%E5%8F%B7";
+//	private final static String url = "http://127.0.0.1:8050/unit/register?token=EB0318BF7A016AACF1E71707EECF598B35EBCAFFECCC3F1105328A9C6D3EAE65FBE992BC735785FDEB06D01C7E25D990&mobile=13703957317&areaCode=4101&areaName=%E6%B2%B3%E5%8D%97%E9%83%91%E5%B7%9E&name=%E7%8E%8B%E5%A4%A7%E9%99%86&street=%E5%B7%A5%E4%BA%BA%E8%B7%AF100%E5%8F%B7";
+//	private final static String url = "http://192.168.3.112:8050/member/update?token=0CECBC9B5FB67F54DBCFFB89AADC5E493A703F3686720F5BA979A5CAEFA66859FBE992BC735785FDEB06D01C7E25D990&nickName=%E8%B6%85%E4%BA%BA&name=&headImg=&gender=&birthday=&taxCompany=&dutyParagraph=";
+	private final static String url = "http://192.168.3.112:8050/folder/save?name=h12316&sort=1";
 	public static class sendMultiHttp implements Runnable{
 		private int i;
 		public sendMultiHttp(int i){

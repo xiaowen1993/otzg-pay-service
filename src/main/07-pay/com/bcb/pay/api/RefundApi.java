@@ -49,7 +49,7 @@ public class RefundApi extends AbstractController {
         }
 
         //判断是否有对应的而且成功的收款单号
-        PayOrder payOrder = payOrderServ.getSuccessByOrderNo(payRefundOrderDto.getSubOrderNo());
+        PayOrder payOrder = payOrderServ.getSuccessBySubOrderNo(payRefundOrderDto.getSubOrderNo());
         if(null == payOrder){
             sendJson(false, RespTips.PAYORDER_NOTFINISHED.code,RespTips.PAYORDER_NOTFINISHED.tips);
             return;
@@ -125,7 +125,7 @@ public class RefundApi extends AbstractController {
             return;
         }
         //如果成功
-        sendJson(refundOrderServ.findRefundOrderByUnit(finder,unitId,payChannel));
+        sendSuccess(refundOrderServ.findRefundOrderByUnit(finder,unitId,payChannel));
 
     }
 }

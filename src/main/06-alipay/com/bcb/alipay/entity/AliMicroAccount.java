@@ -49,25 +49,24 @@ public class AliMicroAccount implements Serializable {
 
     /**
      * 授权方应用id
-     * auth_app_id授权方应用id String 是 授权方应用 id
      */
     @Column(name = "auth_app_id",nullable = false,length = 50)
     String authAppId;
 
     /**
-     * app_refresh_token刷新令牌String是刷新令牌
+     * app_refresh_token刷新令牌
      */
     @Column(name = "app_refresh_token",nullable = false,length = 50)
     String appRefreshToken;
 
 
     /**
-     *
+     * 授权开始时间
      */
     @Column(name = "auth_start", nullable = false, length = 19)
     Long authStart;
     /**
-     *
+     * 授权结束时间
      */
     @Column(name = "auth_end",length = 19)
     Long authEnd;

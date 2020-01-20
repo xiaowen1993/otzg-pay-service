@@ -18,5 +18,5 @@ public interface PayReceive {
      *   成功返回 {success:true,code:0000,data:{支付渠道支付返回的信息}}
      *   失败返回 {success:false,code:错误码,msg:失败原因}
      */
-    Map pay(String payChannelAccount, String payOrderNo, PayOrderDto payOrderDto);
+    PayResult pay(String payChannelAccount, String payOrderNo, PayOrderDto payOrderDto);
 }

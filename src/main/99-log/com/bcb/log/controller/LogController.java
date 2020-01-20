@@ -57,7 +57,7 @@ public class LogController extends BaseController {
         jo.put("alipay.notifyUrl=", AlipayConfig.getNotifyUrl());
         jo.put("alipay.authNotifyUrl=", AlipayConfig.getAuthNotifyUrl());
         //返回结果
-        sendJson(true, RespTips.SUCCESS_CODE.code,jo);
+        sendSuccess(jo);
     }
 
     @RequestMapping(value="/test/upload/img",method = RequestMethod.POST)

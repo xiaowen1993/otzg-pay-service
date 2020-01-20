@@ -11,7 +11,7 @@ import java.util.Map;
  * @Author G.
  * @Date 2019/11/23 0023 下午 3:10
  */
-public class FastJsonUtil {
+public final class FastJsonUtil {
 
     public static Map getJson(Object o){
         return JSON.parseObject(o.toString());
@@ -87,104 +87,6 @@ public class FastJsonUtil {
             reja.add(addChecked(ja.getJSONObject(i),ids));
         }
         return reja;
-    }
-
-    /**
-     * 只返回成功失败
-     * @param b success:true|false 表示操作是否成功
-     */
-    public static final JSONObject get(boolean b){
-        JSONObject result=new JSONObject();
-        result.put("success",b);
-        return result;
-    }
-    /**
-     * 返回成功失败和提示信息
-     * @param b success:true|false 表示操作是否成功
-     * @param c code:"操作码"
-     */
-    public static final JSONObject get(boolean b,String c){
-        JSONObject result=new JSONObject();
-        result.put("success",b);
-        if(!CheckUtil.isEmpty(c)){
-            result.put("code",c);
-        }
-        return result;
-    }
-
-    /**
-     * 返回成功失败、错误码、提示信息
-     * @param b true|false
-     * @param c 错误码
-     * @param m 提示信息
-     */
-    public static final JSONObject get(boolean b,String c,String m){
-        JSONObject result=new JSONObject();
-        result.put("success",b);
-        if(!CheckUtil.isEmpty(c)){
-            result.put("code",c);
-        }
-        if(!CheckUtil.isEmpty(m)){
-            result.put("msg",m);
-        }
-        return result;
-    }
-
-    /**
-     * 返回成功失败、提示信息、和一个json对象
-     * @param b
-     * @param c
-     * @param data
-     */
-    public static final JSONObject get(boolean b,String c,Object data){
-        return get(b,c,null,data);
-    }
-
-    public static final JSONObject get(boolean b,String c,String m,Object data){
-        JSONObject result=new JSONObject();
-        result.put("success",b);
-        if(!CheckUtil.isEmpty(c)){
-            result.put("code",c);
-        }
-        if(!CheckUtil.isEmpty(m)){
-            result.put("msg",m);
-        }
-        result.put("data",data);
-        return result;
-    }
-
-    /**
-     * 返回成功失败、提示信息、和一个data、及分页对象
-     * @param b
-     * @param c
-     * @param data
-     * @param count 数量
-     */
-    public static final JSONObject get(boolean b,String c,Object data,Long count){
-        JSONObject result=new JSONObject();
-        result.put("success",b);
-        if(!CheckUtil.isEmpty(c)){
-            result.put("code",c);
-        }
-        result.put("count",count);
-        result.put("data",data);
-        return result;
-    }
-
-    /**
-     * 向浏览器发送参数错误(0.8 rate)
-     * @author G/2018年1月6日
-     */
-    protected final JSONObject sendParamError(){
-        return get(false,RespTips.PARAM_ERROR.code,RespTips.PARAM_ERROR.tips);
-    }
-
-    /**
-     * 向浏览器发送操作成功(0.8 rate)
-     * @author G/2018年1月6日
-     */
-    protected final JSONObject sendSuccess(){
-        return get(true,RespTips.SUCCESS_CODE.code,RespTips.SUCCESS_CODE.tips);
     }
 
     /**

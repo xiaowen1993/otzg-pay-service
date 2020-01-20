@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
 import com.bcb.base.Page;
+import com.bcb.base.ResultUtil;
 import com.bcb.pay.entity.PayChannelAccount;
 import com.bcb.pay.entity.PayOrder;
 import com.bcb.pay.service.PayChannelAccountServ;
@@ -232,14 +233,10 @@ public class RedPackServImpl extends AbstractServ implements RedPackServ {
     @Override
     public Map findWxRedPackOrderByUnit(Finder finder, String unitId) {
         Page page = findByUnit(finder,unitId);
-        return FastJsonUtil.get(true,
-                RespTips.SUCCESS_CODE.code,
-                ((List<WxRedPack>) page.getItems())
-                        .stream()
-                        .map(wxRedPack->FastJsonUtil.getJson(wxRedPack.getBaseJson()))
-                        .toArray(),
-                page.getTotalCount()
-        );
+        return ResultUtil.getPageJson(page.getTotalPages(),page.getTotalCount(),((List<WxRedPack>) page.getItems())
+                .stream()
+                .map(wxRedPack->FastJsonUtil.getJson(wxRedPack.getBaseJson()))
+                .toArray());
     }
 
     Page findByUnit(Finder finder, String unitId){

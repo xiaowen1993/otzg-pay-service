@@ -3,6 +3,7 @@ package com.bcb.pay.service;
 import com.bcb.base.AbstractServ;
 import com.bcb.base.Finder;
 import com.bcb.base.Page;
+import com.bcb.base.ResultUtil;
 import com.bcb.pay.dao.PayAccountDao;
 import com.bcb.pay.dao.PayAccountLogDao;
 import com.bcb.pay.dao.PayChannelAccountDao;
@@ -70,14 +71,11 @@ public class PayAccountServImpl extends AbstractServ implements PayAccountServ {
     @Override
     public Map findByUnit(Finder finder, String unitId,String payChannel) {
         Page page = findPage(finder,unitId,payChannel);
-        return FastJsonUtil.get(true,
-                RespTips.SUCCESS_CODE.code,
+        return ResultUtil.getPageJson(page.getTotalPages(),page.getTotalCount(),
                 ((List<PayAccountLog>) page.getItems())
-                        .stream()
-                        .map(payAccountLog->FastJsonUtil.getJson(payAccountLog.getJson()))
-                        .toArray(),
-                page.getTotalCount()
-        );
+                .stream()
+                .map(payAccountLog->FastJsonUtil.getJson(payAccountLog.getJson()))
+                .toArray());
     }
 
     Page findPage(Finder finder,String unitId,String payChannel){

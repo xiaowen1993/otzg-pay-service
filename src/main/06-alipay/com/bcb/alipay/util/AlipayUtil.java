@@ -10,18 +10,22 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.*;
 import com.alipay.api.response.*;
 import com.bcb.alipay.util.face.api.request.TradepayParam;
+import com.bcb.base.ResultUtil;
 import com.bcb.log.util.LogUtil;
 import com.bcb.pay.dto.PayOrderDto;
 import com.bcb.pay.util.PayOrderDtoAlipayCheck;
 import com.bcb.pay.util.PayQuery;
 import com.bcb.pay.util.PayReceive;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.CheckUtil;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.util.FuncUtil;
-import com.bcb.util.RespTips;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.UUID;
 
 public class AlipayUtil implements PayReceive, PayQuery {
 
@@ -31,7 +35,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
      * @param appAuthToken
      * @return
      */
-    public Map createPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult createPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
 
         try {
             AlipayTradeCreateModel model = new AlipayTradeCreateModel();
@@ -66,10 +70,11 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 //如果支付结果 response.code=10000时表示支付成功
                 //如果支付结果 response.code=10003时表示等待用户付款
 
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), JSON.parseObject(response.getBody()));
+                //获取预支付信息成功，等待支付
+                return new PayResult(0,response.getBody());
             } else {
                 System.out.println("调用失败");
-                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+                return new PayResult(-1);
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
@@ -83,7 +88,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
      * @param appAuthToken
      * @return
      */
-    public Map precreatePay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult precreatePay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
 
         try {
             AlipayTradePrecreateModel model = new AlipayTradePrecreateModel();
@@ -117,10 +122,13 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 //如果支付结果 response.code=10000时表示支付成功
                 //如果支付结果 response.code=10003时表示等待用户付款
 
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), JSON.parseObject(response.getBody()));
+                //获取预支付信息成功，等待支付
+                return new PayResult(0,response.getBody());
             } else {
                 System.out.println("调用失败");
-                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+//                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+
+                return new PayResult(-1);
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
@@ -136,7 +144,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
      * @param appAuthToken
      * @return
      */
-    public Map appPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult appPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
 
         try {
 
@@ -176,17 +184,16 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 //如果支付结果 response.code=10000时表示支付成功
                 //如果支付结果 response.code=10003时表示等待用户付款
 
-                JSONObject jo = new JSONObject();
-                jo.put("body", response.getBody());
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+                //获取预支付信息成功等待支付
+                return new PayResult(0,response.getBody());
             } else {
                 System.out.println("调用失败");
-                return FastJsonUtil.get(false, response.getCode(), response.getMsg());
+                return new PayResult(-1);
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
+            return new PayResult(0);
         }
-        return null;
     }
 
     //======================================支付宝条码收款=======================================================/
@@ -211,7 +218,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
      * "trade_no":"2019011022001433520200667601"},
      * "sign":"Io//wg+Q85Qg+408yv1WGsIAFrtIRno3eURYv2J6KrXwlUPXfVkF1N40luV6KgsvMBPArg44kwC8jyIJUlIZUN3tsOhrdtcXdC1u0tQHY9U4qZ2Z0qW2S8rr8fMZTWV7Py4mViroNOoPIckFjICSYaM7nhDl46uOuXpmFTJcOd9SsXEMS8aDQK3oicWvLtItwkxQdSLEQ01Ommg3XiwhdvtDuJRbA7bDEDlZnbeGeXzfW4WBExYHJMmVvetXZcsAAhJN0R5olx9PCmabLDzKe4FiHSxORDqZtvwnr37f2xRizEW37N4vbS6/kyuNL0NtTpoVBBq5RKmd3RLtuDjHDg=="}
      */
-    public Map barCodPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult barCodPay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
 
         try {
             AlipayTradePayModel model = new AlipayTradePayModel();
@@ -250,15 +257,18 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 JSONObject jo = new JSONObject();
                 jo.put("tradeNo", response.getTradeNo());
                 jo.put("buyerUserId", response.getBuyerUserId());
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+//                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+                return new PayResult(1);
             } else {
                 System.out.println("调用错误");
-                return FastJsonUtil.get(false, response.getCode(), response.getSubMsg());
+                //return FastJsonUtil.get(false, response.getCode(), response.getSubMsg());
+                return new PayResult(0);
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
             System.out.println("调用失败");
-            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+//            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+            return new PayResult(0);
         }
     }
     //======================================刷脸收款=======================================================/
@@ -311,7 +321,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
 //            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
 //        }
 //    }
-    public Map facePay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult facePay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
         try {
             TradepayParam tradepayParam = new TradepayParam();
             tradepayParam.setOut_trade_no(UUID.randomUUID().toString());
@@ -338,18 +348,23 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 //如果支付结果 response.code=10000时表示支付成功
                 //如果支付结果 response.code=10003时表示等待用户付款
 
-                JSONObject jo = new JSONObject();
-                jo.put("tradeNo", response.getTradeNo());
-                jo.put("buyerUserId", response.getBuyerUserId());
-                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+//                JSONObject jo = new JSONObject();
+//                jo.put("tradeNo", response.getTradeNo());
+//                jo.put("buyerUserId", response.getBuyerUserId());
+//                return FastJsonUtil.get(true, response.getCode(), response.getMsg(), jo);
+                return new PayResult(1,response.getBody());
             } else {
                 System.out.println("调用失败");
-                return FastJsonUtil.get(false, response.getCode(), response.getBody());
+//                return FastJsonUtil.get(false, response.getCode(), response.getBody());
+
+                return new PayResult(-1);
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
             System.out.println("调用失败");
-            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+//            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+
+            return new PayResult(-1);
         }
     }
 
@@ -455,7 +470,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
             //userid支付宝用户标识String是支付宝用户标识
 
             if (!response.isSuccess()) {
-                return FastJsonUtil.get(false, response.getCode(), response.getBody());
+                return ResultUtil.getJson(false, response.getCode(), response.getBody());
             }
 
             JSONObject jo = new JSONObject();
@@ -465,7 +480,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
             jo.put("expiresIn", response.getExpiresIn());
             jo.put("reExpiresIn", response.getReExpiresIn());
             jo.put("userId", response.getUserId());
-            return FastJsonUtil.get(true, response.getCode(), jo);
+            return ResultUtil.getJson(true, response.getCode(), response.getMsg(),jo);
 
 
             //2019-12-05 13:55
@@ -487,7 +502,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
 
         } catch (AlipayApiException e) {
             e.printStackTrace();
-            return FastJsonUtil.get(false, "500", e.getMessage());
+            return ResultUtil.getJson(false,e.getErrCode(),e.getErrMsg());
         }
     }
 
@@ -523,13 +538,13 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 jo.put("expiresIn", response.getExpiresIn());
                 jo.put("reExpiresIn", response.getReExpiresIn());
                 jo.put("userId", response.getUserId());
-                return FastJsonUtil.get(true, response.getCode(), jo);
+                return ResultUtil.getJson(true, response.getCode(),response.getMsg(), jo);
             } else {
-                return FastJsonUtil.get(false, response.getCode());
+                return ResultUtil.getJson(false, response.getCode(),response.getMsg());
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
-            return FastJsonUtil.get(false, e.getMessage());
+            return ResultUtil.getJson(false,e.getErrCode(), e.getMessage());
         }
     }
 
@@ -559,13 +574,13 @@ public class AlipayUtil implements PayReceive, PayQuery {
                 //当前app_auth_token的授权失效时间
                 jo.put("authEnd", response.getAuthEnd());
                 jo.put("status", response.getStatus());
-                return FastJsonUtil.get(true, response.getCode(), jo);
+                return ResultUtil.getJson(true, response.getCode(),response.getMsg(), jo);
             } else {
-                return FastJsonUtil.get(false, response.getCode());
+                return ResultUtil.getJson(false, response.getCode(),response.getMsg());
             }
         } catch (AlipayApiException e) {
             e.printStackTrace();
-            return FastJsonUtil.get(false, e.getMessage());
+            return ResultUtil.getJson(false,e.getErrCode(),e.getErrMsg());
         }
     }
 
@@ -615,34 +630,27 @@ public class AlipayUtil implements PayReceive, PayQuery {
     }
 
 
-    //初始化一个返回值
-    final Map getInitMap() {
-        Map map = new TreeMap();
-        map.put("success", false);
-        return map;
-    }
-
+    PayResult payResult;
     //支付宝收款业务入口
-    public final Map pay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
-        Map map = getInitMap();
+    public final PayResult pay(String appAuthToken, String payOrderNo, PayOrderDto payOrderDto) {
         try {
             if (payOrderDto.getPayType().equals(PayOrderDtoAlipayCheck.TradeType.BARCODE.name())) {
-                map = barCodPay(appAuthToken, payOrderNo, payOrderDto);
+                payResult = barCodPay(appAuthToken, payOrderNo, payOrderDto);
             } else if (payOrderDto.getPayType().equals(PayOrderDtoAlipayCheck.TradeType.APP.name())) {
-                map = appPay(appAuthToken, payOrderNo, payOrderDto);
+                payResult = appPay(appAuthToken, payOrderNo, payOrderDto);
             } else if (payOrderDto.getPayType().equals(PayOrderDtoAlipayCheck.TradeType.CREATE.name())) {
-                map = createPay(appAuthToken, payOrderNo, payOrderDto);
+                payResult = createPay(appAuthToken, payOrderNo, payOrderDto);
             } else if (payOrderDto.getPayType().equals(PayOrderDtoAlipayCheck.TradeType.PRECREATE.name())) {
-                map = precreatePay(appAuthToken, payOrderNo, payOrderDto);
+                payResult = precreatePay(appAuthToken, payOrderNo, payOrderDto);
             } else if (payOrderDto.getPayType().equals(PayOrderDtoAlipayCheck.TradeType.FACE.name())) {
-                map = facePay(appAuthToken, payOrderNo, payOrderDto);
+                payResult = facePay(appAuthToken, payOrderNo, payOrderDto);
             }
 
-            return map;
+            return payResult;
 
         } catch (Exception e) {
             LogUtil.saveTradeLog("支付宝收款错误=>" + e.toString());
-            return map;
+            return payResult;
         }
     }
 
@@ -661,7 +669,7 @@ public class AlipayUtil implements PayReceive, PayQuery {
      * "trade_status":"TRADE_CLOSED"},
      * "sign":"IEtVhRN7tqDsEcWvaLW9zfwx1sR2Fxm/ivQfyXVIiEih+nNq3Ven1hLE/s86Ha0+ovOk29IhC1BrUqz7Ry/vciD+qtesVzEkZ4ypxXK+sgh0iLKFoS9jPoYQZdkkb57Jj0W3xokmwocNO1GOjUf+bMht4ZblncDaMCKK4UNnBRhTyHr/AMx8lv1qYq1aJ30s+Sr4+o9vrkW+f6o358LyrcPuDTYkh2cQ/J9+KR5G6oimRVS7kami7w8ssSI/U1qZrnBcLkllAvDCI26pbQqUO6K/4diEFu3ewmotmIa5miciGLJgrc8yBiIJ7wv3bP9+qTENUmoo+sOl1AkTFM/YRA=="}
      */
-    public Map query(String appAuthToken,
+    public PayResult query(String appAuthToken,
                      String outTradeNo) {
         try {
             AlipayTradeQueryModel model = new AlipayTradeQueryModel();
@@ -680,11 +688,13 @@ public class AlipayUtil implements PayReceive, PayQuery {
             // "total_amount":"0.01","trade_no":"2019120622001436275742033599","trade_status":"WAIT_BUYER_PAY"},
             // "sign":"VEWHEd08A+yuEjakUTJkOADvyV/4Hm5zWG5r/tP3J2+aeqF/EMFNWeiN4nvDcL08gm4mKIKCpF2FIQmAmHuZ0j264eOGcVRYfR1Mf2fE3pgSRVIuKi6/9vSyMysb6+1zzJu1GQ3R6iVU8rv8MmqYD41G6YWKupuAcU4X9efNotzMdXNk3vY5sELZZhJBhitL0z43f7mDhApvt2GvnWI6XW/WVNKjqcLP38vLxYnG0OdtBwJMEwkPGV5+tTzjQnWX3A+h5KDeEd7eLNKtVmtobl9LJI9fe//yJsM1zTaA7Ck9qbwtesl/5Pq4pKuOCdLBH7G3r2h1ZAiDtevyA71bEw=="}
             if (!response.isSuccess()) {
-                return FastJsonUtil.get(false, response.getCode(), "支付失败", response.getSubMsg());
+                //ResultUtil.getJson(false, response.getCode(), "支付失败", response.getSubMsg());
+                return new PayResult(-1);
             }
 
             if (response.getTradeStatus().equals("WAIT_BUYER_PAY")) {
-                return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_WAIT.code, RespTips.PAYCHANNLE_PAY_WAIT.tips);
+//                return ResultUtil.getJson(false, RespTips.PAYCHANNLE_PAY_WAIT.code, RespTips.PAYCHANNLE_PAY_WAIT.tips);
+                return new PayResult(0);
             }
 
             //支付成功需返回结果
@@ -696,19 +706,25 @@ public class AlipayUtil implements PayReceive, PayQuery {
 
             //交易状态：WAIT_BUYER_PAY（交易创建，等待买家付款）、TRADE_CLOSED（未付款交易超时关闭，或支付完成后全额退款）、TRADE_SUCCESS（交易支付成功）、TRADE_FINISHED（交易结束，不可退款）
             if (response.getTradeStatus().equals("TRADE_SUCCESS")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNEL_PAY_SUCCESS.code, RespTips.PAYCHANNEL_PAY_SUCCESS.tips, jo);
+//                return ResultUtil.getJson(true, RespTips.PAYCHANNEL_PAY_SUCCESS.code, RespTips.PAYCHANNEL_PAY_SUCCESS.tips, jo);
+                return new PayResult(1);
             } else if (response.getTradeStatus().equals("TRADE_CLOSED")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_CLOSED.code, RespTips.PAYCHANNLE_PAY_CLOSED.tips, jo);
+//                return ResultUtil.getJson(true, RespTips.PAYCHANNLE_PAY_CLOSED.code, RespTips.PAYCHANNLE_PAY_CLOSED.tips, jo);
+                return new PayResult(1);
             } else if (response.getTradeStatus().equals("TRADE_FINISHED")) {
-                return FastJsonUtil.get(true, RespTips.PAYCHANNLE_PAY_FINISHED.code, RespTips.PAYCHANNLE_PAY_FINISHED.tips, jo);
+//                return ResultUtil.getJson(true, RespTips.PAYCHANNLE_PAY_FINISHED.code, RespTips.PAYCHANNLE_PAY_FINISHED.tips, jo);
+                return new PayResult(1);
             } else {
-                return FastJsonUtil.get(false, response.getCode(), "支付失败", response.getBody());
+//                return ResultUtil.getJson(false, response.getCode(), "支付失败", response.getBody());
+                return new PayResult(-1);
             }
 
         } catch (AlipayApiException e) {
             e.printStackTrace();
             System.out.println("调用失败");
-            return FastJsonUtil.get(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+//            return ResultUtil.getJson(false, RespTips.PAYCHANNLE_PAY_ERROR.code, RespTips.PAYCHANNLE_PAY_ERROR.tips);
+
+            return new PayResult(0);
         }
     }
 

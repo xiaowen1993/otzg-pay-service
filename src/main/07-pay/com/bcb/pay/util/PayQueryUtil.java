@@ -24,7 +24,7 @@ public class PayQueryUtil implements PayQuery {
     }
 
     @Override
-    public Map query(String payChannelAccount, String payOrderNo) {
+    public PayResult query(String payChannelAccount, String payOrderNo) {
         return this.payQuery.query(payChannelAccount,payOrderNo);
     }
 }

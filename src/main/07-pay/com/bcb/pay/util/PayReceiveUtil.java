@@ -28,7 +28,7 @@ public class PayReceiveUtil implements PayReceive {
     }
 
     @Override
-    public Map pay(String payChannelAccount, String payOrderNo, PayOrderDto payOrderDto) {
+    public PayResult pay(String payChannelAccount, String payOrderNo, PayOrderDto payOrderDto) {
         return this.payReceive.pay(payChannelAccount, payOrderNo, payOrderDto);
     }
 }

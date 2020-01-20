@@ -27,12 +27,12 @@ public class PayRefundUtil implements PayRefund {
     }
 
     @Override
-    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
+    public PayResult refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
         return this.payRefund.refund(payChannelAccount,payOrderNo,refundOrderNo, payRefundOrderDto);
     }
 
     @Override
-    public Map query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
+    public PayResult query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
         return this.payRefund.query(payChannelAccount,payOrderNo,refundOrderNo);
     }
 }

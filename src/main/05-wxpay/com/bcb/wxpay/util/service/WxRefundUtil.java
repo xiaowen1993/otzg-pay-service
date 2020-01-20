@@ -3,6 +3,7 @@ package com.bcb.wxpay.util.service;
 import com.bcb.log.util.LogUtil;
 import com.bcb.pay.dto.PayRefundOrderDto;
 import com.bcb.pay.util.PayRefund;
+import com.bcb.pay.util.PayResult;
 import com.bcb.util.FastJsonUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
@@ -66,14 +67,6 @@ public class WxRefundUtil implements PayRefund {
         return paramMap;
     }
 
-
-    //初始化一个返回值
-    final Map getInitMap() {
-        Map map = new TreeMap();
-        map.put("success", false);
-        return map;
-    }
-
     /**
      * 退款结果查询
      * <xml>
@@ -117,15 +110,14 @@ public class WxRefundUtil implements PayRefund {
      * @return
      */
     @Override
-    public Map refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
-        Map map = getInitMap();
+    public PayResult refund(String payChannelAccount, String payOrderNo, String refundOrderNo, PayRefundOrderDto payRefundOrderDto) {
         try {
             WXPayConfig wxPayConfig = new WXPayConfig(SignType.HMACSHA256.name(),true);
             wxPayConfig.setUrl(WXPayConstants.getPayRefundUrl());
             WXPayRequest wxPayRequest = new WXPayRequest(wxPayConfig);
 
             Map<String, String> data = refundData(payChannelAccount, payOrderNo, refundOrderNo, payRefundOrderDto.getAmount(), payRefundOrderDto);
-            map = wxPayRequest.requestCert(data);
+            Map map = wxPayRequest.requestCert(data);
             LogUtil.saveTradeLog("调用结果=" + map);
             //2019-11-27 16:52
             //{nonce_str=sEOZMKGvN0zRa0Dl, appid=wxa574b9142c67f42e,sign=3B0F81C9A5819007C641DF9C628B8A75105A5391B785A1147F959585E24FEFCD,
@@ -167,17 +159,18 @@ public class WxRefundUtil implements PayRefund {
             ) {
                 LogUtil.saveTradeLog("调用成功=" + map.toString());
                 //如果成功应返回一个结构体payChannelNo
-                Map jo = new TreeMap();
-                jo.put("payChannelNo",map.get("refund_id"));
-                return FastJsonUtil.get(true, map.get("result_code").toString(), "调用成功", jo);
+//                return FastJsonUtil.get(true, map.get("result_code").toString(), "调用成功", jo);
+                return new PayResult(1,map.get("refund_id"));
             } else {
                 LogUtil.saveTradeLog("调用失败");
-                return FastJsonUtil.get(false, map.get("result_code").toString(), "调用失败");
+//                return FastJsonUtil.get(false, map.get("result_code").toString(), "调用失败");
+
+                return new PayResult(-1);
             }
         } catch (Exception e) {
             e.printStackTrace();
             LogUtil.saveTradeLog("微信支付错误=>" + e.toString());
-            return map;
+            return new PayResult(0);
         }
     }
 
@@ -195,7 +188,7 @@ public class WxRefundUtil implements PayRefund {
      */
 
     @Override
-    public Map query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
+    public PayResult query(String payChannelAccount, String payOrderNo, String refundOrderNo) {
         try{
             WXPayConfig wxPayConfig = new WXPayConfig();
             wxPayConfig.setUrl(WXPayConstants.getPayRefundQueryUrl());
@@ -216,15 +209,17 @@ public class WxRefundUtil implements PayRefund {
                     && result.get("result_code").equals("SUCCESS")
             ) {
                 LogUtil.saveTradeLog("微信退款成功=" + result.toString());
-                return FastJsonUtil.get(true, result.get("result_code").toString(), "退款成功", result.get("transaction_id"));
+//                return FastJsonUtil.get(true, result.get("result_code").toString(), "退款成功", result.get("transaction_id"));
+                return new PayResult(1,result.get("refund_id_0"));
             } else {
                 LogUtil.saveTradeLog("微信退款未成功=" + result.toString());
-                return FastJsonUtil.get(false, result.get("err_code").toString(), "退款未成功");
+//                return FastJsonUtil.get(false, result.get("err_code").toString(), "退款未成功");
+                return new PayResult(-1);
             }
         }catch (Exception e){
             e.printStackTrace();
             LogUtil.saveTradeLog("调用微信退款查询接口失败");
-            return getInitMap();
+            return new PayResult(0);
         }
     }
 }

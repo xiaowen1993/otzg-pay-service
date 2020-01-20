@@ -1,17 +1,15 @@
 package com.bcb.wxpay.util.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bcb.base.ResultUtil;
 import com.bcb.util.FuncUtil;
-import com.bcb.util.JsonUtil;
 import com.bcb.wxpay.dto.WxRedPackDto;
-import com.bcb.wxpay.entity.WxRedPack;
 import com.bcb.wxpay.util.XmlUtil;
 import com.bcb.wxpay.util.sdk.WXPayConstants;
 import com.bcb.wxpay.util.sdk.WXPayRequest;
 import com.bcb.wxpay.util.sdk.WXPayUtil;
-import net.sf.json.JSONObject;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -132,10 +130,10 @@ public class RedPackSubmit {
                 && result.get("result_code").equals("SUCCESS")
         ) {
             System.out.println("调用成功=" + result.toString());
-            return JsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), "调用成功", result);
         } else {
             System.out.println("调用失败");
-            return JsonUtil.get(false, result.get("result_code").toString(), "调用失败");
+            return ResultUtil.getJson(false, result.get("result_code").toString(), "调用失败");
         }
     }
 
@@ -259,10 +257,10 @@ public class RedPackSubmit {
                 && result.get("result_code").equals("SUCCESS")
         ) {
             System.out.println("调用成功=" + result.toString());
-            return JsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), "调用成功", result);
         } else {
             System.out.println("调用失败");
-            return JsonUtil.get(false, result.get("result_code").toString(), "调用失败");
+            return ResultUtil.getJson(false, result.get("result_code").toString(), "调用失败");
         }
     }
 
@@ -286,10 +284,10 @@ public class RedPackSubmit {
                 && result.get("result_code").equals("SUCCESS")
         ) {
             System.out.println("调用成功=" + result.toString());
-            return JsonUtil.get(true, result.get("result_code").toString(), "调用成功", result);
+            return ResultUtil.getJson(true, result.get("result_code").toString(), "调用成功", result);
         } else {
             System.out.println("调用失败");
-            return JsonUtil.get(false, result.get("result_code").toString(), "调用失败");
+            return ResultUtil.getJson(false, result.get("result_code").toString(), "调用失败");
         }
     }
 
@@ -327,7 +325,7 @@ public class RedPackSubmit {
 //        wxRedPack.setSceneId("PRODUCT_2");
         Map<String, String> payData = redPackData(subMchId,payRedpackOrderNo,wxRedPackDto);
         System.out.println("result=" + XmlUtil.Map2Xml(payData));
-        Map<String, String> result = redPackPay(payData);
+        Map result = redPackPay(payData);
         System.out.println("result=" + result.toString());
         //2019-11-21 09:55
         //{re_openid=olFJwwK3yub_nNNXXOhkTf07nYC0, total_amount=1000, total_num=10, err_code=PARAM_ERROR, return_msg=参数错误:total_num必须等于1, result_code=FAIL, err_code_des=参数错误:total_num必须等于1, mch_id=1513549201, return_code=SUCCESS, wxappid=wxd8de5d37b6976b55, mch_billno=1332313233233213}
@@ -367,7 +365,7 @@ public class RedPackSubmit {
         String payRedpackOrderNo="2019121216320002";
         Map<String, String> payData = redPackData(subMchId,payRedpackOrderNo,wxRedPackDto);
 
-        Map<String, String> result = redPackGroupPay(payData);
+        Map result = redPackGroupPay(payData);
         System.out.println("result=" + result.toString());
     }
 
