@@ -98,10 +98,6 @@
       encoding:
         force: true
 
-      multipart:
-        maxFileSize: 10Mb
-        maxRequestSize: 10Mb
-
     mvc:
       view:
         prefix: /

@@ -14,7 +14,7 @@
  #本服务基本配置
   spring:
     application:
-      name: bcb-server
+      name: otzg-server
 
     #数据库
     datasource:

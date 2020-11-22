@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "server",
-      "type": "com.bcb.WebAppConfig",
-      "sourceType": "com.bcb.WebAppConfig"
+      "type": "com.otzg.WebAppConfig",
+      "sourceType": "com.otzg.WebAppConfig"
     }
   ],
   "properties": [],

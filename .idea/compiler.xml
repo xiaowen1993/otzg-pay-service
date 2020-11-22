@@ -6,16 +6,16 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="bcb-pay" />
+        <module name="otzg-pay" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="7">
-      <module name="bcb-pay" target="1.8" />
+      <module name="otzg-pay" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="bcb-pay" options="-parameters" />
+      <module name="otzg-pay" options="-parameters" />
     </option>
   </component>
 </project>

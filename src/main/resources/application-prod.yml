@@ -14,14 +14,14 @@
  #本服务基本配置
   spring:
     application:
-      name: bcb-server
+      name: otzg-server
 
     #数据库
     datasource:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://122.114.4.130:31306/weika?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
+      url: jdbc:mysql://122.114.4.111:31306/weika?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
       username: root
-      password: xghwep999xgh
+      password:
 
       #添加阿里连接池
       type: com.alibaba.druid.pool.DruidDataSource
