@@ -17,7 +17,7 @@ public class RedisConfig {
     private String clusterNodes;
     private String redisHost="127.0.0.1";
     private int redisPort=6379;
-    private String redisPasswd="g5ymm5";
+    private String redisPasswd="";
     private int timeOut = 2000;
     private int redirects = 8;
 
